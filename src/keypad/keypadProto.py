@@ -63,11 +63,11 @@ class CalcPanel(wx.Panel):
 class CalcFrame(wx.Frame):
  
     def __init__(self):
-        super().__init__(None, title = "wxCalculator", size = (350, 375))
+        super().__init__(None, title = "", size = (350, 375))
         panel = CalcPanel(self)
         self.Show()
 
-        self.ShowFullScreen(True)
+        #self.ShowFullScreen(True)
         self.Maximize(True)
 
 if __name__ == '__main__':
