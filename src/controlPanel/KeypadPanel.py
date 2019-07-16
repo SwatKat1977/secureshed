@@ -1,11 +1,7 @@
 import wx
 
-## https://www.blog.pythonlibrary.org/2019/02/12/creating-a-calculator-with-wxpython/
 
-
-class CalcPanel(wx.Panel):
-
-    KeySize = 4
+class KeypadPanel(wx.Panel):
 
     def __init__(self, parent):
         super().__init__(parent)
@@ -42,7 +38,6 @@ class CalcPanel(wx.Panel):
             main_sizer.Add(btn_sizer, 1, wx.ALIGN_CENTER|wx.EXPAND)
 
         self.SetSizer(main_sizer)
-        
 
 
     def __PressKey(self, event):
@@ -58,19 +53,3 @@ class CalcPanel(wx.Panel):
 
     def __CommitCode(self, event):
         print(f"Committing code value of '{self.__sequence}'")
-
-
-class CalcFrame(wx.Frame):
- 
-    def __init__(self):
-        super().__init__(None, title = "", size = (350, 375))
-        panel = CalcPanel(self)
-        self.Show()
-
-        #self.ShowFullScreen(True)
-        self.Maximize(True)
-
-if __name__ == '__main__':
-    app = wx.App(False)
-    frame = CalcFrame()
-    app.MainLoop()
