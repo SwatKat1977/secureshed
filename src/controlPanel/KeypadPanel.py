@@ -20,13 +20,14 @@ class KeypadPanel(wx.Panel):
 
     def __init__(self, parent):
         super().__init__(parent)
-        self.last_button_pressed = None
-        self.create_ui()
+        
+        # Key sequence pressed.
+        self.__keySequence = ''
+ 
+        self.__CreateUI()
 
-        self.__sequence = ''
 
-
-    def create_ui(self):
+    def __CreateUI(self):
         main_sizer = wx.BoxSizer(wx.VERTICAL)
         font = wx.Font(12, wx.MODERN, wx.NORMAL, wx.NORMAL)
 
@@ -59,12 +60,13 @@ class KeypadPanel(wx.Panel):
         pressedKey = event.GetEventObject()
         pressedKeyValue = pressedKey.GetLabel()
         
-        self.__sequence = self.__sequence + pressedKeyValue
+        self.__keySequence = self.__keySequence + pressedKeyValue
+        print(f'Pressed key : {pressedKeyValue}')
 
  
     def __ClearKeypad(self, event):
-        self.__sequence = ''
+        self.__keySequence = ''
 
 
     def __CommitCode(self, event):
-        print(f"Committing code value of '{self.__sequence}'")
+        print(f"Committing code value of '{self.__keySequence}'")
