@@ -1,7 +1,8 @@
 import wx
-from KeypadPanel import KeypadPanel
+from ControlPanelFrame import ControlPanelFrame
+
 
 if __name__ == '__main__':
     app = wx.App(False)
-    frame = CalcFrame()
+    frame = ControlPanelFrame()
     app.MainLoop()
