@@ -66,7 +66,7 @@ class KeypadPanel(wx.Panel):
                     button.Bind(wx.EVT_BUTTON, self.__TryTransmittingKeyCode)
 
                 elif label == 'Reset':
-                    button.Bind(wx.EVT_BUTTON, self.__ClearKeypad)
+                    button.Bind(wx.EVT_BUTTON, self.__ResetKeypad)
 
                 else:
                     button.Bind(wx.EVT_BUTTON, self.__PressKey)
@@ -95,7 +95,8 @@ class KeypadPanel(wx.Panel):
         self.__keySequence = self.__keySequence + pressedKeyValue
 
  
-    def __ClearKeypad(self, event):
+    def __ResetKeypad(self, event):
+        print('[DEBUG] The keypad has been reset...')
         self.__keySequence = ''
 
 
