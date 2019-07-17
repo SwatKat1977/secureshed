@@ -16,13 +16,10 @@ limitations under the License.
 from enum import Enum
 import json
 import threading
-import time
 from flask import Flask, request, abort
 from werkzeug.serving import make_server
 import jsonschema
 
-### application/json
-### https://stackoverflow.com/questions/23110383/how-to-dynamically-build-a-json-object-with-python
 
 ReceiveKeyCodeJsonSchema = {
     "type" : "object",
@@ -149,13 +146,3 @@ class KeypadAPIThread(threading.Thread):
         responseJson = {}
         responseJson["StatusCode"] = ReceiveKeyCodeReturnCode.KeycodeAccepted.value
         return 'OK'
-
-
-server = KeypadAPIThread(5000)
-server.start()
-
-#while True:
-#    pass
-
-time.sleep(20)
-server.shutdown()
