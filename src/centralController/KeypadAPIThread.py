@@ -111,6 +111,16 @@ class KeypadAPIThread(threading.Thread):
         keySeq = body[schemas.receiveKeyCodeBody.KeySeq]
         KeypadAPIThread.KeypadAPIEndpoint.logger.info(f"keySequence : {keySeq}")
 
+        schemas.receiveKeyCodeResponse.Actions
+
         responseJson = {}
-        responseJson["StatusCode"] = ReceiveKeyCodeReturnCode.KeycodeAccepted.value
+        responseJson[schemas.receiveKeyCodeResponse.ReturnCode] = \
+            ReceiveKeyCodeReturnCode.KeycodeAccepted.value
+        responseJson[schemas.receiveKeyCodeResponse.Actions] = \
+        {
+            'DisablePad' : 30
+        }
+        foo = json.dumps(responseJson)
+        print(foo)
+
         return 'OK'

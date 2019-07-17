@@ -29,5 +29,11 @@ ReceiveKeyCodeJsonSchema = {
 class receiveKeyCodeHeader(object):
     AuthKey = 'authorisationKey'
 
+
 class receiveKeyCodeBody(object):
     KeySeq = 'keySequence'
+
+
+class receiveKeyCodeResponse(object):
+    ReturnCode = 'returnCode'
+    Actions = 'actions'
