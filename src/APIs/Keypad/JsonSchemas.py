@@ -16,12 +16,13 @@ limitations under the License.
 
 ReceiveKeyCodeJsonSchema = {
     "type" : "object",
-    "additionalProperties": False,
+    "additionalProperties" : False,
 
     "properties" : {
-        "additionalProperties": False,
+        "additionalProperties" : False,
         "keySequence" : {"type" : "string"},
     },
+    "required": ["keySequence"]
 }
 
 
