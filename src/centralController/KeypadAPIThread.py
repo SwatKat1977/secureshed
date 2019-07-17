@@ -18,7 +18,7 @@ import threading
 from flask import Flask, request, abort
 from werkzeug.serving import make_server
 import jsonschema
-import keypadAPI.JsonSchemas as schemas
+import APIs.Keypad.JsonSchemas as schemas
 from APIs.Keypad.ReceiveKeyCodeReturnCode import ReceiveKeyCodeReturnCode
 
 '''
