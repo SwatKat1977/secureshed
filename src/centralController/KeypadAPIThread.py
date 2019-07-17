@@ -13,30 +13,13 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 '''
-from enum import Enum
 import json
 import threading
 from flask import Flask, request, abort
 from werkzeug.serving import make_server
 import jsonschema
 import keypadAPI.JsonSchemas as schemas
-
-
-## Return codes for ReceiveKeyCode route.
-class ReceiveKeyCodeReturnCode(Enum):
-    # The keycode has been accepted and the alarm is now off/disabled.
-    KeycodeAccepted = 0
-
-    # The keycode entered was invalid, as a result the keypad could get locked
-    # for a period of time.
-    KeycodeIncorrect = 1
-
-    # The keycode was refused, possibly you are trying to enter a keycode when
-    # the keypad is meant to be disabled.    
-    KeycodeRefused = 2
-
-    # a keycode was received out of sequence and is not expected so rejecting.
-    OutOfSequence = 3
+from APIs.Keypad.ReceiveKeyCodeReturnCode import ReceiveKeyCodeReturnCode
 
 '''
 KeycodeIncorrect and KeycodeRefused have atateChange value:
