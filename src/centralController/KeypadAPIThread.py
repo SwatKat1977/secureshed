@@ -19,17 +19,7 @@ import threading
 from flask import Flask, request, abort
 from werkzeug.serving import make_server
 import jsonschema
-
-
-ReceiveKeyCodeJsonSchema = {
-    "type" : "object",
-    "additionalProperties": False,
-
-    "properties" : {
-        "additionalProperties": False,
-        "keySequence" : {"type" : "string"},
-    },
-}
+import keypadAPI.JsonSchemas as schemas
 
 
 ## Return codes for ReceiveKeyCode route.
@@ -52,12 +42,6 @@ class ReceiveKeyCodeReturnCode(Enum):
 KeycodeIncorrect and KeycodeRefused have atateChange value:
 DisablePad : <timeInSeconds>
 '''
-
-class receiveKeyCodeHeader(object):
-    AuthKey = 'authorisationKey'
-
-class receiveKeyCodeBody(object):
-    KeySeq = 'keySequence'
 
 
 ## Implementation of thread that handles API calls to the keypad API.
@@ -112,13 +96,13 @@ class KeypadAPIThread(threading.Thread):
 
         # Verify that an authorisation key exists in the requet header, if not
         # then return a 401 error with a human-readable reasoning. 
-        if receiveKeyCodeHeader.AuthKey not in request.headers:
+        if schemas.receiveKeyCodeHeader.AuthKey not in request.headers:
             errMsg = 'Authorisation key is missing'
             response = KeypadAPIThread.KeypadAPIEndpoint.response_class(
                 response=errMsg, status=401, mimetype='text')
             return response
 
-        authorisationKey = request.headers[receiveKeyCodeHeader.AuthKey]
+        authorisationKey = request.headers[schemas.receiveKeyCodeHeader.AuthKey]
 
         # As the authorisation key functionality isn't currently implemented I
         # have hard-coded as 'authKey'.  If the key isn't valid then the error
@@ -132,7 +116,8 @@ class KeypadAPIThread(threading.Thread):
         # Validate that the json body conforms to the expected schema.
         # If the message isn't valid then a 400 error should be generated.        
         try:
-            jsonschema.validate(instance = body, schema = ReceiveKeyCodeJsonSchema)
+            jsonschema.validate(instance = body,
+                schema = schemas.ReceiveKeyCodeJsonSchema)
 
         except Exception as ex:
             errMsg = 'Message body validation failed.'
@@ -140,7 +125,7 @@ class KeypadAPIThread(threading.Thread):
                 response=errMsg, status=400, mimetype='text')
             return response
 
-        keySeq = body[receiveKeyCodeBody.KeySeq]
+        keySeq = body[schemas.receiveKeyCodeBody.KeySeq]
         KeypadAPIThread.KeypadAPIEndpoint.logger.info(f"keySequence : {keySeq}")
 
         responseJson = {}

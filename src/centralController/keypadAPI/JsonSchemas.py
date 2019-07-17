@@ -13,18 +13,20 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 '''
-import time
-from KeypadAPIThread import KeypadAPIThread
+
+ReceiveKeyCodeJsonSchema = {
+    "type" : "object",
+    "additionalProperties": False,
+
+    "properties" : {
+        "additionalProperties": False,
+        "keySequence" : {"type" : "string"},
+    },
+}
 
 
-### application/json
-### https://stackoverflow.com/questions/23110383/how-to-dynamically-build-a-json-object-with-python
+class receiveKeyCodeHeader(object):
+    AuthKey = 'authorisationKey'
 
-server = KeypadAPIThread(5000)
-server.start()
-
-#while True:
-#    pass
-
-time.sleep(20)
-server.shutdown()
+class receiveKeyCodeBody(object):
+    KeySeq = 'keySequence'
