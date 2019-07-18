@@ -21,11 +21,6 @@ import jsonschema
 import APIs.Keypad.JsonSchemas as schemas
 from APIs.Keypad.ReceiveKeyCodeReturnCode import ReceiveKeyCodeReturnCode
 
-'''
-KeycodeIncorrect and KeycodeRefused have atateChange value:
-DisablePad : <timeInSeconds>
-'''
-
 
 ## Implementation of thread that handles API calls to the keypad API.
 class KeypadAPIThread(threading.Thread):
@@ -111,16 +106,29 @@ class KeypadAPIThread(threading.Thread):
         keySeq = body[schemas.receiveKeyCodeBody.KeySeq]
         KeypadAPIThread.KeypadAPIEndpoint.logger.info(f"keySequence : {keySeq}")
 
-        schemas.receiveKeyCodeResponse.Actions
-
-        responseJson = {}
-        responseJson[schemas.receiveKeyCodeResponse.ReturnCode] = \
-            ReceiveKeyCodeReturnCode.KeycodeAccepted.value
-        responseJson[schemas.receiveKeyCodeResponse.Actions] = \
+        actions = \
         {
-            'DisablePad' : 30
+            schemas.receiveKeyCodeResponseAction.DisableKeypad : 30,
+            schemas.receiveKeyCodeResponseAction.AlarmUnlocked : None,
         }
-        foo = json.dumps(responseJson)
-        print(foo)
+        responseMsg = KeypadAPIThread.__GenerateReceiveKeyCodeResponse(
+            ReceiveKeyCodeReturnCode.KeycodeRefused.value, actions)
+        print(responseMsg)
 
-        return 'OK'
+        return KeypadAPIThread.KeypadAPIEndpoint.response_class(
+                response = responseMsg, status = 200,
+                mimetype = 'application/json')
+
+
+    ## Generate a receive key code response message.
+    #  @param self The object pointer.
+    #  @param returnCode The return code for the response.
+    #  @param actions List of actions to do with the response.
+    #  @return Returns a JSON string with return code and actions. 
+    def __GenerateReceiveKeyCodeResponse(returnCode, actions):
+        responseJson = \
+        {
+            schemas.receiveKeyCodeResponse.ReturnCode : returnCode,
+            schemas.receiveKeyCodeResponse.Actions : actions    
+        }
+        return json.dumps(responseJson)
