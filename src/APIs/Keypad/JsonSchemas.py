@@ -37,3 +37,8 @@ class receiveKeyCodeBody(object):
 class receiveKeyCodeResponse(object):
     ReturnCode = 'returnCode'
     Actions = 'actions'
+
+
+class receiveKeyCodeResponseAction(object):
+    DisableKeypad = 'disableKeypad'
+    AlarmUnlocked = 'alarmUnlocked'
