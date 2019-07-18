@@ -113,7 +113,6 @@ class KeypadAPIThread(threading.Thread):
         }
         responseMsg = KeypadAPIThread.__GenerateReceiveKeyCodeResponse(
             ReceiveKeyCodeReturnCode.KeycodeRefused.value, actions)
-        print(responseMsg)
 
         return KeypadAPIThread.KeypadAPIEndpoint.response_class(
                 response = responseMsg, status = 200,
