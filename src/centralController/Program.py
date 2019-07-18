@@ -19,7 +19,6 @@ import time
 from KeypadAPIThread import KeypadAPIThread
 
 
-### application/json
 ### https://stackoverflow.com/questions/23110383/how-to-dynamically-build-a-json-object-with-python
 
 server = KeypadAPIThread(5000)
@@ -28,5 +27,5 @@ server.start()
 #while True:
 #    pass
 
-time.sleep(20)
+time.sleep(60)
 server.shutdown()

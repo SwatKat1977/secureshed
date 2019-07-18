@@ -2,3 +2,4 @@ Dependencies
 ============
 
 sudo -H pip install Flask-Twisted
+sudo -H pip install jsonschema
