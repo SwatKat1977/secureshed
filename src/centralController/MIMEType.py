@@ -13,3 +13,22 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 '''
+
+# Based on:
+#https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Complete_list_of_MIME_types
+class MIMEType(object):
+
+   # .css | Cascading Style Sheets (CSS)
+   CascadingStyleSheets = 'text/css'
+
+   # .csv | Comma-separated values (CSV)
+   CommaSeparatedValues = 'text/csv'
+
+   # .htm, .html | HyperText Markup Language (HTML)
+   HTML = 'text/html'
+
+   # .json | JSON format
+   JSON = 'application/json'
+
+   # .jsonld | JSON-LD format
+   JSONLD = 'application/ld+json'
