@@ -13,7 +13,10 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 '''
+import json
 import wx
+from common.APIClient.APIEndpointClient import APIEndpointClient
+from common.APIClient.MIMEType import MIMEType
 
 
 ## Panel that implements a numbered keypad.
@@ -28,7 +31,15 @@ class KeypadPanel(wx.Panel):
 	#  @param parent Parent of the wxPython panel.
     def __init__(self, parent):
         super().__init__(parent)
-        
+
+        self.__authorisationKey = 'authKey'
+
+        self.__additionalHeaders = {
+            'authorisationKey' : self.__authorisationKey
+        }
+
+        self.__APIClient = APIEndpointClient('http://127.0.0.1:5000/')
+
         # Key sequence pressed.
         self.__keySequence = ''
         
@@ -95,8 +106,7 @@ class KeypadPanel(wx.Panel):
         self.__keySequence = self.__keySequence + pressedKeyValue
 
  
-    def __ResetKeypad(self, event):
-        print('[DEBUG] The keypad has been reset...')
+    def __ResetKeypad(self, event = None):
         self.__keySequence = ''
 
 
@@ -110,7 +120,22 @@ class KeypadPanel(wx.Panel):
             return
 
         print(f"[DEBUG] Transmitting key sequence '{self.__keySequence}'")
-        self.__ClearKeypad(None)
+
+        body = {"keySequence": self.__keySequence}
+        jsonBody = json.dumps(body)
+
+        res = self.__APIClient.SendPostMsg('receiveKeyCode', MIMEType.JSON,
+            self.__additionalHeaders, jsonBody)
+
+        if res == None:
+            print(f'failed to transmit, reason : {self.__APIClient.LastErrMsg}')
+        
+        else:
+            print('Response:')
+            print(f'|=> Text        : {res.text}')
+            print(f'|=> Status Code : {res.status_code}')
+
+        self.__ResetKeypad()
         self.__sequenceTimer.Stop()        
 
 
@@ -121,5 +146,5 @@ class KeypadPanel(wx.Panel):
 	#  @param event Unused.
     def __TimeoutEvent(self, event):
         print("[DEBUG] Keypad sequence has timed out...'")
-        self.__ClearKeypad(None)
+        self.__ResetKeypad()
         self.__sequenceTimer.Stop()
