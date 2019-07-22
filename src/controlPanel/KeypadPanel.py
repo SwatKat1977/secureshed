@@ -18,6 +18,9 @@ import wx
 from common.APIClient.APIEndpointClient import APIEndpointClient
 from common.APIClient.HTTPStatusCode import HTTPStatusCode
 from common.APIClient.MIMEType import MIMEType
+import APIs.Keypad.JsonSchemas as JsonSchemas
+from APIs.Keypad.ReceiveKeyCodeReturnCode import ReceiveKeyCodeReturnCode
+
 
 
 ## Panel that implements a numbered keypad.
@@ -127,6 +130,8 @@ class KeypadPanel(wx.Panel):
         body = {"keySequence": self.__keySequence}
         jsonBody = json.dumps(body)
 
+        self.__TimeoutEvent()
+
         response = self.__APIClient.SendPostMsg('receiveKeyCode',
             MIMEType.JSON, self.__additionalHeaders, jsonBody)
 
@@ -144,30 +149,19 @@ class KeypadPanel(wx.Panel):
 
         # 200 OK : code accepted, code incorrect or code refused.
         elif response.status_code == HTTPStatusCode.OK:
-            print('Response:')
-            print(f'|=> Text        : {response.text}')
-            print(f'|=> Status Code : {response.status_code}')
 
-            responseText = json(response.text)
-            print(responseText)
+            responseText = json.loads(response.text)
 
-            '''
-## Return codes for ReceiveKeyCode route.
-class ReceiveKeyCodeReturnCode(Enum):
-    # The keycode has been accepted and the alarm is now off/disabled.
-    KeycodeAccepted = 0
+            code = responseText[JsonSchemas.receiveKeyCodeResponse.ReturnCode]
 
-    # The keycode entered was invalid, as a result the keypad could get locked
-    # for a period of time.
-    KeycodeIncorrect = 1
+            if code == ReceiveKeyCodeReturnCode.KeycodeAccepted.value:
+                print('KeycodeAccepted')
 
-    # The keycode was refused, possibly you are trying to enter a keycode when
-    # the keypad is meant to be disabled.    
-    KeycodeRefused = 2
+            elif code == ReceiveKeyCodeReturnCode.KeycodeIncorrect.value:
+                print('KeycodeIncorrect')
 
-    # a keycode was received out of sequence and is not expected so rejecting.
-    OutOfSequence = 3
-            '''
+            elif code == ReceiveKeyCodeReturnCode.KeycodeRefused.value:
+                print('KeycodeRefused')
 
 
 	## Timer timeout event function.  This will cause any stored key sequence
@@ -175,7 +169,6 @@ class ReceiveKeyCodeReturnCode(Enum):
 	#  pressed.
 	#  @param self The object pointer.
 	#  @param event Unused.
-    def __TimeoutEvent(self, event):
-        print("[DEBUG] Keypad sequence has timed out...'")
+    def __TimeoutEvent(self, event = None):
         self.__ResetKeypad()
         self.__sequenceTimer.Stop()
