@@ -16,6 +16,7 @@ limitations under the License.
 import json
 import wx
 from common.APIClient.APIEndpointClient import APIEndpointClient
+from common.APIClient.HTTPStatusCode import HTTPStatusCode
 from common.APIClient.MIMEType import MIMEType
 
 
@@ -119,24 +120,35 @@ class KeypadPanel(wx.Panel):
         if len(self.__keySequence) == 0:
             return
 
-        print(f"[DEBUG] Transmitting key sequence '{self.__keySequence}'")
+        keySeq = self.__keySequence
+
+        print(f"[DEBUG] Transmitting key sequence '{keySeq}'")
 
         body = {"keySequence": self.__keySequence}
         jsonBody = json.dumps(body)
 
-        res = self.__APIClient.SendPostMsg('receiveKeyCode', MIMEType.JSON,
-            self.__additionalHeaders, jsonBody)
+        response = self.__APIClient.SendPostMsg('receiveKeyCode',
+            MIMEType.JSON, self.__additionalHeaders, jsonBody)
 
-        if res == None:
+        if response == None:
             print(f'failed to transmit, reason : {self.__APIClient.LastErrMsg}')
-        
-        else:
-            print('Response:')
-            print(f'|=> Text        : {res.text}')
-            print(f'|=> Status Code : {res.status_code}')
+            return
 
-        self.__ResetKeypad()
-        self.__sequenceTimer.Stop()        
+        returnStatusCode = response.status_code
+
+        # 400 Bad Request : Missing or invalid json body or validation failed.
+        if response.status_code == HTTPStatusCode.BadRequest:
+            return
+
+        # 401 Unauthenticated : Missing or invalid authentication key.
+        elif response.status_code == HTTPStatusCode.Unauthenticated:
+            return
+
+        # 200 OK : code accepted, trip alarm, disable keypad.
+        elif response.status_code == HTTPStatusCode.OK:
+            print('Response:')
+            print(f'|=> Text        : {response.text}')
+            print(f'|=> Status Code : {response.status_code}')
 
 
 	## Timer timeout event function.  This will cause any stored key sequence
