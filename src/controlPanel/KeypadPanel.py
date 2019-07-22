@@ -134,8 +134,6 @@ class KeypadPanel(wx.Panel):
             print(f'failed to transmit, reason : {self.__APIClient.LastErrMsg}')
             return
 
-        returnStatusCode = response.status_code
-
         # 400 Bad Request : Missing or invalid json body or validation failed.
         if response.status_code == HTTPStatusCode.BadRequest:
             return
@@ -144,11 +142,32 @@ class KeypadPanel(wx.Panel):
         elif response.status_code == HTTPStatusCode.Unauthenticated:
             return
 
-        # 200 OK : code accepted, trip alarm, disable keypad.
+        # 200 OK : code accepted, code incorrect or code refused.
         elif response.status_code == HTTPStatusCode.OK:
             print('Response:')
             print(f'|=> Text        : {response.text}')
             print(f'|=> Status Code : {response.status_code}')
+
+            responseText = json(response.text)
+            print(responseText)
+
+            '''
+## Return codes for ReceiveKeyCode route.
+class ReceiveKeyCodeReturnCode(Enum):
+    # The keycode has been accepted and the alarm is now off/disabled.
+    KeycodeAccepted = 0
+
+    # The keycode entered was invalid, as a result the keypad could get locked
+    # for a period of time.
+    KeycodeIncorrect = 1
+
+    # The keycode was refused, possibly you are trying to enter a keycode when
+    # the keypad is meant to be disabled.    
+    KeycodeRefused = 2
+
+    # a keycode was received out of sequence and is not expected so rejecting.
+    OutOfSequence = 3
+            '''
 
 
 	## Timer timeout event function.  This will cause any stored key sequence
