@@ -105,12 +105,28 @@ class KeypadAPIThread(threading.Thread):
 
         keySeq = body[schemas.receiveKeyCodeBody.KeySeq]
         KeypadAPIThread.KeypadAPIEndpoint.logger.info(f"keySequence : {keySeq}")
+        
+        keySeqValid = False
 
-        # schemas.receiveKeyCodeResponseAction.DisableKeypad : 30,
-        actions = \
-        {
-            schemas.receiveKeyCodeResponseAction_KeycodeAccepted.AlarmUnlocked : None,
-        }
+        # Temporarily hard-code the value for development.
+        if keySeq == '1234':
+            keySeqValid = True
+        
+            # schemas.receiveKeyCodeResponseAction.DisableKeypad : 30,
+            actions = \
+            {
+                 schemas.receiveKeyCodeResponseAction_KeycodeAccepted.AlarmUnlocked \
+                  : None,
+            }
+        
+        else:
+            # schemas.receiveKeyCodeResponseAction.DisableKeypad : 30,
+            actions = \
+            {
+                 schemas.receiveKeyCodeResponseAction_KeycodeAccepted.AlarmUnlocked \
+                  : None,
+            }
+
         responseMsg = KeypadAPIThread.__GenerateReceiveKeyCodeResponse(
             ReceiveKeyCodeReturnCode.KeycodeRefused.value, actions)
 
