@@ -106,10 +106,10 @@ class KeypadAPIThread(threading.Thread):
         keySeq = body[schemas.receiveKeyCodeBody.KeySeq]
         KeypadAPIThread.KeypadAPIEndpoint.logger.info(f"keySequence : {keySeq}")
 
+        # schemas.receiveKeyCodeResponseAction.DisableKeypad : 30,
         actions = \
         {
-            schemas.receiveKeyCodeResponseAction.DisableKeypad : 30,
-            schemas.receiveKeyCodeResponseAction.AlarmUnlocked : None,
+            schemas.receiveKeyCodeResponseAction_KeycodeAccepted.AlarmUnlocked : None,
         }
         responseMsg = KeypadAPIThread.__GenerateReceiveKeyCodeResponse(
             ReceiveKeyCodeReturnCode.KeycodeRefused.value, actions)
