@@ -155,14 +155,16 @@ class KeypadPanel(wx.Panel):
             code = responseText[JsonSchemas.receiveKeyCodeResponse.ReturnCode]
 
             if code == ReceiveKeyCodeReturnCode.KeycodeAccepted.value:
-                print('KeycodeAccepted')
+                self.__HandleKeycodeAcceptedActions(
+                    responseText[JsonSchemas.receiveKeyCodeResponse.Actions])
 
             elif code == ReceiveKeyCodeReturnCode.KeycodeIncorrect.value:
-                print('KeycodeIncorrect')
+                self.__HandleKeycodeIncorrectActions(
+                    responseText[JsonSchemas.receiveKeyCodeResponse.Actions])
 
             elif code == ReceiveKeyCodeReturnCode.KeycodeRefused.value:
-                print('KeycodeRefused')
-                print(responseText)
+                self.__HandleKeycodeRefusedActions(
+                    responseText[JsonSchemas.receiveKeyCodeResponse.Actions])
 
 
 	## Timer timeout event function.  This will cause any stored key sequence
@@ -173,3 +175,16 @@ class KeypadPanel(wx.Panel):
     def __TimeoutEvent(self, event = None):
         self.__ResetKeypad()
         self.__sequenceTimer.Stop()
+
+
+    def __HandleKeycodeRefusedActions(self, actions):
+        print('KeycodeRefused')
+        print(actions)
+
+
+    def __HandleKeycodeIncorrectActions(self, actions):
+        print('KeycodeIncorrect')
+
+
+    def __HandleKeycodeAcceptedActions(self, actions):
+        print('KeycodeAccepted')
