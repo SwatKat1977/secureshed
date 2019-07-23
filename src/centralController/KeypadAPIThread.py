@@ -20,6 +20,7 @@ from werkzeug.serving import make_server
 import jsonschema
 import APIs.Keypad.JsonSchemas as schemas
 from APIs.Keypad.ReceiveKeyCodeReturnCode import ReceiveKeyCodeReturnCode
+from common.APIClient.HTTPStatusCode import HTTPStatusCode
 
 
 ## Implementation of thread that handles API calls to the keypad API.
@@ -27,18 +28,22 @@ class KeypadAPIThread(threading.Thread):
 
     KeypadAPIEndpoint = Flask(__name__)
 
+    ConsoleLogger = None
+
 
     ## KeypadAPIThread class constructor, passing in the network port that the
     #  API will listen to.
     #  @param self The object pointer.
     #  @param listeningPort Network port to listen on.
-    def __init__(self, listeningPort):
+    def __init__(self, listeningPort, logger):
         threading.Thread.__init__(self)
         self.srv = make_server('127.0.0.1', listeningPort,
             KeypadAPIThread.KeypadAPIEndpoint)
         KeypadAPIThread.KeypadAPIEndpoint.debug = True
         self.ctx = KeypadAPIThread.KeypadAPIEndpoint.app_context()
         self.ctx.push()
+
+        KeypadAPIThread.ConsoleLogger = logger
 
 
     ## Thread execution function, in this case run the Flask API interface.
@@ -57,7 +62,7 @@ class KeypadAPIThread(threading.Thread):
     #  Recieve a key code from the keypad.  This is for unlocking/disabling the
     #  alarm system.
     #  Return codes:
-    #  * 200 (OK) - code accepted, trip alarm, disable keypad.
+    #  * 200 (OK) - code accepted, rejected or refused.
     #  * 400 (Bad Request) - Missing or invalid json body or validation failed.
     #  * 401 (Unauthenticated) - Missing or invalid authentication key.
     @KeypadAPIEndpoint.route('/receiveKeyCode',methods = ['POST'])
@@ -104,34 +109,34 @@ class KeypadAPIThread(threading.Thread):
             return response
 
         keySeq = body[schemas.receiveKeyCodeBody.KeySeq]
-        KeypadAPIThread.KeypadAPIEndpoint.logger.info(f"keySequence : {keySeq}")
-        
-        keySeqValid = False
+        KeypadAPIThread.ConsoleLogger.debug(f"keySequence : {keySeq}")
 
         # Temporarily hard-code the value for development.
         if keySeq == '1234':
-            keySeqValid = True
-        
-            # schemas.receiveKeyCodeResponseAction.DisableKeypad : 30,
+            KeypadAPIThread.ConsoleLogger.debug('ReceiveKeyCode:: Key is valid')
+
             actions = \
             {
                  schemas.receiveKeyCodeResponseAction_KeycodeAccepted.AlarmUnlocked \
                   : None,
             }
-        
+            responseType = ReceiveKeyCodeReturnCode.KeycodeAccepted.value
+
         else:
-            # schemas.receiveKeyCodeResponseAction.DisableKeypad : 30,
+            KeypadAPIThread.ConsoleLogger.debug('ReceiveKeyCode:: Key is invalid')
+
             actions = \
             {
-                 schemas.receiveKeyCodeResponseAction_KeycodeAccepted.AlarmUnlocked \
-                  : None,
+                 schemas.receiveKeyCodeResponseAction_KeycodeIncorrect.DisableKeypad \
+                  : 30,
             }
+            responseType = ReceiveKeyCodeReturnCode.KeycodeIncorrect.value
 
         responseMsg = KeypadAPIThread.__GenerateReceiveKeyCodeResponse(
-            ReceiveKeyCodeReturnCode.KeycodeRefused.value, actions)
+            responseType, actions)
 
         return KeypadAPIThread.KeypadAPIEndpoint.response_class(
-                response = responseMsg, status = 200,
+                response = responseMsg, status = HTTPStatusCode.OK,
                 mimetype = 'application/json')
 
 

@@ -13,6 +13,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 '''
+import logging
+import signal
 import sys
 sys.path.append('..')
 import time
@@ -21,11 +23,26 @@ from KeypadAPIThread import KeypadAPIThread
 
 ### https://stackoverflow.com/questions/23110383/how-to-dynamically-build-a-json-object-with-python
 
-server = KeypadAPIThread(5000)
+def handler(signum, frame):
+    print('Shutting down...')
+    server.shutdown()
+    sys.exit(1)
+
+signal.signal(signal.SIGINT, handler)
+
+formatter = logging.Formatter("%(asctime)s [%(levelname)s] %(message)s",
+    "%Y-%m-%d %H:%M:%S")
+logger = logging.getLogger('system log')
+consoleStream = logging.StreamHandler()
+consoleStream.setFormatter(formatter)
+logger.setLevel(logging.DEBUG)
+
+# add the handlers to logger
+logger.addHandler(consoleStream)
+
+server = KeypadAPIThread(5000, logger)
 server.start()
 
-#while True:
-#    pass
-
-time.sleep(60)
-server.shutdown()
+while True:
+    pass
+    time.sleep(1)
