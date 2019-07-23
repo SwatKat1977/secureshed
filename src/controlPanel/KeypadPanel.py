@@ -162,6 +162,7 @@ class KeypadPanel(wx.Panel):
 
             elif code == ReceiveKeyCodeReturnCode.KeycodeRefused.value:
                 print('KeycodeRefused')
+                print(responseText)
 
 
 	## Timer timeout event function.  This will cause any stored key sequence
