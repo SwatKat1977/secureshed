@@ -39,6 +39,13 @@ class receiveKeyCodeResponse(object):
     Actions = 'actions'
 
 
-class receiveKeyCodeResponseAction(object):
-    DisableKeypad = 'disableKeypad'
+class receiveKeyCodeResponseAction_KeycodeAccepted(object):
     AlarmUnlocked = 'alarmUnlocked'
+
+
+class receiveKeyCodeResponseAction_KeycodeRefused(object):
+    DisableKeypad = 'disableKeypad'
+
+
+class receiveKeyCodeResponseAction_KeycodeIncorrect(object):
+    DisableKeypad = 'disableKeypad'
