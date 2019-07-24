@@ -19,6 +19,7 @@ import sys
 sys.path.append('..')
 import time
 from KeypadAPIThread import KeypadAPIThread
+from StatusObject import StatusObject
 
 
 ### https://stackoverflow.com/questions/23110383/how-to-dynamically-build-a-json-object-with-python
@@ -40,7 +41,9 @@ logger.setLevel(logging.DEBUG)
 # add the handlers to logger
 logger.addHandler(consoleStream)
 
-server = KeypadAPIThread(5000, logger)
+statusObject = StatusObject()
+
+server = KeypadAPIThread(5000, logger, statusObject)
 server.start()
 
 while True:
