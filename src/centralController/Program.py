@@ -18,6 +18,7 @@ import signal
 import sys
 sys.path.append('..')
 import time
+from ConfigurationManager import ConfigurationManager
 from KeypadAPIThread import KeypadAPIThread
 from StatusObject import StatusObject
 
@@ -30,6 +31,14 @@ def handler(signum, frame):
     sys.exit(1)
 
 signal.signal(signal.SIGINT, handler)
+
+configFile = '../../configurations/centralController/configuration.json'
+
+configManger = ConfigurationManager()
+
+if configManger.ParseConfigFile(configFile) == False:
+    print(f"Parse failed, last message : {cm.LastErrorMsg}")
+    sys.exit(1)
 
 formatter = logging.Formatter("%(asctime)s [%(levelname)s] %(message)s",
     "%Y-%m-%d %H:%M:%S")
