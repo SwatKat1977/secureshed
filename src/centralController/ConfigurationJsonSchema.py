@@ -92,18 +92,20 @@ ConfigurationJsonSchema = \
       "items": { "$ref": "#/definitions/failedAttemptResponse" },
       "default": []
     },
-    "networking":
+    "keypadAPI":
     {
       "additionalProperties" : False,
       "properties":
       {
-        "keypadAPINetworkPort" :
+        "additionalProperties" : False,
+        "NetworkPort" :
         {
-          "type" : "integer"
+          "type" : "integer",
+          "minimum": 1
         }
       },
-      "required" : ["keypadAPINetworkPort"]
+      "required" : ["NetworkPort"]
     }
   },
-  "required" : ["failedAttemptResponses", "networking"]
+  "required" : ["failedAttemptResponses", "keypadAPI"]
 }

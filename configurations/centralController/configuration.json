@@ -1,7 +1,7 @@
 {
-  "networking" :
+  "keypadAPI" :
   {
-    "keypadAPINetworkPort" : 5001
+    "NetworkPort" : 5001
   },
 
   "failedAttemptResponses":

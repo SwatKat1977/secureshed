@@ -61,10 +61,15 @@ class ConfigurationManager(object):
         except Exception as ex:
             self.__lastErrorMsg = f"Configuration file {filename} failed " + \
                 "to validate against expected schema.  Please check!"
+            print(ex)
+            return False
+        
+        print(configJson)
 
 
+configFile = '../../configurations/centralController/configuration.json'
 cm = ConfigurationManager()
-if cm.ParseConfigFile('configuration.json') == False:
+if cm.ParseConfigFile(configFile) == False:
     print(f"Parse failed, last message : {cm.LastErrorMsg}")
 
 class Configuration(object):
