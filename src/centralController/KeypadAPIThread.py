@@ -29,13 +29,15 @@ class KeypadAPIThread(threading.Thread):
     KeypadAPIEndpoint = Flask(__name__)
 
     ConsoleLogger = None
+    
+    StatusObject = None
 
 
     ## KeypadAPIThread class constructor, passing in the network port that the
     #  API will listen to.
     #  @param self The object pointer.
     #  @param listeningPort Network port to listen on.
-    def __init__(self, listeningPort, logger):
+    def __init__(self, listeningPort, logger, statusObject):
         threading.Thread.__init__(self)
         self.srv = make_server('127.0.0.1', listeningPort,
             KeypadAPIThread.KeypadAPIEndpoint)
@@ -44,6 +46,7 @@ class KeypadAPIThread(threading.Thread):
         self.ctx.push()
 
         KeypadAPIThread.ConsoleLogger = logger
+        KeypadAPIThread.StatusObject = statusObject
 
 
     ## Thread execution function, in this case run the Flask API interface.
