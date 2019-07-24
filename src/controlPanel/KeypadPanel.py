@@ -177,13 +177,19 @@ class KeypadPanel(wx.Panel):
         self.__sequenceTimer.Stop()
 
 
+    # Currently we don't do anything with this action except write a debug
+    # message.
     def __HandleKeycodeRefusedActions(self, actions):
-        print('KeycodeRefused')
-        print(actions)
+        print('[DEBUG] The keycode was refused!')
 
 
     def __HandleKeycodeIncorrectActions(self, actions):
-        print('KeycodeIncorrect')
+        print('[DEBUG[ The keycode was incorrect')
+
+        # If there is an action to disable the keypad then 
+        if JsonSchemas.receiveKeyCodeResponseAction_KeycodeRefused.DisableKeypad \
+            in actions:
+            print('action : disable keypad')
 
 
     def __HandleKeycodeAcceptedActions(self, actions):
