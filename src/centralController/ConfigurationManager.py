@@ -65,14 +65,3 @@ class ConfigurationManager(object):
             return False
         
         print(configJson)
-
-
-configFile = '../../configurations/centralController/configuration.json'
-cm = ConfigurationManager()
-if cm.ParseConfigFile(configFile) == False:
-    print(f"Parse failed, last message : {cm.LastErrorMsg}")
-
-class Configuration(object):
-
-    def __init__(self):
-        pass
