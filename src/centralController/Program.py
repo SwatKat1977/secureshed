@@ -36,8 +36,8 @@ configFile = '../../configurations/centralController/configuration.json'
 
 configManger = ConfigurationManager()
 
-if configManger.ParseConfigFile(configFile) == False:
-    print(f"Parse failed, last message : {cm.LastErrorMsg}")
+if configManger.ParseConfigFile(configFile) == None:
+    print(f"Parse failed, last message : {configManger.LastErrorMsg}")
     sys.exit(1)
 
 formatter = logging.Formatter("%(asctime)s [%(levelname)s] %(message)s",
