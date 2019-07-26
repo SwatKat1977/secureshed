@@ -36,7 +36,8 @@ configFile = '../../configurations/centralController/configuration.json'
 
 configManger = ConfigurationManager()
 
-if configManger.ParseConfigFile(configFile) == None:
+configuration = configManger.ParseConfigFile(configFile)
+if configuration == None:
     print(f"Parse failed, last message : {configManger.LastErrorMsg}")
     sys.exit(1)
 
@@ -52,9 +53,9 @@ logger.addHandler(consoleStream)
 
 statusObject = StatusObject()
 
-server = KeypadAPIThread(5000, logger, statusObject)
+server = KeypadAPIThread(configuration.KeypadAPIConfig.NetworkPort,
+    logger, statusObject)
 server.start()
 
 while True:
-    pass
     time.sleep(1)
