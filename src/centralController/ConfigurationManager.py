@@ -44,7 +44,7 @@ class ConfigurationManager(object):
 
 
     def ParseConfigFile(self, filename):
-    
+
         self.__lastErrorMsg = ''
 
         try:
@@ -58,7 +58,7 @@ class ConfigurationManager(object):
 
         try:
             configJson = json.loads(fileContents)
-        
+
         except json.JSONDecodeError as excpt:
             self.__lastErrorMsg = "Unable to parse configuration file" + \
                 f"{filename}, reason: {excpt}"
@@ -71,7 +71,6 @@ class ConfigurationManager(object):
         except Exception as ex:
             self.__lastErrorMsg = f"Configuration file {filename} failed " + \
                 "to validate against expected schema.  Please check!"
-            print(ex)
             return None
 
         keypadApiNetworkPort = configJson[JSON_keypadAPI][JSON_keypadAPI_Port]
