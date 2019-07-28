@@ -117,13 +117,12 @@ class KeypadAPIThread(threading.Thread):
             return response
 
         keySeq = body[schemas.receiveKeyCodeBody.KeySeq]
-        KeypadAPIThread.ConsoleLogger.debug(f"keySequence : {keySeq}")
 
         # Read the key code detail from the database.
         details = KeypadAPIThread.ControllerDb.GetKeycodeDetails(keySeq)
 
         if details != None:
-            KeypadAPIThread.ConsoleLogger.debug('ReceiveKeyCode:: Key is valid')
+            KeypadAPIThread.ConsoleLogger.debug('A valid key code received')
 
             actions = \
             {
@@ -133,7 +132,7 @@ class KeypadAPIThread(threading.Thread):
             responseType = ReceiveKeyCodeReturnCode.KeycodeAccepted.value
 
         else:
-            KeypadAPIThread.ConsoleLogger.debug('ReceiveKeyCode:: Key is invalid')
+            KeypadAPIThread.ConsoleLogger.debug('An invalid key code received')
 
             actions = \
             {
