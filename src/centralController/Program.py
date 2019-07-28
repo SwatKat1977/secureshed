@@ -19,6 +19,7 @@ import sys
 sys.path.append('..')
 import time
 from ConfigurationManager import ConfigurationManager
+from ControllerDBInterface import ControllerDBInterface
 from KeypadAPIThread import KeypadAPIThread
 from StatusObject import StatusObject
 
@@ -53,8 +54,14 @@ logger.addHandler(consoleStream)
 
 statusObject = StatusObject()
 
+controllerDbInterface = ControllerDBInterface()
+
+if controllerDbInterface.Connect('ccontroller.db') == False:
+    print('[ERROR] Database ccontroller.db is missing, aborting...')
+    sys.exit(1)
+
 server = KeypadAPIThread(configuration.KeypadAPIConfig.NetworkPort,
-    logger, statusObject)
+    logger, statusObject, controllerDbInterface)
 server.start()
 
 while True:
