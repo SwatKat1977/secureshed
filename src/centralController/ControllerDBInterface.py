@@ -56,6 +56,8 @@ class ControllerDBInterface(object):
         self.__dbName = dbName
         self.__isConnected = True
         self.__cursor = self.__dbObj.cursor()
+        
+        return True
 
 
     def GetKeycodeDetails(self, keycode):
