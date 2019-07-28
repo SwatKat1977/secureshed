@@ -31,13 +31,17 @@ class KeypadAPIThread(threading.Thread):
     ConsoleLogger = None
     
     StatusObject = None
+    
+    ControllerDb = None
 
 
     ## KeypadAPIThread class constructor, passing in the network port that the
     #  API will listen to.
     #  @param self The object pointer.
     #  @param listeningPort Network port to listen on.
-    def __init__(self, listeningPort, logger, statusObject):
+    def __init__(self, listeningPort, logger, statusObject,
+        controllerDbInterface):
+
         threading.Thread.__init__(self)
         self.srv = make_server('127.0.0.1', listeningPort,
             KeypadAPIThread.KeypadAPIEndpoint)
@@ -47,6 +51,7 @@ class KeypadAPIThread(threading.Thread):
 
         KeypadAPIThread.ConsoleLogger = logger
         KeypadAPIThread.StatusObject = statusObject
+        KeypadAPIThread.ControllerDb = controllerDbInterface
 
 
     ## Thread execution function, in this case run the Flask API interface.
@@ -114,8 +119,10 @@ class KeypadAPIThread(threading.Thread):
         keySeq = body[schemas.receiveKeyCodeBody.KeySeq]
         KeypadAPIThread.ConsoleLogger.debug(f"keySequence : {keySeq}")
 
-        # Temporarily hard-code the value for development.
-        if keySeq == '1234':
+        # Read the key code detail from the database.
+        details = KeypadAPIThread.ControllerDb.GetKeycodeDetails(keySeq)
+
+        if details != None:
             KeypadAPIThread.ConsoleLogger.debug('ReceiveKeyCode:: Key is valid')
 
             actions = \
