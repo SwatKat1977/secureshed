@@ -47,7 +47,8 @@ class ControllerDBInterface(object):
 
         try:
             dburi = 'file:{}?mode=rw'.format(pathname2url(dbName))
-            self.__dbObj = sqlite3.connect(dburi, uri = True)
+            self.__dbObj = sqlite3.connect(dburi, uri = True,
+                check_same_thread = False)
 
         except sqlite3.OperationalError as ex:
             self.__lastErrMsg = f'Unable to connect to database {dbName}'
@@ -63,7 +64,7 @@ class ControllerDBInterface(object):
     def GetKeycodeDetails(self, keycode):
         query = "SELECT IsMasterKey FROM KeyCodes WHERE KeyCode=?"
         details = self.__ExecuteWithReturn(query, (keycode,), True)
-        
+
         if details == None:
             return None
         
