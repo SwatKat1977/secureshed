@@ -149,6 +149,7 @@ class KeypadAPIThread(threading.Thread):
             if attempts in KeypadAPIThread.Config.FailedAttemptResponses:
                 responses = KeypadAPIThread.Config.FailedAttemptResponses[
                     attempts]
+
                 for response in responses:
 
                     if response == 'disableKeyPad':
@@ -160,10 +161,10 @@ class KeypadAPIThread(threading.Thread):
                         actions[schemas. \
                         receiveKeyCodeResponseAction_KeycodeIncorrect. \
                         TriggerAlarm] = None
+                        KeypadAPIThread.StatusObject.CurrentAlarmState = \
+                            KeypadAPIThread.StatusObject.AlarmState.Triggered
 
             responseType = ReceiveKeyCodeReturnCode.KeycodeIncorrect.value
-
-        print(actions)
 
         responseMsg = KeypadAPIThread.__GenerateReceiveKeyCodeResponse(
             responseType, actions)
