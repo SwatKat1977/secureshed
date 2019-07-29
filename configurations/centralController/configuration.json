@@ -12,7 +12,7 @@
       [
         {
           "actionType" : "disableKeyPad",
-          "parameters" : [{ "key": "lockTime", "value": "90" }]
+          "parameters" : [{ "key": "lockTime", "value": "3" }]
         }
       ]
     },
