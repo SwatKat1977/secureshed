@@ -13,9 +13,19 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 '''
+from enum import Enum
 
 
 class StatusObject(object):
+
+    class AlarmState(Enum):
+        Deactivated = 0
+        Activated = 1
+        Trigger = 2
+
+        # This is a future feature, but added so don't forget it!
+        #Muted = 3
+
 
     ## Property getter : Failed entry attempts
     @property
@@ -24,23 +34,19 @@ class StatusObject(object):
 
     ## Property getter : Is authenticated flag.
     @property
-    def IsAuthenticated(self):
-        return self.__isAuthenticated
+    def CurrentAlarmState(self):
+        return self.__alarmState
 
-    @IsAuthenticated.setter
-    def IsAuthenticated(self, newValue):
-
-        if type(newValue) != bool:
-            raise TypeError()
-
-        self.__isAuthenticated = newValue
+    @CurrentAlarmState.setter
+    def CurrentAlarmState(self, newValue):
+        self.__alarmState = newValue
 
 
 	## StatusObject default constructor.
 	#  @param self The object pointer.
     def __init__(self):
         self.__failedEntryAttempts = 0
-        self.__isAuthenticated = False
+        self.__alarmState = self.AlarmState.Deactivated
 
 
 	## Increment the failed entry attempts.
