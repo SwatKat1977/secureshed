@@ -31,8 +31,10 @@ class KeypadAPIThread(threading.Thread):
     ConsoleLogger = None
     
     StatusObject = None
-    
+
     ControllerDb = None
+    
+    Config = None
 
 
     ## KeypadAPIThread class constructor, passing in the network port that the
@@ -40,7 +42,7 @@ class KeypadAPIThread(threading.Thread):
     #  @param self The object pointer.
     #  @param listeningPort Network port to listen on.
     def __init__(self, listeningPort, logger, statusObject,
-        controllerDbInterface):
+        controllerDbInterface, config):
 
         threading.Thread.__init__(self)
         self.srv = make_server('127.0.0.1', listeningPort,
@@ -52,6 +54,7 @@ class KeypadAPIThread(threading.Thread):
         KeypadAPIThread.ConsoleLogger = logger
         KeypadAPIThread.StatusObject = statusObject
         KeypadAPIThread.ControllerDb = controllerDbInterface
+        KeypadAPIThread.Config = config
 
 
     ## Thread execution function, in this case run the Flask API interface.
@@ -134,12 +137,33 @@ class KeypadAPIThread(threading.Thread):
         else:
             KeypadAPIThread.ConsoleLogger.debug('An invalid key code received')
 
-            actions = \
-            {
-                 schemas.receiveKeyCodeResponseAction_KeycodeIncorrect.DisableKeypad \
-                  : 30,
-            }
+            KeypadAPIThread.StatusObject.IncrementFailedEntryAttempts()
+            attempts = KeypadAPIThread.StatusObject.FailedEntryAttempts
+
+            actions = {}
+
+            # If the attempt failed then send the response of type
+            # receiveKeyCodeResponseAction_KeycodeIncorrect along with any
+            # response actions that have been defined in the configuraution
+            # file.
+            if attempts in KeypadAPIThread.Config.FailedAttemptResponses:
+                responses = KeypadAPIThread.Config.FailedAttemptResponses[
+                    attempts]
+                for response in responses:
+
+                    if response == 'disableKeyPad':
+                        actions[schemas. \
+                        receiveKeyCodeResponseAction_KeycodeIncorrect. \
+                        DisableKeypad] = int(responses[response]['lockTime'])
+
+                    elif response == 'triggerAlarm':
+                        actions[schemas. \
+                        receiveKeyCodeResponseAction_KeycodeIncorrect. \
+                        TriggerAlarm] = None
+
             responseType = ReceiveKeyCodeReturnCode.KeycodeIncorrect.value
+
+        print(actions)
 
         responseMsg = KeypadAPIThread.__GenerateReceiveKeyCodeResponse(
             responseType, actions)
