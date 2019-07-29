@@ -11,8 +11,8 @@ rm -rf src/centralController/keypadAPI/__pycache__
 rm -rf src/centralController/keypadAPI/.DS_Store
 
 # Clean control panel directory.
-rm -rf src/controlPanel/__pycache__
-rm -rf src/controlPanel/.DS_Store
+rm -rf src/keypadController/__pycache__
+rm -rf src/keypadController/.DS_Store
 
 rm -rf src/common/__pycache__
 rm -rf src/common/.DS_Store
