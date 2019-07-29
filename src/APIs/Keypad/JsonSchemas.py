@@ -53,3 +53,4 @@ class receiveKeyCodeResponseAction_KeycodeRefused(object):
 
 class receiveKeyCodeResponseAction_KeycodeIncorrect(object):
     DisableKeypad = 'disableKeypad'
+    TriggerAlarm = 'triggerAlarm'
