@@ -61,7 +61,7 @@ if controllerDbInterface.Connect('ccontroller.db') == False:
     sys.exit(1)
 
 server = KeypadAPIThread(configuration.KeypadAPIConfig.NetworkPort,
-    logger, statusObject, controllerDbInterface)
+    logger, statusObject, controllerDbInterface, configuration)
 server.start()
 
 while True:
