@@ -21,10 +21,7 @@ class StatusObject(object):
     class AlarmState(Enum):
         Deactivated = 0
         Activated = 1
-        Trigger = 2
-
-        # This is a future feature, but added so don't forget it!
-        #Muted = 3
+        Triggered = 2
 
 
     ## Property getter : Failed entry attempts
