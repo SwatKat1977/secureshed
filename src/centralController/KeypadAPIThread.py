@@ -127,6 +127,27 @@ class KeypadAPIThread(threading.Thread):
         if details != None:
             KeypadAPIThread.ConsoleLogger.debug('A valid key code received')
 
+            if KeypadAPIThread.StatusObject.CurrentAlarmState == \
+                KeypadAPIThread.StatusObject.AlarmState.Triggered:
+                KeypadAPIThread.ConsoleLogger.debug(
+                    'Alarm state changed : Unlocked')
+                KeypadAPIThread.StatusObject.CurrentAlarmState = \
+                    KeypadAPIThread.StatusObject.AlarmState.Deactivated
+
+            elif KeypadAPIThread.StatusObject.CurrentAlarmState == \
+                KeypadAPIThread.StatusObject.AlarmState.Deactivated:
+                KeypadAPIThread.ConsoleLogger.debug(
+                    'Alarm state changed : Activated')
+                KeypadAPIThread.StatusObject.CurrentAlarmState = \
+                    KeypadAPIThread.StatusObject.AlarmState.Activated
+
+            elif KeypadAPIThread.StatusObject.CurrentAlarmState == \
+                KeypadAPIThread.StatusObject.AlarmState.Activated:
+                KeypadAPIThread.ConsoleLogger.debug(
+                    'Alarm state changed : Deactivated')
+                KeypadAPIThread.StatusObject.CurrentAlarmState = \
+                    KeypadAPIThread.StatusObject.AlarmState.Deactivated
+
             actions = \
             {
                  schemas.receiveKeyCodeResponseAction_KeycodeAccepted.AlarmUnlocked \
@@ -161,6 +182,8 @@ class KeypadAPIThread(threading.Thread):
                         actions[schemas. \
                         receiveKeyCodeResponseAction_KeycodeIncorrect. \
                         TriggerAlarm] = None
+                        KeypadAPIThread.ConsoleLogger.debug('Alarm triggered!')
+
                         KeypadAPIThread.StatusObject.CurrentAlarmState = \
                             KeypadAPIThread.StatusObject.AlarmState.Triggered
 
