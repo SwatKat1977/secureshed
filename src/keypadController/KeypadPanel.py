@@ -57,8 +57,6 @@ class KeypadPanel(wx.Panel):
  
         self.__CreateUI()
 
-        self.DisableKeypad(5)
-
 
     ## Create the keypad user interface.
     #  @param self The object pointer.
@@ -120,7 +118,6 @@ class KeypadPanel(wx.Panel):
         pressedKeyValue = pressedKey.GetLabel()
 
         if len(self.__keySequence) == 0:
-            print('[DEBUG] First key in sequence, starting timer...')
             self.__sequenceTimer.Start(self.SequenceTimeout * 1000)
 
         self.__keySequence = self.__keySequence + pressedKeyValue
@@ -142,8 +139,6 @@ class KeypadPanel(wx.Panel):
             return
 
         keySeq = self.__keySequence
-
-        print(f"[DEBUG] Transmitting key sequence '{keySeq}'")
 
         body = {"keySequence": self.__keySequence}
         jsonBody = json.dumps(body)
@@ -204,12 +199,12 @@ class KeypadPanel(wx.Panel):
 
     #  @param self The object pointer.
     def __HandleKeycodeIncorrectActions(self, actions):
-        print('[DEBUG[ The keycode was incorrect')
+        print('[DEBUG[ Incorrect keycode event..')
 
-        # If there is an action to disable the keypad then 
-        if JsonSchemas.receiveKeyCodeResponseAction_KeycodeRefused.DisableKeypad \
-            in actions:
-            print('action : disable keypad')
+        for a in actions:
+            if a == JsonSchemas.receiveKeyCodeResponseAction_KeycodeRefused.\
+                DisableKeypad:
+                self.DisableKeypad(actions[a])
 
 
     ## STUB
