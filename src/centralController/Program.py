@@ -33,7 +33,7 @@ def handler(signum, frame):
 
 signal.signal(signal.SIGINT, handler)
 
-configFile = '../../configurations/centralController/configuration.json'
+configFile = './configuration.json'
 
 configManger = ConfigurationManager()
 

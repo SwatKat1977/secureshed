@@ -52,8 +52,8 @@ class ConfigurationManager(object):
                 fileContents = fileHandle.read()
 
         except IOError as excpt:
-            self.__lastErrorMsg = "Unable to open configuration file" + \
-                f"{filename}, reason: {excpt.strerror}"
+            self.__lastErrorMsg = "Unable to open configuration file '" + \
+                f"{filename}', reason: {excpt.strerror}"
             return None
 
         try:
