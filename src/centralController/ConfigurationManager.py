@@ -15,9 +15,9 @@ limitations under the License.
 '''
 import json
 import jsonschema
-from Configuration import KeypadAPIConfig, Configuration
-from ConfigurationJsonSchema import ConfigurationJsonSchema
-from FailedCodeAttemptAction import (FailedCodeAttemptActionType,
+from centralController.Configuration import KeypadAPIConfig, Configuration
+from centralController.ConfigurationJsonSchema import ConfigurationJsonSchema
+from centralController.FailedCodeAttemptAction import (FailedCodeAttemptActionType,
     ActionTypeParams)
 
 
