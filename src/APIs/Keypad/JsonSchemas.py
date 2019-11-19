@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 '''
 
-class Routes(object):
+class Routes:
     ReceiveKeyCode = 'ReceiveKeyCode'
 
 
@@ -30,27 +30,27 @@ ReceiveKeyCodeJsonSchema = {
 }
 
 
-class receiveKeyCodeHeader(object):
+class receiveKeyCodeHeader:
     AuthKey = 'authorisationKey'
 
 
-class receiveKeyCodeBody(object):
+class receiveKeyCodeBody:
     KeySeq = 'keySequence'
 
 
-class receiveKeyCodeResponse(object):
+class receiveKeyCodeResponse:
     ReturnCode = 'returnCode'
     Actions = 'actions'
 
 
-class receiveKeyCodeResponseAction_KeycodeAccepted(object):
+class receiveKeyCodeResponseAction_KeycodeAccepted:
     AlarmUnlocked = 'alarmUnlocked'
 
 
-class receiveKeyCodeResponseAction_KeycodeRefused(object):
+class receiveKeyCodeResponseAction_KeycodeRefused:
     DisableKeypad = 'disableKeypad'
 
 
-class receiveKeyCodeResponseAction_KeycodeIncorrect(object):
+class receiveKeyCodeResponseAction_KeycodeIncorrect:
     DisableKeypad = 'disableKeypad'
     TriggerAlarm = 'triggerAlarm'

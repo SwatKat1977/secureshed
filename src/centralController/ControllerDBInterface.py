@@ -17,7 +17,7 @@ from urllib.request import pathname2url
 import sqlite3
 
 
-class ControllerDBInterface(object):
+class ControllerDBInterface:
 
     ## Property getter : Database name
     @property
@@ -47,10 +47,10 @@ class ControllerDBInterface(object):
 
         try:
             dburi = 'file:{}?mode=rw'.format(pathname2url(dbName))
-            self.__dbObj = sqlite3.connect(dburi, uri = True,
-                check_same_thread = False)
+            self.__dbObj = sqlite3.connect(dburi, uri=True,
+                check_same_thread=False)
 
-        except sqlite3.OperationalError as ex:
+        except sqlite3.OperationalError:
             self.__lastErrMsg = f'Unable to connect to database {dbName}'
             return False
 
@@ -65,14 +65,14 @@ class ControllerDBInterface(object):
         query = "SELECT IsMasterKey FROM KeyCodes WHERE KeyCode=?"
         details = self.__ExecuteWithReturn(query, (keycode,), True)
 
-        if details == None:
+        if not details:
             return None
         
         cols, vals = details
         return dict(zip(cols, vals))
 
 
-    def __ExecuteWithoutReturn(self, query, values = (), commit = True):
+    def __ExecuteWithoutReturn(self, query, values=(), commit=True):
         if self.__ExecuteSQL(query, values) == False:
             return False
 
@@ -80,7 +80,7 @@ class ControllerDBInterface(object):
             self.__dbObj.commit()
 
 
-    def __ExecuteWithReturn(self, query, values = (), fetchOnlyOne = False):
+    def __ExecuteWithReturn(self, query, values=(), fetchOnlyOne=False):
         if self.__ExecuteSQL(query, values) == False:
             return None
 
