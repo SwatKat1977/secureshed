@@ -13,27 +13,23 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 '''
-import json
 import threading
-from flask import Flask, request, abort
-from werkzeug.serving import make_server
-import jsonschema
-import APIs.Keypad.JsonSchemas as schemas
-from APIs.Keypad.ReceiveKeyCodeReturnCode import ReceiveKeyCodeReturnCode
-from common.APIClient.HTTPStatusCode import HTTPStatusCode
+
+try:
+    import RPi.GPIO as GPIO
+except ModuleNotFoundError:
+    from centralController.EmulatedRaspberryPiIO import GPIO
 
 
 ## Implementation of thread that handles API calls to the keypad API.
 class IOProcessingThread(threading.Thread):
 
-    KeypadAPIEndpoint = Flask(__name__)
-
     ConsoleLogger = None
-    
+
     StatusObject = None
 
     ControllerDb = None
-    
+
     Config = None
 
 
@@ -41,7 +37,7 @@ class IOProcessingThread(threading.Thread):
     #  API will listen to.
     #  @param self The object pointer.
     #  @param listeningPort Network port to listen on.
-    def __init__(self, logger, statusObject, config):        
+    def __init__(self, logger, statusObject, config):
         threading.Thread.__init__(self)
         self.__logger = logger
         self.__statusObject = statusObject
@@ -57,4 +53,35 @@ class IOProcessingThread(threading.Thread):
     ## Thread shutdown function to stop the keypad API endpoint interface.
     #  @param self The object pointer.
     def shutdown(self):
+        # pylint: disable=C0103
         self.__logger.info('shutting down IO processing thread')
+
+
+import time
+#import RPi.GPIO as GPIO
+
+RelayPin = 23
+
+GPIO.cleanup() 
+
+GPIO.setmode(GPIO.BCM)  
+
+
+GPIO.setup(RelayPin, GPIO.OUT)
+GPIO.output(RelayPin, GPIO.HIGH)
+print('SETUP relay')
+time.sleep(10)
+
+print('Activating')
+GPIO.output(RelayPin, GPIO.LOW)
+time.sleep(10)
+print('De-activating')
+GPIO.output(RelayPin, GPIO.HIGH)
+
+time.sleep(10)
+print('Activating')
+GPIO.output(RelayPin, GPIO.LOW)
+
+time.sleep(10)
+
+GPIO.cleanup() 
