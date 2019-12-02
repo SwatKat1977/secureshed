@@ -14,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 '''
 import hashlib
+import json
+import jsonschema
 
 
 class GPIO:
@@ -92,14 +94,14 @@ class GPIO:
         "type": "object",
         "properties":
         {
-            PinEntryGPIO05Element: {"$ref": "#/definitions/IOPin"},
-            PinEntryGPIO06Element: {"$ref": "#/definitions/IOPin"},
-            PinEntryGPIO14Element: {"$ref": "#/definitions/IOPin"},
-            PinEntryGPIO15Element: {"$ref": "#/definitions/IOPin"},
-            PinEntryGPIO18Element: {"$ref": "#/definitions/IOPin"},
-            PinEntryGPIO23Element: {"$ref": "#/definitions/IOPin"},
-            PinEntryGPIO24Element: {"$ref": "#/definitions/IOPin"},
-            PinEntryGPIO25Element: {"$ref": "#/definitions/IOPin"},
+            PinEntryGPIO05Element: {"$ref": f"#/definitions/{IOPinElement}"},
+            PinEntryGPIO06Element: {"$ref": f"#/definitions/{IOPinElement}"},
+            PinEntryGPIO14Element: {"$ref": f"#/definitions/{IOPinElement}"},
+            PinEntryGPIO15Element: {"$ref": f"#/definitions/{IOPinElement}"},
+            PinEntryGPIO18Element: {"$ref": f"#/definitions/{IOPinElement}"},
+            PinEntryGPIO23Element: {"$ref": f"#/definitions/{IOPinElement}"},
+            PinEntryGPIO24Element: {"$ref": f"#/definitions/{IOPinElement}"},
+            PinEntryGPIO25Element: {"$ref": f"#/definitions/{IOPinElement}"}
         },
         "additionalProperties": False
     }
@@ -158,3 +160,36 @@ class GPIO:
 
         except IOError:
             return None
+
+
+    @staticmethod
+    def ReadPinoutFile(filename):
+        try:
+            with open(filename, 'rb') as fileHandle:
+                fileContents = fileHandle.read()
+
+        except IOError:
+            return (False, 'Cannot read file')
+
+        try:
+            readJson = json.loads(fileContents)
+
+        except json.JSONDecodeError as excpt:
+            msg = f"Unable to parse '{filename}', reason: {excpt}"
+            return (False, msg)
+
+        try:
+            jsonschema.validate(instance=readJson,
+                                schema=GPIO.PinOutJsonFileSchema)
+
+        except jsonschema.exceptions.ValidationError as ex:
+            msg = f"Header file {filename} failed to validate against " + \
+                  f"expected schema. Reason: {ex}"
+            return (False, msg)
+
+        except jsonschema.exceptions.SchemaError as ex:
+            msg = f"Header file {filename} failed to validate due to " + \
+                  f"schema syntax error, Traceback: {ex}"
+            return (False, msg)
+
+        return readJson
