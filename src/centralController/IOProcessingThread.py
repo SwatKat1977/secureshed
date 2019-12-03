@@ -95,36 +95,21 @@ class IOProcessingThread(threading.Thread):
         if newHash is None or newHash == self.__emulatedPinOutFileHash:
             return
 
-        print('different!!!')
         self.__emulatedPinOutFileHash = newHash
 
-        newPinOutStates = []
+        newPinOutStates = {}
 
         status, pinouts = GPIO.ReadPinoutFile(pinOutFile)
-        print(pinouts)
         if status:
             for key in pinouts:
-                #newPinOutStates[key] = pinouts[key]
-                print(int(key))
-                print(pinouts[key][GPIO.IOPinElement_State])
-            #pinouts
+                pinState = pinouts[key][GPIO.IOPinElement_State]
+                newPinOutStates[key] = 1 \
+                    if pinState == GPIO.IOPinStateElement_High \
+                    else 0
 
             print(newPinOutStates)
         else:
             print(pinouts)
-
-        #print(self.__emulatedPinOutFileHash)
-        #print(GPIO.HashPinoutFile('doxygen.cnf'))
-
-        '''
-    def ReadPinoutFile(filename):
-        try:
-            with open(filename, 'rb') as fileHandle:
-                fileContents = fileHandle.read()
-
-        except IOError:
-            return (False, 'Cannot read file')
-        '''
 
 
 '''
