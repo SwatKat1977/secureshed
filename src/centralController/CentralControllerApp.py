@@ -17,6 +17,7 @@ import logging
 import os
 import signal
 import sys
+import time
 from centralController.ConfigurationManager import ConfigurationManager
 from centralController.ControllerDBInterface import ControllerDBInterface
 from centralController.KeypadAPIThread import KeypadApiController
@@ -26,13 +27,16 @@ from centralController.KeypadAPIThread import KeypadApiController
 
 
 class CentralControllerApp:
-    __slots__ = ['__db', '__configFile', '__endpoint', '__logger']
+    __slots__ = ['__db', '__configFile', '__endpoint', '__ioProcessor',
+                 '__logger']
+
 
     def __init__(self, endpoint):
         self.__endpoint = endpoint
         self.__configFile = os.getenv('CENCON_CONFIG')
         self.__db = os.getenv('CENCON_DB')
         self.__logger = None
+        self.__ioProcessor = None
 
 
     def StartApp(self):
@@ -68,8 +72,9 @@ class CentralControllerApp:
             self.__logger.error("[ERROR] Database '%s' is missing!", self.__db)
             sys.exit(1)
  
-        ioThread = IOProcessingThread(self.__logger, statusObject, configuration)
-        ioThread.start()
+        self.__ioProcessor = IOProcessingThread(self.__logger, statusObject,
+                                                configuration)
+        self.__ioProcessor.start()
 
         ###     def __init__(self, logger, statusObject, controllerDb, config, endpoint):
         keypadApiController = KeypadApiController(self.__logger, statusObject,
@@ -86,4 +91,10 @@ class CentralControllerApp:
 
 
     def __Shutdown(self):
-        pass
+        self.__ioProcessor.SignalShutdownRequested()
+
+        while not self.__ioProcessor.shutdownCompleted:
+            time.sleep(5)
+            pass
+
+        self.__logger.info('IO Processor has Shut down')

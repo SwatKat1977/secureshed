@@ -25,28 +25,28 @@ class GPIO:
     # |============================|
 
     ## Pin entry: GPIO05.
-    PinEntryGPIO05Element = 'GPIO05'
+    PinEntryGPIO05Element = '05'
 
     ## Pin entry: GPIO06.
-    PinEntryGPIO06Element = 'GPIO06'
+    PinEntryGPIO06Element = '06'
 
     ## Pin entry: GPIO14.
-    PinEntryGPIO14Element = 'GPIO14'
+    PinEntryGPIO14Element = '14'
 
     ## Pin entry: GPIO15.
-    PinEntryGPIO15Element = 'GPIO15'
+    PinEntryGPIO15Element = '15'
 
     ## Pin entry: GPIO18.
-    PinEntryGPIO18Element = 'GPIO18'
+    PinEntryGPIO18Element = '18'
 
     ## Pin entry: GPIO23.
-    PinEntryGPIO23Element = 'GPIO23'
+    PinEntryGPIO23Element = '23'
 
     ## Pin entry: GPIO24.
-    PinEntryGPIO24Element = 'GPIO24'
+    PinEntryGPIO24Element = '24'
 
     ## Pin entry: GPIO25.
-    PinEntryGPIO25Element = 'GPIO25'
+    PinEntryGPIO25Element = '25'
 
     # |========================|
     # | IO pin object elements |
@@ -64,9 +64,6 @@ class GPIO:
     ## IO pin state constant : Low.
     IOPinStateElement_Low = 'low'
 
-    ## IO pin state constant : Unused.
-    IOPinStateElement_Unused = 'unused'
-
     PinOutJsonFileSchema = {
         "$schema": "http://json-schema.org/draft-07/schema#",
         "definitions":
@@ -82,8 +79,7 @@ class GPIO:
                         "enum":
                         [
                             IOPinStateElement_High,
-                            IOPinStateElement_Low,
-                            IOPinStateElement_Unused
+                            IOPinStateElement_Low
                         ]
                     }
                 },
@@ -103,6 +99,17 @@ class GPIO:
             PinEntryGPIO24Element: {"$ref": f"#/definitions/{IOPinElement}"},
             PinEntryGPIO25Element: {"$ref": f"#/definitions/{IOPinElement}"}
         },
+        "required":
+        [
+            PinEntryGPIO05Element,
+            PinEntryGPIO06Element,
+            PinEntryGPIO14Element,
+            PinEntryGPIO15Element,
+            PinEntryGPIO18Element,
+            PinEntryGPIO23Element,
+            PinEntryGPIO24Element,
+            PinEntryGPIO25Element
+        ],
         "additionalProperties": False
     }
 
@@ -192,4 +199,4 @@ class GPIO:
                   f"schema syntax error, Traceback: {ex}"
             return (False, msg)
 
-        return readJson
+        return (True, readJson)

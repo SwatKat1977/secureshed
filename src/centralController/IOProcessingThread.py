@@ -13,35 +13,57 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 '''
+import enum
 import threading
+import time
+
 
 try:
     import RPi.GPIO as GPIO
+    RPIO_EMULATED = False
 except ModuleNotFoundError:
     from centralController.EmulatedRaspberryPiIO import GPIO
+    RPIO_EMULATED = True
 
 
 ## Implementation of thread that handles API calls to the keypad API.
 class IOProcessingThread(threading.Thread):
 
-    ConsoleLogger = None
+    class IOPinState(enum.Enum):
+        High = 0,
+        Low = 1
 
-    StatusObject = None
-
-    ControllerDb = None
-
-    Config = None
+    ## Property getter : Last error message
+    @property
+    def shutdownCompleted(self):
+        return self.__shutdownCompleted
 
 
     ## KeypadAPIThread class constructor, passing in the network port that the
     #  API will listen to.
     #  @param self The object pointer.
-    #  @param listeningPort Network port to listen on.
+    #  @param logger Network port to listen on.
+    #  @param statusObject Network port to listen on.
+    #  @param config Network port to listen on.
     def __init__(self, logger, statusObject, config):
         threading.Thread.__init__(self)
         self.__logger = logger
         self.__statusObject = statusObject
         self.__config = config
+        self.__shutdownRequested = False
+        self.__shutdownCompleted = False
+        self.__emulatedPinOutFileHash = None
+
+        self.__emulatedPinOutStates = {
+            5 : self.IOPinState.High,
+            6 : self.IOPinState.High,
+            14 : self.IOPinState.High,
+            15 : self.IOPinState.High,
+            18 : self.IOPinState.High,
+            23 : self.IOPinState.High,
+            24 : self.IOPinState.High,
+            25 : self.IOPinState.High
+        }
 
 
     ## Thread execution function, in this case run the Flask API interface.
@@ -49,17 +71,63 @@ class IOProcessingThread(threading.Thread):
     def run(self):
         self.__logger.info('starting IO processing thread')
 
+        if RPIO_EMULATED:
+            self.__logger.info('Using Raspberry PI IO Emulation...')
 
-    ## Thread shutdown function to stop the keypad API endpoint interface.
-    #  @param self The object pointer.
-    def shutdown(self):
-        # pylint: disable=C0103
-        self.__logger.info('shutting down IO processing thread')
+        while not self.__shutdownRequested:
+
+            if RPIO_EMULATED:
+                self.__UpdateFromPinOutFile()
+
+            time.sleep(2)
+
+        self.__shutdownCompleted = True
 
 
-import time
-#import RPi.GPIO as GPIO
+    def SignalShutdownRequested(self):
+        self.__shutdownRequested = True
 
+
+    def __UpdateFromPinOutFile(self):
+        pinOutFile = 'centralController/pinOutFile.json'
+
+        newHash = GPIO.HashPinoutFile(pinOutFile)
+        if newHash is None or newHash == self.__emulatedPinOutFileHash:
+            return
+
+        print('different!!!')
+        self.__emulatedPinOutFileHash = newHash
+
+        newPinOutStates = []
+
+        status, pinouts = GPIO.ReadPinoutFile(pinOutFile)
+        print(pinouts)
+        if status:
+            for key in pinouts:
+                #newPinOutStates[key] = pinouts[key]
+                print(int(key))
+                print(pinouts[key][GPIO.IOPinElement_State])
+            #pinouts
+
+            print(newPinOutStates)
+        else:
+            print(pinouts)
+
+        #print(self.__emulatedPinOutFileHash)
+        #print(GPIO.HashPinoutFile('doxygen.cnf'))
+
+        '''
+    def ReadPinoutFile(filename):
+        try:
+            with open(filename, 'rb') as fileHandle:
+                fileContents = fileHandle.read()
+
+        except IOError:
+            return (False, 'Cannot read file')
+        '''
+
+
+'''
 RelayPin = 23
 
 GPIO.cleanup() 
@@ -85,3 +153,4 @@ GPIO.output(RelayPin, GPIO.LOW)
 time.sleep(10)
 
 GPIO.cleanup() 
+'''
