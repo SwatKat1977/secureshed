@@ -107,9 +107,7 @@ class IOProcessingThread(threading.Thread):
                     if pinState == GPIO.IOPinStateElement_High \
                     else 0
 
-            print(newPinOutStates)
-        else:
-            print(pinouts)
+            self.__emulatedPinOutStates = newPinOutStates
 
 
 '''
