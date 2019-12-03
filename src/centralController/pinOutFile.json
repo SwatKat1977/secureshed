@@ -1,10 +1,10 @@
 {
-    "05" : { "State": "high" },
-    "06" : { "State": "high" },
-    "14" : { "State": "high" },
-    "15" : { "State": "high" },
-    "18" : { "State": "high" },
-    "23" : { "State": "high" },
-    "24" : { "State": "high" },
-    "25" : { "State": "high" }
+    "GPIO05" : { "State": "high" },
+    "GPIO06" : { "State": "high" },
+    "GPIO14" : { "State": "high" },
+    "GPIO15" : { "State": "high" },
+    "GPIO18" : { "State": "high" },
+    "GPIO23" : { "State": "high" },
+    "GPIO24" : { "State": "high" },
+    "GPIO25" : { "State": "high" }
 }

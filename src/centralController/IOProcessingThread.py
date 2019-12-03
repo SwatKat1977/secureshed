@@ -30,7 +30,7 @@ except ModuleNotFoundError:
 class IOProcessingThread(threading.Thread):
 
     class IOPinState(enum.Enum):
-        High = 0,
+        High = 0
         Low = 1
 
     ## Property getter : Last error message
@@ -52,18 +52,6 @@ class IOProcessingThread(threading.Thread):
         self.__config = config
         self.__shutdownRequested = False
         self.__shutdownCompleted = False
-        self.__emulatedPinOutFileHash = None
-
-        self.__emulatedPinOutStates = {
-            5 : self.IOPinState.High,
-            6 : self.IOPinState.High,
-            14 : self.IOPinState.High,
-            15 : self.IOPinState.High,
-            18 : self.IOPinState.High,
-            23 : self.IOPinState.High,
-            24 : self.IOPinState.High,
-            25 : self.IOPinState.High
-        }
 
 
     ## Thread execution function, in this case run the Flask API interface.
@@ -77,7 +65,7 @@ class IOProcessingThread(threading.Thread):
         while not self.__shutdownRequested:
 
             if RPIO_EMULATED:
-                self.__UpdateFromPinOutFile()
+                GPIO.UpdateFromPinOutFile(self.__logger)
 
             time.sleep(2)
 
@@ -86,29 +74,6 @@ class IOProcessingThread(threading.Thread):
 
     def SignalShutdownRequested(self):
         self.__shutdownRequested = True
-
-
-    def __UpdateFromPinOutFile(self):
-        pinOutFile = 'centralController/pinOutFile.json'
-
-        newHash = GPIO.HashPinoutFile(pinOutFile)
-        if newHash is None or newHash == self.__emulatedPinOutFileHash:
-            return
-
-        self.__emulatedPinOutFileHash = newHash
-
-        newPinOutStates = {}
-
-        status, pinouts = GPIO.ReadPinoutFile(pinOutFile)
-        if status:
-            for key in pinouts:
-                pinState = pinouts[key][GPIO.IOPinElement_State]
-                newPinOutStates[key] = 1 \
-                    if pinState == GPIO.IOPinStateElement_High \
-                    else 0
-
-            self.__emulatedPinOutStates = newPinOutStates
-
 
 '''
 RelayPin = 23

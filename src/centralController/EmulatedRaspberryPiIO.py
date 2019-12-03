@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 '''
+import enum
 import hashlib
 import json
 import jsonschema
@@ -20,33 +21,40 @@ import jsonschema
 
 class GPIO:
 
+    class PinState(enum.Enum):
+        Low = 0
+        High = 1
+
     # |============================|
     # | Pin out file json elements |
     # |============================|
 
+    ## Pin entry Prefix.
+    PinEntryGPIOPrefix = 'GPIO'
+
     ## Pin entry: GPIO05.
-    PinEntryGPIO05Element = '05'
+    PinEntryGPIO05Element = f'{PinEntryGPIOPrefix}05'
 
     ## Pin entry: GPIO06.
-    PinEntryGPIO06Element = '06'
+    PinEntryGPIO06Element = f'{PinEntryGPIOPrefix}06'
 
     ## Pin entry: GPIO14.
-    PinEntryGPIO14Element = '14'
+    PinEntryGPIO14Element = f'{PinEntryGPIOPrefix}14'
 
     ## Pin entry: GPIO15.
-    PinEntryGPIO15Element = '15'
+    PinEntryGPIO15Element = f'{PinEntryGPIOPrefix}15'
 
     ## Pin entry: GPIO18.
-    PinEntryGPIO18Element = '18'
+    PinEntryGPIO18Element = f'{PinEntryGPIOPrefix}18'
 
     ## Pin entry: GPIO23.
-    PinEntryGPIO23Element = '23'
+    PinEntryGPIO23Element = f'{PinEntryGPIOPrefix}23'
 
     ## Pin entry: GPIO24.
-    PinEntryGPIO24Element = '24'
+    PinEntryGPIO24Element = f'{PinEntryGPIOPrefix}24'
 
     ## Pin entry: GPIO25.
-    PinEntryGPIO25Element = '25'
+    PinEntryGPIO25Element = f'{PinEntryGPIOPrefix}25'
 
     # |========================|
     # | IO pin object elements |
@@ -113,6 +121,22 @@ class GPIO:
         "additionalProperties": False
     }
 
+    CurrentPinOutStates = {
+        PinEntryGPIO05Element : PinState.High,
+        PinEntryGPIO06Element : PinState.High,
+        PinEntryGPIO14Element : PinState.High,
+        PinEntryGPIO15Element : PinState.High,
+        PinEntryGPIO18Element : PinState.High,
+        PinEntryGPIO23Element : PinState.High,
+        PinEntryGPIO24Element : PinState.High,
+        PinEntryGPIO25Element : PinState.High
+    }
+
+    PinOutFileHash = None
+
+    PinOutFile = 'centralController/pinOutFile.json'
+
+
     ##################################
     # -- RPi.GPIO numbering systems --
     ##################################
@@ -165,38 +189,61 @@ class GPIO:
                 fileContents = fileHandle.read()
                 return hashlib.md5(fileContents).hexdigest()
 
-        except IOError:
+        except IOError as ex:
+            print(ex)
             return None
 
 
     @staticmethod
-    def ReadPinoutFile(filename):
+    def ReadPinoutFile():
         try:
-            with open(filename, 'rb') as fileHandle:
+            with open(GPIO.PinOutFile, 'rb') as fileHandle:
                 fileContents = fileHandle.read()
 
         except IOError:
-            return (False, 'Cannot read file')
+            return ('Cannot read file', None)
 
         try:
             readJson = json.loads(fileContents)
 
         except json.JSONDecodeError as excpt:
-            msg = f"Unable to parse '{filename}', reason: {excpt}"
-            return (False, msg)
+            return (f"Unable to parse pinout file, reason: {excpt}",
+                    None)
 
         try:
             jsonschema.validate(instance=readJson,
                                 schema=GPIO.PinOutJsonFileSchema)
 
         except jsonschema.exceptions.ValidationError as ex:
-            msg = f"Header file {filename} failed to validate against " + \
-                  f"expected schema. Reason: {ex}"
-            return (False, msg)
+            return (f"File Schema validation failed, Reason: {ex}", None)
 
         except jsonschema.exceptions.SchemaError as ex:
-            msg = f"Header file {filename} failed to validate due to " + \
-                  f"schema syntax error, Traceback: {ex}"
-            return (False, msg)
+            return (f"Internal schema syntax error, Traceback: {ex}", None)
 
-        return (True, readJson)
+        return ('', readJson)
+
+
+    @staticmethod
+    def UpdateFromPinOutFile(logger):
+        newHash = GPIO.HashPinoutFile(GPIO.PinOutFile)
+        if newHash is None or newHash == GPIO.PinOutFileHash:
+            return
+
+        GPIO.PinOutFileHash = newHash
+
+        newPinOutStates = {}
+
+        status, pinouts = GPIO.ReadPinoutFile()
+        if status or not pinouts:
+            logger.info(f'Unable to read pin file, reason: {status}')
+            return
+
+        for key in pinouts:
+            pinState = pinouts[key][GPIO.IOPinElement_State]
+            newPinOutStates[key] = GPIO.PinState.High \
+                if pinState == GPIO.IOPinStateElement_High \
+                else GPIO.PinState.Low
+
+        logger.info(f'PRE pin out : {GPIO.CurrentPinOutStates}')
+        GPIO.CurrentPinOutStates = newPinOutStates
+        logger.info(f'PST pin out : {GPIO.CurrentPinOutStates}')
