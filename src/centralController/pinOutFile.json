@@ -1,0 +1,10 @@
+{
+    "GPIO05" : { "State": "high" },
+    "GPIO06" : { "State": "high" },
+    "GPIO14" : { "State": "high" },
+    "GPIO15" : { "State": "high" },
+    "GPIO18" : { "State": "high" },
+    "GPIO23" : { "State": "high" },
+    "GPIO24" : { "State": "high" },
+    "GPIO25" : { "State": "high" }
+}
