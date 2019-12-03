@@ -62,9 +62,6 @@ class CentralControllerApp:
             print(f"Parse failed, last message : {configManger.LastErrorMsg}")
             sys.exit(1)
 
-        self.__logger.info('|==configuration')
-        self.__logger.info(configuration)
-        self.__logger.info('|==configuration')
         statusObject = StatusObject()
 
         controllerDb = ControllerDBInterface()
