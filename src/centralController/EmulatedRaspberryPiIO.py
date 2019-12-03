@@ -141,10 +141,10 @@ class GPIO:
     # -- RPi.GPIO numbering systems --
     ##################################
 
-    ## RPi.GPIO numbering systems : BCM.
+    ## RPi.GPIO numbering systems : Broadcom SOC channel.
     BCM = 101
 
-    ## RPi.GPIO numbering systems : BCM.
+    ## RPi.GPIO numbering systems : Board numbers.
     BOARD = 102
 
     IN = 201
@@ -163,27 +163,30 @@ class GPIO:
 
     @staticmethod
     def cleanup():
+        # pylint: disable=C0103
         pass
 
 
     @staticmethod
     def setup(pin, state):
+        # pylint: disable=C0103
         pass
 
 
     @staticmethod
     def setmode(modeType):
+        # pylint: disable=C0103
         pass
 
 
     @staticmethod
     def output(pin, state):
+        # pylint: disable=C0103
         pass
 
 
     @staticmethod
     def HashPinoutFile(pinoutFile):
-
         try:
             with open(pinoutFile, 'rb') as fileHandle:
                 fileContents = fileHandle.read()
@@ -244,6 +247,5 @@ class GPIO:
                 if pinState == GPIO.IOPinStateElement_High \
                 else GPIO.PinState.Low
 
-        logger.info(f'PRE pin out : {GPIO.CurrentPinOutStates}')
         GPIO.CurrentPinOutStates = newPinOutStates
-        logger.info(f'PST pin out : {GPIO.CurrentPinOutStates}')
+        logger.debug(f'Emulated Pin states : {GPIO.CurrentPinOutStates}')
