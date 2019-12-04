@@ -27,7 +27,7 @@ class KeypadAPIConfig(object):
         self.__networkPort = networkPort
 
 
-class Configuration(object):
+class Configuration:
 
     ## Property getter : Keypad API config
     @property

@@ -23,12 +23,11 @@ from centralController.ControllerDBInterface import ControllerDBInterface
 from centralController.KeypadAPIThread import KeypadApiController
 from centralController.IOProcessingThread import IOProcessingThread
 from centralController.StatusObject import StatusObject
-from centralController.KeypadAPIThread import KeypadApiController
 
 
 class CentralControllerApp:
-    __slots__ = ['__db', '__configFile', '__endpoint', '__ioProcessor',
-                 '__logger']
+    __slots__ = ['__db', '__configFile', '__endpoint', '__keypadApiController',
+                 '__ioProcessor', '__logger']
 
 
     def __init__(self, endpoint):
@@ -37,13 +36,14 @@ class CentralControllerApp:
         self.__db = os.getenv('CENCON_DB')
         self.__logger = None
         self.__ioProcessor = None
+        self.__keypadApiController = None
 
 
     def StartApp(self):
-        
+
         # Configure the logging for the application.
         formatter = logging.Formatter("%(asctime)s [%(levelname)s] %(message)s",
-            "%Y-%m-%d %H:%M:%S")
+                                      "%Y-%m-%d %H:%M:%S")
         self.__logger = logging.getLogger('system log')
         consoleStream = logging.StreamHandler()
         consoleStream.setFormatter(formatter)
@@ -52,14 +52,14 @@ class CentralControllerApp:
 
         signal.signal(signal.SIGINT, self.__SignalHandler)
 
-        self.__logger.info(f'Configuration file : {self.__configFile}')
-        self.__logger.info(f'Database           : {self.__db}')
+        self.__logger.info('Configuration file : %s', self.__configFile)
+        self.__logger.info('Database           : %s', self.__db)
 
         configManger = ConfigurationManager()
 
         configuration = configManger.ParseConfigFile(self.__configFile)
         if not configuration:
-            print(f"Parse failed, last message : {configManger.LastErrorMsg}")
+            print(f"Parse failed, last message : {configManger.lastErrorMsg}")
             sys.exit(1)
 
         statusObject = StatusObject()
@@ -68,15 +68,16 @@ class CentralControllerApp:
         if not controllerDb.Connect(self.__db):
             self.__logger.error("[ERROR] Database '%s' is missing!", self.__db)
             sys.exit(1)
- 
+
         self.__ioProcessor = IOProcessingThread(self.__logger, statusObject,
                                                 configuration)
         self.__ioProcessor.start()
 
-        ###     def __init__(self, logger, statusObject, controllerDb, config, endpoint):
-        keypadApiController = KeypadApiController(self.__logger, statusObject,
-                                                  controllerDb, configuration,
-                                                  self.__endpoint)
+        self.__keypadApiController = KeypadApiController(self.__logger,
+                                                         statusObject,
+                                                         controllerDb,
+                                                         configuration,
+                                                         self.__endpoint)
 
 
     def __SignalHandler(self, signum, frame):
@@ -92,6 +93,5 @@ class CentralControllerApp:
 
         while not self.__ioProcessor.shutdownCompleted:
             time.sleep(5)
-            pass
 
         self.__logger.info('IO Processor has Shut down')

@@ -16,7 +16,7 @@ limitations under the License.
 from enum import Enum
 
 
-class StatusObject(object):
+class StatusObject:
 
     class AlarmState(Enum):
         Deactivated = 0

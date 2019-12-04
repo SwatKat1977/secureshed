@@ -1,0 +1,188 @@
+'''
+Copyright 2019 Secure Shed Project Dev Team
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+'''
+# pylint: disable=R0903
+import json
+import jsonschema
+
+
+class ConfigurationManager:
+
+    class JsonTopElement:
+        Device = 'device'
+        Devices = 'devices'
+
+    class DeviceElement:
+        Hardware = 'hardware'
+        DeviceType = 'deviceType'
+        Name = 'name'
+        Pins = 'pins'
+        Enabled = 'enabled'
+
+    class DevicePinsElement:
+        Mode = 'mode'
+        InitialState = 'initialState'
+
+    class DevicePinsModeType:
+        Input = 'input'
+        Output = 'output'
+
+    class DeviceHardwareType:
+        Sensor = 'sensor'
+        Siren = 'siren'
+
+    class DevicePinsInitialStateType:
+        High = 'high'
+        Low = 'low'
+
+    ## Configuration file's Json schema.
+    JsonSchema = \
+    {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+
+        "definitions":
+        {
+            DeviceElement.Pins:
+            {
+                "type" : "object",
+                "properties":
+                {
+                    DevicePinsElement.Mode:
+                    {
+                        "type": "string",
+                        "enum":
+                        [
+                            DevicePinsModeType.Input,
+                            DevicePinsModeType.Output
+                        ]
+                    },
+                    DevicePinsElement.InitialState:
+                    {
+                        "type": "string",
+                        "enum":
+                        [
+                            DevicePinsInitialStateType.High,
+                            DevicePinsInitialStateType.Low
+                        ]
+                    }
+                },
+                "additionalProperties": False,
+                "required":
+                [
+                    DevicePinsElement.Mode,
+                    DevicePinsElement.InitialState
+                ],
+            },
+            JsonTopElement.Device:
+            {
+                "type" : "object",
+                "properties":
+                {
+                    DeviceElement.DeviceType:
+                    {
+                        "type": "string"
+                    },
+                    DeviceElement.Hardware:
+                    {
+                        "type": "string",
+                        "enum":
+                        [
+                            DeviceHardwareType.Sensor,
+                            DeviceHardwareType.Siren
+                        ]
+                    },
+                    DeviceElement.Name:
+                    {
+                        "type": "string"
+                    },
+                    DeviceElement.Enabled:
+                    {
+                        "type": "boolean"
+                    },
+                    DeviceElement.Pins:
+                    {
+                        "type": "array",
+                        "items": {"$ref": f"#/definitions/{DeviceElement.Pins}"}
+                    }
+                },
+                "additionalProperties": False,
+                "required":
+                [
+                    DeviceElement.DeviceType,
+                    DeviceElement.Hardware,
+                    DeviceElement.Name,
+                    DeviceElement.Enabled,
+                    DeviceElement.Pins
+                ],
+            }
+        },
+        "type" : "object",
+        "properties":
+        {
+            JsonTopElement.Devices:
+            {
+                "type": "array",
+                "items": {"$ref": f"#/definitions/{JsonTopElement.Device}"}
+            }
+        },
+        "required" : [JsonTopElement.Devices],
+        "additionalProperties" : False,
+    }
+
+    ## Property getter : Last error message
+    @property
+    def lastErrorMsg(self):
+        return self.__lastErrorMsg
+
+
+    def __init__(self):
+        self.__lastErrorMsg = ''
+
+
+    def ReadDevicesConfigFile(self, filename):
+
+        self.__lastErrorMsg = ''
+
+        try:
+            with open(filename) as fileHandle:
+                fileContents = fileHandle.read()
+
+        except IOError as excpt:
+            self.__lastErrorMsg = "Unable to open configuration file '" + \
+                f"{filename}', reason: {excpt.strerror}"
+            return None
+
+        try:
+            configJson = json.loads(fileContents)
+
+        except json.JSONDecodeError as excpt:
+            self.__lastErrorMsg = "Unable to parse configuration file" + \
+                f"{filename}, reason: {excpt}"
+            return None
+
+        try:
+            jsonschema.validate(instance=configJson,
+                                schema=self.JsonSchema)
+
+        except jsonschema.exceptions.SchemaError:
+            self.__lastErrorMsg = f"Configuration file {filename} failed " + \
+                "to validate against expected schema.  Please check!"
+            return None
+
+        return configJson
+
+CN = ConfigurationManager()
+print(CN.ReadDevicesConfigFile('pinOutFile.json'))
+print(CN.lastErrorMsg)
