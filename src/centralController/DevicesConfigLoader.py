@@ -138,7 +138,7 @@ class ConfigurationManager:
             }
         },
         "required" : [JsonTopElement.Devices],
-        "additionalProperties" : False,
+        "additionalProperties" : False
     }
 
     ## Property getter : Last error message
@@ -177,12 +177,17 @@ class ConfigurationManager:
                                 schema=self.JsonSchema)
 
         except jsonschema.exceptions.SchemaError:
-            self.__lastErrorMsg = f"Configuration file {filename} failed " + \
-                "to validate against expected schema.  Please check!"
+            self.__lastErrorMsg = f"FATAL internal error, schema file invalid!"
+            return None
+
+        except jsonschema.exceptions.ValidationError as ex:
+            self.__lastErrorMsg = "Schema validation failed for devices " + \
+                f"file '{filename} failed."
+            print(ex)
             return None
 
         return configJson
 
 CN = ConfigurationManager()
-print(CN.ReadDevicesConfigFile('pinOutFile.json'))
+print(CN.ReadDevicesConfigFile('../../configurationFiles/centralController/devices.json'))
 print(CN.lastErrorMsg)

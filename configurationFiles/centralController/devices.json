@@ -1,1 +1,13 @@
-
+{
+    "devices": [
+        {
+            "enabled": true,
+            "hardware": "sensor",
+            "deviceType": "string'}",
+            "name": "{'type': 'string'}",
+            "pins":
+            [
+            ]
+        }
+    ]
+}
