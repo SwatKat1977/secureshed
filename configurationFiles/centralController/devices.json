@@ -1,12 +1,17 @@
 {
     "devices": [
         {
-            "enabled": true,
-            "hardware": "sensor",
-            "deviceType": "string'}",
             "name": "{'type': 'string'}",
+            "hardware": "siren",
+            "deviceType": "string'}",
+            "enabled": true,
             "pins":
             [
+                {
+                    "ioPin": "GPIO18",
+                    "initialState": "high",
+                    "mode": "output"
+                }
             ]
         }
     ]

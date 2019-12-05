@@ -16,6 +16,7 @@ limitations under the License.
 # pylint: disable=R0903
 import json
 import jsonschema
+from EmulatedRaspberryPiIO import GPIO
 
 
 class ConfigurationManager:
@@ -32,6 +33,7 @@ class ConfigurationManager:
         Enabled = 'enabled'
 
     class DevicePinsElement:
+        IoPin = 'ioPin'
         Mode = 'mode'
         InitialState = 'initialState'
 
@@ -59,6 +61,21 @@ class ConfigurationManager:
                 "type" : "object",
                 "properties":
                 {
+                    DevicePinsElement.IoPin:
+                    {
+                        "type": "string",
+                        "enum":
+                        [
+                            GPIO.PinEntryGPIO05Element,
+                            GPIO.PinEntryGPIO06Element,
+                            GPIO.PinEntryGPIO14Element,
+                            GPIO.PinEntryGPIO15Element,
+                            GPIO.PinEntryGPIO18Element,
+                            GPIO.PinEntryGPIO23Element,
+                            GPIO.PinEntryGPIO24Element,
+                            GPIO.PinEntryGPIO25Element
+                        ]
+                    },
                     DevicePinsElement.Mode:
                     {
                         "type": "string",
@@ -81,6 +98,7 @@ class ConfigurationManager:
                 "additionalProperties": False,
                 "required":
                 [
+                    DevicePinsElement.IoPin,
                     DevicePinsElement.Mode,
                     DevicePinsElement.InitialState
                 ],
