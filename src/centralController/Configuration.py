@@ -13,30 +13,24 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 '''
+import collections
 
 
-class KeypadAPIConfig(object):
-
-    ## Property getter : Network port
-    @property
-    def NetworkPort(self):
-        return self.__networkPort
-
-
-    def __init__(self, networkPort):
-        self.__networkPort = networkPort
+KeypadAPIConfig = collections.namedtuple('KeypadAPIConfig', 'networkPort')
 
 
 class Configuration:
+    __slots__ = ['__failedAttemptResponses', '__keypadApiConfig']
+
 
     ## Property getter : Keypad API config
     @property
-    def KeypadAPIConfig(self):
-        return self.__keypadAPIConfig
+    def keypadApiConfig(self):
+        return self.__keypadApiConfig
 
     ## Property getter : Failed code entry attempt responses
     @property
-    def FailedAttemptResponses(self):
+    def failedAttemptResponses(self):
         return self.__failedAttemptResponses
 
 
@@ -44,6 +38,6 @@ class Configuration:
         if not isinstance(keypadAPIConfig, KeypadAPIConfig):
             raise TypeError('keypadAPIConfig param not type keypadAPIConfig')
 
-        self.__keypadAPIConfig = keypadAPIConfig
+        self.__keypadApiConfig = keypadAPIConfig
 
         self.__failedAttemptResponses = failedAttemptResponses
