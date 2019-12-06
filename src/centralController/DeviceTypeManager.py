@@ -14,13 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 '''
 import importlib
-from DeviceTypes.BaseSirenDeviceType import BaseSirenDeviceType
-from DeviceTypes.BaseSensorDeviceType import BaseSensorDeviceType
+from centralController.DeviceTypes.BaseSirenDeviceType import BaseSirenDeviceType
+from centralController.DeviceTypes.BaseSensorDeviceType import BaseSensorDeviceType
 
 
 class DeviceTypeManager:
     # pylint: disable=R0903
-    __slots__ = ['__deviceTypes', '__logger']
+    __slots__ = ['__deviceTypes', '__expectedDeviceTypes', '__logger']
 
     @property
     def deviceTypes(self):
@@ -30,15 +30,19 @@ class DeviceTypeManager:
     def __init__(self, logger):
         self.__logger = logger
 
-        self.__deviceTypes = {
+        self.__expectedDeviceTypes = {
             'GenericAlarmSiren': None,
             'GenericMageticSensor': None
         }
 
-        newDeviceTypes = {}
+        self.__deviceTypes = {}
 
-        for device in self.__deviceTypes:
-            moduleName = f'DeviceTypes.{device}'
+
+    def LoadDeviceTypes(self):
+        defaultModulePath = 'centralController.DeviceTypes.'
+
+        for device in self.__expectedDeviceTypes:
+            moduleName = f'{defaultModulePath}{device}'
 
             try:
                 importedModule = importlib.import_module(moduleName)
@@ -65,9 +69,8 @@ class DeviceTypeManager:
                          "used and was removed from the devices list.")
                     continue
 
-                newDeviceTypes[device] = importedCls
+                self.__deviceTypes[device] = importedCls
+                self.__logger.info(f"Loaded plug-in for device type '{device}'")
 
             except AttributeError:
                 pass
-
-        self.__deviceTypes = newDeviceTypes
