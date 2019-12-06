@@ -20,14 +20,16 @@ import sys
 import time
 from centralController.ConfigurationManager import ConfigurationManager
 from centralController.ControllerDBInterface import ControllerDBInterface
+from centralController.DevicesConfigLoader import DevicesConfigLoader
+from centralController.DeviceTypeManager import DeviceTypeManager
 from centralController.KeypadAPIThread import KeypadApiController
 from centralController.IOProcessingThread import IOProcessingThread
 from centralController.StatusObject import StatusObject
 
 
 class CentralControllerApp:
-    __slots__ = ['__db', '__configFile', '__endpoint', '__keypadApiController',
-                 '__ioProcessor', '__logger']
+    __slots__ = ['__db', '__configFile', '__currDevices', '__endpoint',
+                 '__keypadApiController', '__ioProcessor', '__logger']
 
 
     def __init__(self, endpoint):
@@ -66,8 +68,20 @@ class CentralControllerApp:
 
         controllerDb = ControllerDBInterface()
         if not controllerDb.Connect(self.__db):
-            self.__logger.error("[ERROR] Database '%s' is missing!", self.__db)
+            self.__logger.error("Database '%s' is missing!", self.__db)
             sys.exit(1)
+
+        devicesCfg = '../configurationFiles/centralController/devices.json'
+        devicesConfigLoader = DevicesConfigLoader()
+
+        self.__currDevices = devicesConfigLoader.ReadDevicesConfigFile(devicesCfg)
+        if not self.__currDevices:
+            self.__logger.error(devicesConfigLoader.lastErrorMsg)
+            sys.exit(1)
+
+        deviceTypeMgr = DeviceTypeManager(self.__logger)
+
+        deviceTypeMgr.LoadDeviceTypes()
 
         self.__ioProcessor = IOProcessingThread(self.__logger, statusObject,
                                                 configuration)
