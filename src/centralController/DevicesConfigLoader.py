@@ -201,7 +201,6 @@ class DevicesConfigLoader:
         except jsonschema.exceptions.ValidationError as ex:
             self.__lastErrorMsg = "Schema validation failed for devices " + \
                 f"file '{filename} failed."
-            print(ex)
             return None
 
         return configJson
