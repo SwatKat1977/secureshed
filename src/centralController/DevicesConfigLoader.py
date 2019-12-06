@@ -16,10 +16,10 @@ limitations under the License.
 # pylint: disable=R0903
 import json
 import jsonschema
-from EmulatedRaspberryPiIO import GPIO
+from centralController.EmulatedRaspberryPiIO import GPIO
 
 
-class ConfigurationManager:
+class DevicesConfigLoader:
 
     class JsonTopElement:
         Device = 'device'
@@ -178,7 +178,7 @@ class ConfigurationManager:
                 fileContents = fileHandle.read()
 
         except IOError as excpt:
-            self.__lastErrorMsg = "Unable to open configuration file '" + \
+            self.__lastErrorMsg = "Unable to read devices file '" + \
                 f"{filename}', reason: {excpt.strerror}"
             return None
 
@@ -186,7 +186,7 @@ class ConfigurationManager:
             configJson = json.loads(fileContents)
 
         except json.JSONDecodeError as excpt:
-            self.__lastErrorMsg = "Unable to parse configuration file" + \
+            self.__lastErrorMsg = "Unable to parse devices file" + \
                 f"{filename}, reason: {excpt}"
             return None
 
@@ -205,7 +205,3 @@ class ConfigurationManager:
             return None
 
         return configJson
-
-CN = ConfigurationManager()
-print(CN.ReadDevicesConfigFile('../../configurationFiles/centralController/devices.json'))
-print(CN.lastErrorMsg)

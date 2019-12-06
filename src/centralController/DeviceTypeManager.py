@@ -19,6 +19,7 @@ from DeviceTypes.BaseSensorDeviceType import BaseSensorDeviceType
 
 
 class DeviceTypeManager:
+    # pylint: disable=R0903
     __slots__ = ['__deviceTypes', '__logger']
 
     @property
@@ -70,10 +71,3 @@ class DeviceTypeManager:
                 pass
 
         self.__deviceTypes = newDeviceTypes
-
-
-class testLogger:
-    def warn(self, msg):
-        print(f'[WARN] {msg}')
-
-d = DeviceTypeManager(testLogger())
