@@ -39,6 +39,7 @@ class CentralControllerApp:
         self.__logger = None
         self.__ioProcessor = None
         self.__keypadApiController = None
+        self.__currDevices = None
 
 
     def StartApp(self):
@@ -71,17 +72,20 @@ class CentralControllerApp:
             self.__logger.error("Database '%s' is missing!", self.__db)
             sys.exit(1)
 
+        # Attempt to load the device types plug-ins, if a plug-in cannot be
+        # found or is invalid then a warning is logged and it's not loaded.
+        deviceTypeMgr = DeviceTypeManager(self.__logger)
+        deviceTypeMgr.LoadDeviceTypes()
+
+        # Load the devices configuration file which contains the devices
+        # attached to the alarm.  The devices are matched to the device types
+        # loaded above.
         devicesCfg = '../configurationFiles/centralController/devices.json'
         devicesConfigLoader = DevicesConfigLoader()
-
         self.__currDevices = devicesConfigLoader.ReadDevicesConfigFile(devicesCfg)
         if not self.__currDevices:
             self.__logger.error(devicesConfigLoader.lastErrorMsg)
             sys.exit(1)
-
-        deviceTypeMgr = DeviceTypeManager(self.__logger)
-
-        deviceTypeMgr.LoadDeviceTypes()
 
         self.__ioProcessor = IOProcessingThread(self.__logger, statusObject,
                                                 configuration)
