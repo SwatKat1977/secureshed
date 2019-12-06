@@ -15,10 +15,24 @@
             ]
         },
         {
-            "name": "Door sensor",
+            "name": "Side Door sensor",
             "hardware": "siren",
             "deviceType": "string'",
             "enabled": false,
+            "pins":
+            [
+                {
+                    "ioPin": "GPIO18",
+                    "initialState": "high",
+                    "mode": "output"
+                }
+            ]
+        },
+        {
+            "name": "Garage door sensor",
+            "hardware": "siren",
+            "deviceType": "GenericAlarmSiren",
+            "enabled": true,
             "pins":
             [
                 {
