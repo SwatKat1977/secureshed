@@ -13,6 +13,20 @@
                     "mode": "output"
                 }
             ]
+        },
+        {
+            "name": "Door sensor",
+            "hardware": "siren",
+            "deviceType": "string'",
+            "enabled": false,
+            "pins":
+            [
+                {
+                    "ioPin": "GPIO18",
+                    "initialState": "high",
+                    "mode": "output"
+                }
+            ]
         }
     ]
 }
