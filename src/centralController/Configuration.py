@@ -24,16 +24,22 @@ class Configuration:
 
 
     ## Property getter : Keypad API config
+    #  @param self The object pointer.
     @property
     def keypadApiConfig(self):
         return self.__keypadApiConfig
 
     ## Property getter : Failed code entry attempt responses
+    #  @param self The object pointer.
     @property
     def failedAttemptResponses(self):
         return self.__failedAttemptResponses
 
 
+    ## Default constructor for Configuration class.
+    #  @param self The object pointer.
+    #  @param keypadAPIConfig Configuration items for keypad api.
+    #  @param failedAttemptResponses Responses when an attempt fails.
     def __init__(self, keypadAPIConfig, failedAttemptResponses):
         if not isinstance(keypadAPIConfig, KeypadAPIConfig):
             raise TypeError('keypadAPIConfig param not type keypadAPIConfig')
