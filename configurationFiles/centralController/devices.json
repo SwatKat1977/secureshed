@@ -9,8 +9,7 @@
             [
                 {
                     "ioPin": "GPIO18",
-                    "initialState": "high",
-                    "mode": "output"
+                    "identifier": "SensorPin"
                 }
             ]
         },
@@ -23,8 +22,7 @@
             [
                 {
                     "ioPin": "GPIO18",
-                    "initialState": "high",
-                    "mode": "output"
+                    "identifier": "SensorPin"
                 }
             ]
         },
@@ -37,8 +35,7 @@
             [
                 {
                     "ioPin": "GPIO18",
-                    "initialState": "high",
-                    "mode": "output"
+                    "identifier": "SensorPin"
                 }
             ]
         }

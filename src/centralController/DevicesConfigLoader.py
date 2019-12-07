@@ -34,20 +34,11 @@ class DevicesConfigLoader:
 
     class DevicePinsElement:
         IoPin = 'ioPin'
-        Mode = 'mode'
-        InitialState = 'initialState'
-
-    class DevicePinsModeType:
-        Input = 'input'
-        Output = 'output'
+        Identifier = 'identifier'
 
     class DeviceHardwareType:
         Sensor = 'sensor'
         Siren = 'siren'
-
-    class DevicePinsInitialStateType:
-        High = 'high'
-        Low = 'low'
 
     ## Configuration file's Json schema.
     JsonSchema = \
@@ -76,32 +67,17 @@ class DevicesConfigLoader:
                             GPIO.PinEntryGPIO25Element
                         ]
                     },
-                    DevicePinsElement.Mode:
+                    DevicePinsElement.Identifier:
                     {
-                        "type": "string",
-                        "enum":
-                        [
-                            DevicePinsModeType.Input,
-                            DevicePinsModeType.Output
-                        ]
-                    },
-                    DevicePinsElement.InitialState:
-                    {
-                        "type": "string",
-                        "enum":
-                        [
-                            DevicePinsInitialStateType.High,
-                            DevicePinsInitialStateType.Low
-                        ]
+                        "type": "string"
                     }
                 },
                 "additionalProperties": False,
                 "required":
                 [
                     DevicePinsElement.IoPin,
-                    DevicePinsElement.Mode,
-                    DevicePinsElement.InitialState
-                ],
+                    DevicePinsElement.Identifier
+                ]
             },
             JsonTopElement.Device:
             {
@@ -143,7 +119,7 @@ class DevicesConfigLoader:
                     DeviceElement.Name,
                     DeviceElement.Enabled,
                     DeviceElement.Pins
-                ],
+                ]
             }
         },
         "type" : "object",
