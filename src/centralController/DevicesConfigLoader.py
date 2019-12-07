@@ -198,7 +198,7 @@ class DevicesConfigLoader:
             self.__lastErrorMsg = f"FATAL internal error, schema file invalid!"
             return None
 
-        except jsonschema.exceptions.ValidationError as ex:
+        except jsonschema.exceptions.ValidationError:
             self.__lastErrorMsg = "Schema validation failed for devices " + \
                 f"file '{filename} failed."
             return None
