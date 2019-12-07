@@ -28,8 +28,8 @@
         },
         {
             "name": "Garage door sensor",
-            "hardware": "siren",
-            "deviceType": "GenericAlarmSiren",
+            "hardware": "sensor",
+            "deviceType": "MagneticContactSensor",
             "enabled": true,
             "pins":
             [

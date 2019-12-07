@@ -32,7 +32,8 @@ class DeviceTypeManager:
 
         self.__expectedDeviceTypes = {
             'GenericAlarmSiren': None,
-            'GenericMageticSensor': None
+            'MagneticContactSensor': None,
+            'InvalidForTesting': None
         }
 
         self.__deviceTypes = {}
