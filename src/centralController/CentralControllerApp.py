@@ -91,6 +91,8 @@ class CentralControllerApp:
         deviceManager = DeviceManager(self.__logger, deviceTypeMgr)
         devLst = self.__currDevices[devicesConfigLoader.JsonTopElement.Devices]
         deviceManager.Load(devLst)
+        deviceManager.InitialiseHardware()
+
         sys.exit(1)
 
         self.__ioProcessor = IOProcessingThread(self.__logger, statusObject,
