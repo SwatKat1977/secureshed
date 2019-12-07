@@ -102,11 +102,13 @@ class DeviceManager:
 
             for pin in device.pins:
                 self.__logger.debug(f'|=> PIN : {pin}')
+                initialState = pin
 
             # Device(name='Garage door sensor', hardware='siren',
             # deviceType=<class 'centralController.DeviceTypes.GenericAlarmSiren.GenericAlarmSiren'>,
             # enabled=True, pins=[{'ioPin': 'GPIO18', 'initialState': 'high', 'mode': 'output'}])
 
 
+    #  @param self The object pointer.
     def CleanupDevices(self):
         GPIO.cleanup()

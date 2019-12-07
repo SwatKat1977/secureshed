@@ -59,9 +59,6 @@ class IOProcessingThread(threading.Thread):
     def run(self):
         self.__logger.info('starting IO processing thread')
 
-        if RPIO_EMULATED:
-            self.__logger.info('Using Raspberry PI IO Emulation...')
-
         while not self.__shutdownRequested:
 
             if RPIO_EMULATED:
