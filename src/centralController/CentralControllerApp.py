@@ -21,6 +21,7 @@ import time
 from centralController.ConfigurationManager import ConfigurationManager
 from centralController.ControllerDBInterface import ControllerDBInterface
 from centralController.DevicesConfigLoader import DevicesConfigLoader
+from centralController.DeviceManager import DeviceManager
 from centralController.DeviceTypeManager import DeviceTypeManager
 from centralController.KeypadAPIThread import KeypadApiController
 from centralController.IOProcessingThread import IOProcessingThread
@@ -86,6 +87,11 @@ class CentralControllerApp:
         if not self.__currDevices:
             self.__logger.error(devicesConfigLoader.lastErrorMsg)
             sys.exit(1)
+
+        deviceManager = DeviceManager(self.__logger, deviceTypeMgr)
+        devLst = self.__currDevices[devicesConfigLoader.JsonTopElement.Devices]
+        deviceManager.Load(devLst)
+        sys.exit(1)
 
         self.__ioProcessor = IOProcessingThread(self.__logger, statusObject,
                                                 configuration)
