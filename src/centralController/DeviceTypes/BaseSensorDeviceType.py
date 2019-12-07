@@ -13,8 +13,10 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 '''
+from centralController.DeviceTypes.BaseDeviceType import BaseDeviceType
 
-class BaseSensorDeviceType:
+
+class BaseSensorDeviceType(BaseDeviceType):
 
     def CheckState(self):
         raise NotImplementedError
