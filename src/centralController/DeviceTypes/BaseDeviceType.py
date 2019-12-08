@@ -18,3 +18,11 @@ class BaseDeviceType:
 
     def Initialise(self, deviceName, pins):
         raise NotImplementedError
+
+
+    def CheckDevice(self):
+        raise NotImplementedError
+
+
+    def ReceiveEvent(self, eventId, event):
+        raise NotImplementedError
