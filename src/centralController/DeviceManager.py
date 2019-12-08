@@ -94,6 +94,10 @@ class DeviceManager:
 
     #  @param self The object pointer.
     def CheckHardwareDevices(self):
+
+        if RPIO_EMULATED:
+            GPIO.UpdateFromPinOutFile(self.__logger)
+
         for device in self.__devices:
             try:
                 device.deviceType.CheckDevice()
