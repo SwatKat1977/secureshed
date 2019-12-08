@@ -183,6 +183,12 @@ class GPIO:
 
 
     @staticmethod
+    def input(pin):
+        # pylint: disable=C0103
+        pass
+
+
+    @staticmethod
     def output(pin, state):
         # pylint: disable=C0103
         pass
