@@ -1,5 +1,4 @@
-from centralController.DeviceTypes.BaseSirenDeviceType import BaseSirenDeviceType
+from centralController.DeviceTypes.BaseDeviceType import BaseDeviceType
 
-class GenericAlarmSiren(BaseSirenDeviceType):
-#class GenericAlarmSiren(object):
+class GenericAlarmSiren(BaseDeviceType):
     trial = 'test'

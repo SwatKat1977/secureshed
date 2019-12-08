@@ -16,5 +16,5 @@ limitations under the License.
 
 class BaseDeviceType:
 
-    def Initialise(self, pins):
+    def Initialise(self, deviceName, pins):
         raise NotImplementedError
