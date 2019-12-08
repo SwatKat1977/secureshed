@@ -118,6 +118,6 @@ class CentralControllerApp:
         self.__ioProcessor.SignalShutdownRequested()
 
         while not self.__ioProcessor.shutdownCompleted:
-            time.sleep(5)
+            time.sleep(1)
 
         self.__logger.info('IO Processor has Shut down')

@@ -54,7 +54,7 @@ class IOProcessingThread(threading.Thread):
 
         while not self.__shutdownRequested:
             self.__deviceManager.CheckHardwareDevices()
-            time.sleep(2)
+            time.sleep(0.5)
 
         self.__shutdownCompleted = True
 
