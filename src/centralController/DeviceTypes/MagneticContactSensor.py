@@ -5,7 +5,7 @@ class MagneticContactSensor(BaseDeviceType):
 
     def __init__(self, logger, hardwareIO):
         self.__logger = logger
-        self.__pins = []
+        self.__ioPin = None
         self.__hardwareIO = hardwareIO
         self.__isTriggered = False
         self.__deviceName = None
@@ -31,67 +31,16 @@ class MagneticContactSensor(BaseDeviceType):
                                deviceName, self.ExpectedPinId)
             return False
 
-        pinNo = int(pin[0]['ioPin'][len(pinPrefix):])
-        self.__hardwareIO.setup(pinNo, self.__hardwareIO.IN,
+        self.__ioPin = int(pin[0]['ioPin'][len(pinPrefix):])
+        self.__hardwareIO.setup(self.__ioPin, self.__hardwareIO.IN,
                                 pull_up_down=self.__hardwareIO.PUD_UP)
 
         return True
 
 
     def CheckDevice(self):
-        if GPIO.input(relayPin):
-            print "switch is open"
+        if self.__hardwareIO.input(self.__ioPin):
+            print("switch is open")
         else:
-            print "switch is closed"
+            print("switch is closed")
 
-        self.__deviceName
-
-
-'''
-# the pin numbers refer to the board connector not the chip
-GPIO.setmode(GPIO.BCM)
-
-relayPin = 18
-
-print(relayPin)
-GPIO.setup(relayPin, GPIO.IN, pull_up_down = GPIO.PUD_UP) 
-# set up pin ?? (one of the above listed pins) as an input with
-# a pull-up resistor
-
-while True:
-    if GPIO.input(relayPin):
-        print "switch is open"
-    else:
-        print "switch is closed"
-
-    time.sleep(1)
-'''
-
-
-'''
-RelayPin = 23
-
-GPIO.cleanup() 
-
-GPIO.setmode(GPIO.BCM)
-
-
-GPIO.setup(RelayPin, GPIO.OUT)
-GPIO.output(RelayPin, GPIO.HIGH)
-print('SETUP relay')
-time.sleep(10)
-
-print('Activating')
-GPIO.output(RelayPin, GPIO.LOW)
-time.sleep(10)
-print('De-activating')
-GPIO.output(RelayPin, GPIO.HIGH)
-
-time.sleep(10)
-print('Activating')
-GPIO.output(RelayPin, GPIO.LOW)
-
-time.sleep(10)
-
-GPIO.cleanup() 
-'''

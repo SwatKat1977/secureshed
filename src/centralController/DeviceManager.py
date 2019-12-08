@@ -23,28 +23,7 @@ except ModuleNotFoundError:
     from centralController.EmulatedRaspberryPiIO import GPIO
     RPIO_EMULATED = True
 
-
-'''
-# the pin numbers refer to the board connector not the chip
-GPIO.setmode(GPIO.BCM)
-
-relayPin = 18
-
-print(relayPin)
-GPIO.setup(relayPin, GPIO.IN, pull_up_down = GPIO.PUD_UP) 
-# set up pin ?? (one of the above listed pins) as an input with
-# a pull-up resistor
-
-while True:
-    if GPIO.input(relayPin):
-        print "switch is open"
-    else:
-        print "switch is closed"
-
-    time.sleep(1)
-'''
-
-
+ 
 class DeviceManager:
     __slots__ = ['__devices', '__deviceTypeMgr', '__logger']
 
@@ -103,7 +82,6 @@ class DeviceManager:
                         " failed so cannot be used.", device.name)
                     continue
 
-                print('cont')
                 devices.append(device)
 
             except NotImplementedError:
@@ -111,9 +89,18 @@ class DeviceManager:
                     "implement Initialise() so cannot be used.", device.name)
 
 
-            # Device(name='Garage door sensor', hardware='siren',
-            # deviceType=<class 'centralController.DeviceTypes.GenericAlarmSiren.GenericAlarmSiren'>,
-            # enabled=True, pins=[{'ioPin': 'GPIO18', 'initialState': 'high', 'mode': 'output'}])
+        self.__devices = devices
+
+
+    #  @param self The object pointer.
+    def CheckHardwareDevices(self):
+        for device in self.__devices:
+            try:
+                device.deviceType.CheckDevice()
+
+            except NotImplementedError:
+                self.__logger.error("Device name '%s' plug-in does not " +\
+                    "implement Initialise() so cannot be used.", device.name)
 
 
     #  @param self The object pointer.

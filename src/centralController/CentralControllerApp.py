@@ -93,10 +93,10 @@ class CentralControllerApp:
         deviceManager.Load(devLst)
         deviceManager.InitialiseHardware()
 
-        sys.exit(1)
+        #sys.exit(1)
 
         self.__ioProcessor = IOProcessingThread(self.__logger, statusObject,
-                                                configuration)
+                                                configuration, deviceManager)
         self.__ioProcessor.start()
 
         self.__keypadApiController = KeypadApiController(self.__logger,
