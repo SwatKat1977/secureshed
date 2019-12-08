@@ -161,18 +161,30 @@ class GPIO:
     HIGH = 302
 
 
+    PUD_UP = 401
+
+
+    ## Simulated version of the Raspberry Pi GPIO cleanup() function for
+    #  testing purposes.
+    #  Note: This method is currently empty as nothing needs simualting.
     @staticmethod
     def cleanup():
         # pylint: disable=C0103
         pass
 
 
+    ## Simulated version of the Raspberry Pi GPIO setup() function for
+    #  testing purposes.
+    #  Note: This method is currently empty as nothing needs simualting.
     @staticmethod
-    def setup(pin, state):
+    def setup(pin, state, pull_up_down=None):
         # pylint: disable=C0103
         pass
 
 
+    ## Simulated version of the Raspberry Pi GPIO setmode() function for
+    #  testing purposes.
+    #  Note: This method is currently empty as nothing needs simualting.
     @staticmethod
     def setmode(modeType):
         # pylint: disable=C0103
@@ -180,9 +192,18 @@ class GPIO:
 
 
     @staticmethod
+    def input(pin):
+        # pylint: disable=C0103
+        pinId = f'{GPIO.PinEntryGPIOPrefix}{pin}'
+        return GPIO.CurrentPinOutStates[pinId].value
+
+
+    @staticmethod
     def output(pin, state):
         # pylint: disable=C0103
-        pass
+        pinId = f'{GPIO.PinEntryGPIOPrefix}{pin}'
+        newValue = GPIO.PinState.high if state == 1 else GPIO.PinState.low
+        GPIO.CurrentPinOutStates[pinId] = newValue
 
 
     @staticmethod

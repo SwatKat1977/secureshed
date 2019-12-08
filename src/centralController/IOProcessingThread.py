@@ -18,14 +18,6 @@ import threading
 import time
 
 
-try:
-    import RPi.GPIO as GPIO
-    RPIO_EMULATED = False
-except ModuleNotFoundError:
-    from centralController.EmulatedRaspberryPiIO import GPIO
-    RPIO_EMULATED = True
-
-
 ## Implementation of thread that handles API calls to the keypad API.
 class IOProcessingThread(threading.Thread):
 
@@ -45,13 +37,14 @@ class IOProcessingThread(threading.Thread):
     #  @param logger Network port to listen on.
     #  @param statusObject Network port to listen on.
     #  @param config Network port to listen on.
-    def __init__(self, logger, statusObject, config):
+    def __init__(self, logger, statusObject, config, deviceManager):
         threading.Thread.__init__(self)
         self.__logger = logger
         self.__statusObject = statusObject
         self.__config = config
         self.__shutdownRequested = False
         self.__shutdownCompleted = False
+        self.__deviceManager = deviceManager
 
 
     ## Thread execution function, in this case run the Flask API interface.
@@ -59,14 +52,8 @@ class IOProcessingThread(threading.Thread):
     def run(self):
         self.__logger.info('starting IO processing thread')
 
-        if RPIO_EMULATED:
-            self.__logger.info('Using Raspberry PI IO Emulation...')
-
         while not self.__shutdownRequested:
-
-            if RPIO_EMULATED:
-                GPIO.UpdateFromPinOutFile(self.__logger)
-
+            self.__deviceManager.CheckHardwareDevices()
             time.sleep(2)
 
         self.__shutdownCompleted = True

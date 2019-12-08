@@ -18,24 +18,24 @@ import jsonschema
 from centralController.Configuration import KeypadAPIConfig, Configuration
 from centralController.ConfigurationJsonSchema import ConfigurationJsonSchema
 from centralController.FailedCodeAttemptAction import (FailedCodeAttemptActionType,
-    ActionTypeParams)
+                                                       ActionTypeParams)
 
 
-JSON_keypadAPI = 'keypadAPI'
-JSON_keypadAPI_Port = 'NetworkPort'
-JSON_failedAttemptResponses = 'failedAttemptResponses'
+class ConfigurationManager:
 
-JSON_failedAttemptResponseAttemptNo = 'attemptNo'
-JSON_failedAttemptResponseActions = 'actions'
-JSON_failedAttemptResponseActionsType = 'actionType'
-JSON_failedAttemptResponseActionsParams = 'parameters'
+    JSON_keypadAPI = 'keypadAPI'
+    JSON_keypadAPI_Port = 'NetworkPort'
+    JSON_failedAttemptResponses = 'failedAttemptResponses'
 
+    JSON_failedAttemptResponseAttemptNo = 'attemptNo'
+    JSON_failedAttemptResponseActions = 'actions'
+    JSON_failedAttemptResponseActionsType = 'actionType'
+    JSON_failedAttemptResponseActionsParams = 'parameters'
 
-class ConfigurationManager(object):
 
     ## Property getter : Last error message
     @property
-    def LastErrorMsg(self):
+    def lastErrorMsg(self):
         return self.__lastErrorMsg
 
 
@@ -65,24 +65,24 @@ class ConfigurationManager(object):
             return None
 
         try:
-            jsonschema.validate(instance = configJson,
-                schema = ConfigurationJsonSchema)
+            jsonschema.validate(instance=configJson,
+                                schema=ConfigurationJsonSchema)
 
-        except Exception as ex:
+        except Exception:
             self.__lastErrorMsg = f"Configuration file {filename} failed " + \
                 "to validate against expected schema.  Please check!"
             return None
 
-        keypadApiNetworkPort = configJson[JSON_keypadAPI][JSON_keypadAPI_Port]
+        keypadApiNetworkPort = configJson[self.JSON_keypadAPI][self.JSON_keypadAPI_Port]
         keypadAPIConfig = KeypadAPIConfig(keypadApiNetworkPort)
 
         failedAttemptResponses = {}
 
-        for resp in configJson[JSON_failedAttemptResponses]:
+        for resp in configJson[self.JSON_failedAttemptResponses]:
 
             processedResp = self.__ProcessFailedCodeResponse(resp)
 
-            if processedResp == None:
+            if processedResp is None:
                 return None
 
             attemptNo, response = processedResp
@@ -95,47 +95,47 @@ class ConfigurationManager(object):
 
         processedResponse = {}
 
-        attemptNo = response[JSON_failedAttemptResponseAttemptNo]
+        attemptNo = response[self.JSON_failedAttemptResponseAttemptNo]
         actionsList = []
 
-        actions = response[JSON_failedAttemptResponseActions]
+        actions = response[self.JSON_failedAttemptResponseActions]
 
         for action in actions:
-            paramsList = action[JSON_failedAttemptResponseActionsParams]
+            paramsList = action[self.JSON_failedAttemptResponseActionsParams]
 
-            type = action[JSON_failedAttemptResponseActionsType]
-            
+            actionType = action[self.JSON_failedAttemptResponseActionsType]
+
             processedParams = {}
 
             # This should never happen, but verify is the action type is known
             # about, throwing an error if not.
-            if not FailedCodeAttemptActionType.IsName(type):
-                self.__lastErrorMsg = f'Action type {type} not valid'
+            if not FailedCodeAttemptActionType.IsName(actionType):
+                self.__lastErrorMsg = f'Action type {actionType} not valid'
                 return None
 
             # Extract the name of all of the parameters for the action out and
             # then verify they are all valid.
             paramKeys = [d['key'] for d in paramsList]
-            if not all(elem in ActionTypeParams[type].keys() for elem in paramKeys):
-                self.__lastErrorMsg = f'Action type {type} has an invalid ' +\
+            if not all(elem in ActionTypeParams[actionType].keys() for elem in paramKeys):
+                self.__lastErrorMsg = f'Action type {actionType} has an invalid ' +\
                     'list of parameters'
                 return None
- 
-            for p in paramsList:
-                paramName = p['key']
-                
-                if ActionTypeParams[type][paramName] == int:
+
+            for param in paramsList:
+                paramName = param['key']
+
+                if ActionTypeParams[actionType][paramName] == int:
                     try:
-                        processedParams[paramName] = int(p['value'])
+                        processedParams[paramName] = int(param['value'])
                     except ValueError:
                         self.__lastErrorMsg = f'Parameter {paramName} has ' +\
                             'an invalid type, expecting integer, value is ' +\
-                            f"{p['value']}"
+                            f"{param['value']}"
                         return None
 
-                elif ActionTypeParams[type][paramName] == string:
-                    processedParams[paramName] = int(p['value'])
+                elif ActionTypeParams[actionType][paramName] == string:
+                    processedParams[paramName] = int(param['value'])
 
-            processedResponse[type] = processedParams
+            processedResponse[actionType] = processedParams
 
         return (attemptNo, processedResponse)

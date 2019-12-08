@@ -1,0 +1,43 @@
+{
+    "devices": [
+        {
+            "name": "{'type': 'string'}",
+            "hardware": "siren",
+            "deviceType": "string'}",
+            "enabled": true,
+            "pins":
+            [
+                {
+                    "ioPin": "GPIO18",
+                    "identifier": "sensorPin"
+                }
+            ]
+        },
+        {
+            "name": "Side Door sensor",
+            "hardware": "siren",
+            "deviceType": "string'",
+            "enabled": false,
+            "pins":
+            [
+                {
+                    "ioPin": "GPIO18",
+                    "identifier": "sensorPin"
+                }
+            ]
+        },
+        {
+            "name": "Garage door sensor",
+            "hardware": "sensor",
+            "deviceType": "MagneticContactSensor",
+            "enabled": true,
+            "pins":
+            [
+                {
+                    "ioPin": "GPIO18",
+                    "identifier": "sensorPin"
+                }
+            ]
+        }
+    ]
+}

@@ -26,7 +26,6 @@ class FailedCodeAttemptActionType(Enum):
 
 
 ActionTypeParams = {
-    'disableKeyPad' :  { 'lockTime' : int },
-    'triggerAlarm' :  { }
+    'disableKeyPad' :  {'lockTime' : int},
+    'triggerAlarm' :  {}
 }
-
