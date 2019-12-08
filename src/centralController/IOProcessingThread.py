@@ -59,6 +59,7 @@ class IOProcessingThread(threading.Thread):
         self.__shutdownCompleted = True
 
 
+    #  @param self The object pointer.
     def SignalShutdownRequested(self):
         self.__shutdownRequested = True
 
@@ -88,25 +89,4 @@ GPIO.output(RelayPin, GPIO.LOW)
 time.sleep(10)
 
 GPIO.cleanup() 
-'''
-
-
-'''
-# the pin numbers refer to the board connector not the chip
-GPIO.setmode(GPIO.BCM)
-
-relayPin = 18
-
-print(relayPin)
-GPIO.setup(relayPin, GPIO.IN, pull_up_down = GPIO.PUD_UP) 
-# set up pin ?? (one of the above listed pins) as an input with
-# a pull-up resistor
-
-while True:
-    if GPIO.input(relayPin):
-        print "switch is open"
-    else:
-        print "switch is closed"
-
-    time.sleep(1)
 '''
