@@ -161,6 +161,9 @@ class GPIO:
     HIGH = 302
 
 
+    PUD_UP = 401
+
+
     @staticmethod
     def cleanup():
         # pylint: disable=C0103
@@ -168,7 +171,7 @@ class GPIO:
 
 
     @staticmethod
-    def setup(pin, state):
+    def setup(pin, state, pull_up_down=None):
         # pylint: disable=C0103
         pass
 
