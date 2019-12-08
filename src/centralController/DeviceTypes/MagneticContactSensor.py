@@ -39,8 +39,11 @@ class MagneticContactSensor(BaseDeviceType):
 
 
     def CheckDevice(self):
-        if self.__hardwareIO.input(self.__ioPin):
-            print("switch is open")
-        else:
-            print("switch is closed")
+        contactState = self.__hardwareIO.input(self.__ioPin)
+    
+        if self.__isTriggered != contactState:
+            self.__isTriggered = contactState
 
+            stateMsg = "open" if contactState else "closed"
+            self.__logger.debug("Device '%s' changed state to %s",
+                                self.__deviceName, stateMsg)
