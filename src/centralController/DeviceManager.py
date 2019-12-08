@@ -85,24 +85,31 @@ class DeviceManager:
                                    "device type of '%s'", name, deviceType)
                 continue
 
+            deviceInst = deviceTypes[deviceType](self.__logger, GPIO)
             newDevice = self.Device(name=name, hardware=hardware,
-                                    deviceType=deviceTypes[deviceType](),
-                                    pins=pins)
+                                    deviceType=deviceInst, pins=pins)
             self.__devices.append(newDevice)
 
 
     #  @param self The object pointer.
     def InitialiseHardware(self):
 
+        devices = []
+
         for device in self.__devices:
+            try:
+                if not device.deviceType.Initialise(device.name, device.pins):
+                    self.__logger.error("Device plug-in '%s' initialisation" +\
+                        " failed so cannot be used.", device.name)
+                    continue
 
-            # deviceName = device.name
-            self.__logger.info(f'|=> Device name : {device.name}')
-            self.__logger.info(f'|=> Device type : {device.deviceType}')
+                print('cont')
+                devices.append(device)
 
-            for pin in device.pins:
-                self.__logger.debug(f'|=> PIN : {pin}')
-                initialState = pin
+            except NotImplementedError:
+                self.__logger.error("Device name '%s' plug-in does not " +\
+                    "implement Initialise() so cannot be used.", device.name)
+
 
             # Device(name='Garage door sensor', hardware='siren',
             # deviceType=<class 'centralController.DeviceTypes.GenericAlarmSiren.GenericAlarmSiren'>,

@@ -8,12 +8,14 @@ class MagneticContactSensor(BaseDeviceType):
         self.__pins = []
         self.__hardwareIO = hardwareIO
         self.__isTriggered = False
+        self.__deviceName = None
 
 
     ExpectedPinId = 'sensorPin'
 
 
     def Initialise(self, deviceName, pins):
+        self.__deviceName = deviceName
 
         pinPrefix = 'GPIO'
 
@@ -36,12 +38,14 @@ class MagneticContactSensor(BaseDeviceType):
         return True
 
 
-    def CheckState(self):
-        raise NotImplementedError
+    def CheckDevice(self):
+        if GPIO.input(relayPin):
+            print "switch is open"
+        else:
+            print "switch is closed"
 
+        self.__deviceName
 
-    def CurrentState(self):
-        raise NotImplementedError
 
 '''
 # the pin numbers refer to the board connector not the chip

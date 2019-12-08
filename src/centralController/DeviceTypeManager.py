@@ -14,8 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 '''
 import importlib
-from centralController.DeviceTypes.BaseSirenDeviceType import BaseSirenDeviceType
-from centralController.DeviceTypes.BaseSensorDeviceType import BaseSensorDeviceType
+from centralController.DeviceTypes.BaseDeviceType import BaseDeviceType
 
 
 class DeviceTypeManager:
@@ -61,8 +60,7 @@ class DeviceTypeManager:
             try:
                 importedCls = getattr(importedModule, device)
 
-                valid = BaseSirenDeviceType in importedCls.__bases__ or \
-                    BaseSensorDeviceType in importedCls.__bases__
+                valid = BaseDeviceType in importedCls.__bases__
 
                 if not valid:
                     self.__logger.warn(f"Plug-in for device type '{device}'" +\
