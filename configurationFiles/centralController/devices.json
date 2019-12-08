@@ -9,7 +9,7 @@
             [
                 {
                     "ioPin": "GPIO18",
-                    "identifier": "SensorPin"
+                    "identifier": "sensorPin"
                 }
             ]
         },
@@ -22,7 +22,7 @@
             [
                 {
                     "ioPin": "GPIO18",
-                    "identifier": "SensorPin"
+                    "identifier": "sensorPin"
                 }
             ]
         },
@@ -35,7 +35,7 @@
             [
                 {
                     "ioPin": "GPIO18",
-                    "identifier": "SensorPin"
+                    "identifier": "sensorPin"
                 }
             ]
         }
