@@ -14,7 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 '''
 import enum
-from Common.Singleton import Singleton
 
 
 ## <Description go here>
@@ -24,8 +23,7 @@ class EventManagerStatusCode(enum.Enum):
     EventManagerDisabled = 2
 
 
-## <Description go here>
-@Singleton
+## Event Manager implementation.
 class EventManager:
 
     ## <Description go here>
@@ -71,14 +69,12 @@ class EventManager:
         self._eventHandlers[eventID] = callback
 
 
-    # <summary>
-    # Process the next event, if any exists.  An error will be generated
-    # if the event ID is invalid (should never happen).
-    # </summary>
-    # <returns>Return codes:
+    ## Process the next event, if any exists.  An error will be generated if
+    #  the event ID is invalid (should never happen).
+    #  @param self The object pointer.
+    #  @returnsReturn codes:
     #    EventManagerStatusCode.Success
     #    EventManagerStatusCode.InvalidEventID
-    # </returns>
     def ProcessNextEvent(self):
         # If nothing is ready for processing, return 0 (success)
         if not self._events:
@@ -105,17 +101,13 @@ class EventManager:
         return EventManagerStatusCode.Success
 
 
-    # <summary>
-    # Delete all events.
-    # </summary>
+    ## Delete all events.
     def DeleteAllEvents(self):
         del self._events[:]
 
 
-    # <summary>
-    # Check if an event is valid.
-    # </summary>
-    # <param name="eventID">Event ID to validate.</param>
-    # <returns>Return codes: Valid = True.  Invalid = False# </returns>
+    ## Check if an event is valid.
+    # @param eventID Event ID to validate.
+    # @returns Return codes: Valid = True.  Invalid = False.
     def IsValidEventType(self, eventID):
         return eventID in self._eventHandlers
