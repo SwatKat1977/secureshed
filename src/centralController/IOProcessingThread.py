@@ -63,12 +63,13 @@ class IOProcessingThread(threading.Thread):
     def SignalShutdownRequested(self):
         self.__shutdownRequested = True
 
+
 '''
 RelayPin = 23
 
-GPIO.cleanup() 
+GPIO.cleanup()
 
-GPIO.setmode(GPIO.BCM)  
+GPIO.setmode(GPIO.BCM)
 
 
 GPIO.setup(RelayPin, GPIO.OUT)
@@ -88,5 +89,5 @@ GPIO.output(RelayPin, GPIO.LOW)
 
 time.sleep(10)
 
-GPIO.cleanup() 
+GPIO.cleanup()
 '''
