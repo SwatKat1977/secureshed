@@ -23,6 +23,7 @@ from centralController.ControllerDBInterface import ControllerDBInterface
 from centralController.DevicesConfigLoader import DevicesConfigLoader
 from centralController.DeviceManager import DeviceManager
 from centralController.DeviceTypeManager import DeviceTypeManager
+from common.EventManager import EventManager
 from centralController.KeypadAPIThread import KeypadApiController
 from centralController.IOProcessingThread import IOProcessingThread
 from centralController.StatusObject import StatusObject
@@ -30,21 +31,23 @@ from centralController.StatusObject import StatusObject
 
 class CentralControllerApp:
     __slots__ = ['__db', '__configFile', '__currDevices', '__endpoint',
-                 '__keypadApiController', '__ioProcessor', '__logger']
+                 '__eventManager', '__keypadApiController', '__ioProcessor',
+                 '__logger']
 
 
     def __init__(self, endpoint):
-        self.__endpoint = endpoint
         self.__configFile = os.getenv('CENCON_CONFIG')
+        self.__currDevices = None
         self.__db = os.getenv('CENCON_DB')
+        self.__endpoint = endpoint
+        self.__eventManager = None
         self.__logger = None
         self.__ioProcessor = None
         self.__keypadApiController = None
-        self.__currDevices = None
+
 
 
     def StartApp(self):
-
         # Configure the logging for the application.
         formatter = logging.Formatter("%(asctime)s [%(levelname)s] %(message)s",
                                       "%Y-%m-%d %H:%M:%S")
@@ -63,10 +66,12 @@ class CentralControllerApp:
 
         configuration = configManger.ParseConfigFile(self.__configFile)
         if not configuration:
-            print(f"Parse failed, last message : {configManger.lastErrorMsg}")
+            self.__logger.error('Parse failed, last message : %s',
+                                configManger.lastErrorMsg)
             sys.exit(1)
 
         statusObject = StatusObject()
+        self.__eventManager = EventManager()
 
         controllerDb = ControllerDBInterface()
         if not controllerDb.Connect(self.__db):
@@ -93,8 +98,8 @@ class CentralControllerApp:
         deviceManager.Load(devLst)
         deviceManager.InitialiseHardware()
 
-        #sys.exit(1)
-
+        # Create the IO processing thread which handles IO requests from
+        # hardware devices.
         self.__ioProcessor = IOProcessingThread(self.__logger, statusObject,
                                                 configuration, deviceManager)
         self.__ioProcessor.start()
