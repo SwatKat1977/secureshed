@@ -34,6 +34,6 @@ class Event:
     #  @param self The object pointer.
     #  @param eventID <Description go here>.
     #  @param msgBody <Description go here>.
-    def __init__(self, eventID, msgBody=None):
-        self._eventId = eventID
+    def __init__(self, eventId, msgBody=None):
+        self._eventId = eventId
         self._msgBody = msgBody
