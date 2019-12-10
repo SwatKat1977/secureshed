@@ -67,10 +67,9 @@ class MagneticContactSensor(BaseDeviceType):
                                 self.__deviceName, stateMsg)
 
             evtBody = {
-                'deviceType': 'Magnetic Contact Sensor',
-                'deviceName': self.__deviceName,
-                'state': self.__isTriggered
+                Evts.SensorDeviceBodyItem.DeviceType: 'Magnetic Contact Sensor',
+                Evts.SensorDeviceBodyItem.DeviceName: self.__deviceName,
+                Evts.SensorDeviceBodyItem.State: self.__isTriggered
             }
-
             evt = Event(Evts.EvtType.SensorDeviceStateChange, evtBody)
             self.__eventMgr.QueueEvent(evt)

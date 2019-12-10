@@ -18,15 +18,15 @@ import enum
 
 class EvtType(enum.Enum):
     #------------------------
-    #- Alarm state change events
-    ChangeAlarmStateDeactivated = 1001
-    ChangeAlarmStateActivated = 1002
-    ChangeAlarmStateTriggered = 1003
-
-    #------------------------
     #- Keypad entry events
-    KeypadKeyCodeEntered = 2001
+    KeypadKeyCodeEntered = 1001
 
     #------------------------
     #- Device state change events
-    SensorDeviceStateChange = 3001
+    SensorDeviceStateChange = 2001
+
+
+class SensorDeviceBodyItem:
+    DeviceType = 'deviceType'
+    DeviceName = 'deviceName'
+    State = 'state'
