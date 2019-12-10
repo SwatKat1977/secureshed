@@ -25,7 +25,7 @@ from centralController.DeviceManager import DeviceManager
 from centralController.DeviceTypeManager import DeviceTypeManager
 from centralController.KeypadAPIThread import KeypadApiController
 from centralController.IOProcessingThread import IOProcessingThread
-from centralController.StatusObject import EvtType, StateManager
+from centralController.StateManager import EvtType, StateManager
 from common.EventManager import EventManager
 
 

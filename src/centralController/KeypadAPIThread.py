@@ -16,7 +16,7 @@ limitations under the License.
 import json
 from flask import request
 import APIs.Keypad.JsonSchemas as schemas
-from centralController.StatusObject import EvtType
+from centralController.StateManager import EvtType
 from common.APIClient.HTTPStatusCode import HTTPStatusCode
 from common.APIClient.MIMEType import MIMEType
 from common.Event import Event
