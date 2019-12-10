@@ -65,11 +65,18 @@ class DeviceManager:
                                    "device type of '%s'", name, deviceType)
                 continue
 
-            deviceInst = deviceTypes[deviceType](self.__logger, GPIO,
-                                                 self.__eventMgr)
-            newDevice = self.Device(name=name, hardware=hardware,
-                                    deviceType=deviceInst, pins=pins)
-            self.__devices.append(newDevice)
+            try:
+                deviceInst = deviceTypes[deviceType](self.__logger, GPIO,
+                                                    self.__eventMgr)
+                newDevice = self.Device(name=name, hardware=hardware,
+                                        deviceType=deviceInst, pins=pins)
+                self.__devices.append(newDevice)
+
+            except TypeError:
+                self.__logger.warn("Ignoring device '%s' as unable to " +\
+                                   "instantiate device type of '%s'", name,
+                                   deviceType)
+                continue
 
 
     #  @param self The object pointer.
