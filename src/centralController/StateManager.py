@@ -50,7 +50,6 @@ class StateManager:
 
         if eventInst.id == Evts.EvtType.SensorDeviceStateChange:
             self.__HandleSensorDeviceStateChangeEvent(eventInst)
-            print('[Wibble] Sensor device state changed')
 
 
 	#  @param self The object pointer.
@@ -123,9 +122,7 @@ class StateManager:
                         receiveKeyCodeResponseAction_KeycodeIncorrect. \
                         TriggerAlarm] = None
                         self.__logger.debug('Alarm triggered!')
-
-                        self.__currAlarmState.CurrentAlarmState = \
-                            self.AlarmState.Triggered
+                        self.__currAlarmState = self.AlarmState.Triggered
 
 
             #responseType = ReceiveKeyCodeReturnCode.KeycodeIncorrect.value
@@ -139,8 +136,32 @@ class StateManager:
         return 'ok'
 
 
-	#  @param self The object pointer.
+    #  @param self The object pointer.
     def __HandleSensorDeviceStateChangeEvent(self, eventInst):
-        print(f'EVENT Id   : {eventInst.id}')
-        print(f'EVENT Body : {eventInst.body}')
+        body = eventInst.body
+        deviceName = body[Evts.SensorDeviceBodyItem.DeviceName]
+        state = body[Evts.SensorDeviceBodyItem.State]
 
+        triggered = True if state == 1 else False
+        stateStr = "opened" if triggered else "closed"
+
+        # If the alarm is deactived then ignore the sensor state change after
+        # logging the change for reference.
+        if self.__currAlarmState == self.AlarmState.Deactivated:
+            logMsg = f"{deviceName} was {stateStr}, although alarm isn't on"
+            self.__logger.debug(logMsg)
+            return
+
+        # If the trigger has has already been triggered then opening or closing
+        # a door etc. would change the alarm state, although we should log that
+        # the even occurred.
+        if self.__currAlarmState == self.AlarmState.Triggered:
+            logMsg = f"{deviceName} was {stateStr}, alarm already triggered"
+            self.__logger.debug(logMsg)
+            return
+
+        elif self.__currAlarmState == self.AlarmState.Activated:
+            logMsg = f"Activity on {deviceName} ({stateStr}) has triggerd " +\
+                "the alarm!"
+            self.__logger.debug(logMsg)
+            self.__currAlarmState = self.AlarmState.Triggered
