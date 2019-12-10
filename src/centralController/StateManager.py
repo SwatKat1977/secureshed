@@ -75,20 +75,18 @@ class StateManager:
         details = self.__db.GetKeycodeDetails(keySeq)
 
         if details is not None:
-            self.__logger.debug('A valid key code received')
-
             if self.__currAlarmState == self.AlarmState.Triggered:
-                self.__logger.debug('Alarm state changed : Deactivated')
+                self.__logger.info('Alarm state has been deactivated')
                 self.__currAlarmState = self.AlarmState.Deactivated
                 self.__failedEntryAttempts = 0
 
             elif self.__currAlarmState == self.AlarmState.Deactivated:
-                self.__logger.debug('Alarm state changed : Activated')
+                self.__logger.info('Alarm state has been activated')
                 self.__currAlarmState = self.AlarmState.Activated
                 self.__failedEntryAttempts = 0
 
             elif self.__currAlarmState == self.AlarmState.Activated:
-                self.__logger.debug('Alarm state changed : Deactivated')
+                self.__logger.info('Alarm state has been deactivated')
                 self.__currAlarmState = self.AlarmState.Deactivated
                 self.__failedEntryAttempts = 0
 
@@ -100,7 +98,7 @@ class StateManager:
             #responseType = ReceiveKeyCodeReturnCode.KeycodeAccepted.value
 
         else:
-            self.__logger.debug('An invalid key code received')
+            self.__logger.info('An invalid key code was entered on keypad')
             self.__failedEntryAttempts += 1
 
             attempts = self.__failedEntryAttempts
@@ -125,9 +123,8 @@ class StateManager:
                         receiveKeyCodeResponseAction_KeycodeIncorrect. \
                         TriggerAlarm] = None
 
-                        self.__logger.debug(f'[triggerAlarm] Alarm state: {self.__currAlarmState}')
                         if self.__currAlarmState != self.AlarmState.Triggered:
-                            self.__logger.debug('Alarm triggered!')
+                            self.__logger.info('|=> Alarm has been triggered!')
                             self.__currAlarmState = self.AlarmState.Triggered
 
                     elif response == 'resetAttemptAccount':
