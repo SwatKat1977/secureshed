@@ -121,8 +121,11 @@ class StateManager:
                         actions[schemas. \
                         receiveKeyCodeResponseAction_KeycodeIncorrect. \
                         TriggerAlarm] = None
-                        self.__logger.debug('Alarm triggered!')
-                        self.__currAlarmState = self.AlarmState.Triggered
+
+                        self.__logger.debug(f'[triggerAlarm] Alarm state: {self.__currAlarmState}')
+                        if self.__currAlarmState != self.AlarmState.Triggered:
+                            self.__logger.debug('Alarm triggered!')
+                            self.__currAlarmState = self.AlarmState.Triggered
 
 
             #responseType = ReceiveKeyCodeReturnCode.KeycodeIncorrect.value
