@@ -24,15 +24,15 @@ from centralController.DevicesConfigLoader import DevicesConfigLoader
 from centralController.DeviceManager import DeviceManager
 from centralController.DeviceTypeManager import DeviceTypeManager
 from centralController.KeypadAPIThread import KeypadApiController
-from centralController.IOProcessingThread import IOProcessingThread
 from centralController.StateManager import EvtType, StateManager
+from centralController.WorkerThread import WorkerThread
 from common.EventManager import EventManager
 
 
 class CentralControllerApp:
     __slots__ = ['__db', '__configFile', '__currDevices', '__endpoint',
-                 '__eventManager', '__keypadApiController', '__ioProcessor',
-                 '__logger']
+                 '__eventManager', '__keypadApiController', '__logger',
+                 '__workerThread']
 
 
     def __init__(self, endpoint):
@@ -42,9 +42,8 @@ class CentralControllerApp:
         self.__endpoint = endpoint
         self.__eventManager = None
         self.__logger = None
-        self.__ioProcessor = None
         self.__keypadApiController = None
-
+        self.__workerThread = None
 
 
     def StartApp(self):
@@ -107,10 +106,9 @@ class CentralControllerApp:
 
         # Create the IO processing thread which handles IO requests from
         # hardware devices.
-        self.__ioProcessor = IOProcessingThread(self.__logger, configuration,
-                                                deviceManager,
-                                                self.__eventManager)
-        self.__ioProcessor.start()
+        self.__workerThread = WorkerThread(self.__logger, configuration,
+                                           deviceManager, self.__eventManager)
+        self.__workerThread.start()
 
         self.__keypadApiController = KeypadApiController(self.__logger,
                                                          self.__eventManager,
@@ -128,9 +126,9 @@ class CentralControllerApp:
 
 
     def __Shutdown(self):
-        self.__ioProcessor.SignalShutdownRequested()
+        self.__workerThread.SignalShutdownRequested()
 
-        while not self.__ioProcessor.shutdownCompleted:
+        while not self.__workerThread.shutdownCompleted:
             time.sleep(1)
 
-        self.__logger.info('IO Processor has Shut down')
+        self.__logger.info('Worker thread has Shut down')
