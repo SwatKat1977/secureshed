@@ -16,18 +16,7 @@ limitations under the License.
 import enum
 import jsonschema
 import APIs.Keypad.JsonSchemas as schemas
-
-
-class EvtType(enum.Enum):
-    #------------------------
-    #- Alarm state change events
-    ChangeAlarmStateDeactivated = 1001
-    ChangeAlarmStateActivated = 1002
-    ChangeAlarmStateTriggered = 1003
-
-    #------------------------
-    #- Keypad entry events
-    KeypadKeyCodeEntered = 2001
+import centralController.Events as Evts
 
 
 class StateManager:
@@ -52,8 +41,13 @@ class StateManager:
 	#  @param self The object pointer.
     def RcvKeypadEvent(self, eventInst):
 
-        if eventInst.id == EvtType.KeypadKeyCodeEntered:
+        if eventInst.id == Evts.EvtType.KeypadKeyCodeEntered:
             self.__HandleKeyCodeEnteredEvent(eventInst)
+
+
+	#  @param self The object pointer.
+    def RcvDeviceEvent(self, eventInst):
+        pass
 
 
 	#  @param self The object pointer.

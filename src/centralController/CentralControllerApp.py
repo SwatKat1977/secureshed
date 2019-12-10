@@ -24,7 +24,8 @@ from centralController.DevicesConfigLoader import DevicesConfigLoader
 from centralController.DeviceManager import DeviceManager
 from centralController.DeviceTypeManager import DeviceTypeManager
 from centralController.KeypadAPIThread import KeypadApiController
-from centralController.StateManager import EvtType, StateManager
+import centralController.Events as Evts
+from centralController.StateManager import StateManager
 from centralController.WorkerThread import WorkerThread
 from common.EventManager import EventManager
 
@@ -81,8 +82,12 @@ class CentralControllerApp:
         stateManager = StateManager(controllerDb, self.__logger, configuration)
 
         # Register event: Receive keypad event.
-        self.__eventManager.RegisterEvent(EvtType.KeypadKeyCodeEntered,
+        self.__eventManager.RegisterEvent(Evts.EvtType.KeypadKeyCodeEntered,
                                           stateManager.RcvKeypadEvent)
+
+        # Register event: Receive keypad event.
+        self.__eventManager.RegisterEvent(Evts.EvtType.SensorDeviceStateChange,
+                                          stateManager.RcvDeviceEvent)
 
         # Attempt to load the device types plug-ins, if a plug-in cannot be
         # found or is invalid then a warning is logged and it's not loaded.
@@ -99,7 +104,8 @@ class CentralControllerApp:
             self.__logger.error(devicesConfigLoader.lastErrorMsg)
             sys.exit(1)
 
-        deviceManager = DeviceManager(self.__logger, deviceTypeMgr)
+        deviceManager = DeviceManager(self.__logger, deviceTypeMgr,
+                                      self.__eventManager)
         devLst = self.__currDevices[devicesConfigLoader.JsonTopElement.Devices]
         deviceManager.Load(devLst)
         deviceManager.InitialiseHardware()

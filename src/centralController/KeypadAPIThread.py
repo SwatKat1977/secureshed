@@ -16,7 +16,7 @@ limitations under the License.
 import json
 from flask import request
 import APIs.Keypad.JsonSchemas as schemas
-from centralController.StateManager import EvtType
+import centralController.Events as Evts
 from common.APIClient.HTTPStatusCode import HTTPStatusCode
 from common.APIClient.MIMEType import MIMEType
 from common.Event import Event
@@ -85,7 +85,7 @@ class KeypadApiController:
                 mimetype=MIMEType.Text)
             return response
 
-        evt = Event(EvtType.KeypadKeyCodeEntered, body)
+        evt = Event(Evts.EvtType.KeypadKeyCodeEntered, body)
         self.__eventMgr.QueueEvent(evt)
 
         return self.__endpoint.response_class(response='Ok',
