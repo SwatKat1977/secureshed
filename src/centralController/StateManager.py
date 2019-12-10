@@ -47,7 +47,10 @@ class StateManager:
 
 	#  @param self The object pointer.
     def RcvDeviceEvent(self, eventInst):
-        pass
+
+        if eventInst.id == Evts.EvtType.SensorDeviceStateChange:
+            self.__HandleSensorDeviceStateChangeEvent(eventInst)
+            print('[Wibble] Sensor device state changed')
 
 
 	#  @param self The object pointer.
@@ -134,3 +137,10 @@ class StateManager:
         #                                      status=HTTPStatusCode.OK,
         #                                      mimetype='application/json')
         return 'ok'
+
+
+	#  @param self The object pointer.
+    def __HandleSensorDeviceStateChangeEvent(self, eventInst):
+        print(f'EVENT Id   : {eventInst.id}')
+        print(f'EVENT Body : {eventInst.body}')
+
