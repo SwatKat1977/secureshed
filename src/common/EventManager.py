@@ -90,7 +90,7 @@ class EventManager:
 
         #  Call the event processing function, this is defined by the
         #  registered callback function.
-        self._eventHandlers[event.ID](event)
+        self._eventHandlers[event.id](event)
 
         #  Once the event has been handled, delete it.. The event handler
         # function should deal with issues with the event and therefore
