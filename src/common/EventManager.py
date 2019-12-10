@@ -85,7 +85,7 @@ class EventManager:
 
         # Check to see event ID is valid, if an unknown event ID then return
         # the 'invalid event id' error.
-        if event.ID not in self._eventHandlers:
+        if event.id not in self._eventHandlers:
             return EventManagerStatusCode.InvalidEventID
 
         #  Call the event processing function, this is defined by the
