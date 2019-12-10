@@ -14,30 +14,31 @@ See the License for the specific language governing permissions and
 limitations under the License.
 '''
 import json
-from flask import Flask, request, abort
-import jsonschema
+from flask import request
 import APIs.Keypad.JsonSchemas as schemas
-from APIs.Keypad.ReceiveKeyCodeReturnCode import ReceiveKeyCodeReturnCode
+import centralController.Events as Evts
 from common.APIClient.HTTPStatusCode import HTTPStatusCode
+from common.APIClient.MIMEType import MIMEType
+from common.Event import Event
 
 
 ## Implementation of thread that handles API calls to the keypad API.
 class KeypadApiController:
 
-    __slots__ = ['__config', '__db', '__endpoint', '__logger', '__statusObject']
+    __slots__ = ['__config', '__db', '__endpoint', '__eventMgr', '__logger']
 
 
     ## KeypadAPIThread class constructor, passing in the network port that the
     #  API will listen to.
     #  @param self The object pointer.
     #  @param listeningPort Network port to listen on.
-    def __init__(self, logger, statusObject, controllerDb, config, endpoint):
+    def __init__(self, logger, eventMgr, controllerDb, config, endpoint):
 
         self.__config = config
         self.__db = controllerDb
         self.__endpoint = endpoint
         self.__logger = logger
-        self.__statusObject = statusObject
+        self.__eventMgr = eventMgr
 
         # Add route : /receiveKeyCode
         self.__endpoint.add_url_rule('/receiveKeyCode', methods=['POST'],
@@ -59,15 +60,17 @@ class KeypadApiController:
         if not body:
             errMsg = 'Missing/invalid json body'
             response = self.__endpoint.response_class(
-                response=errMsg, status=400, mimetype='text')
+                response=errMsg, status=HTTPStatusCode.BadRequest,
+                mimetype=MIMEType.Text)
             return response
 
         # Verify that an authorisation key exists in the requet header, if not
-        # then return a 401 error with a human-readable reasoning. 
+        # then return a 401 error with a human-readable reasoning.
         if schemas.receiveKeyCodeHeader.AuthKey not in request.headers:
             errMsg = 'Authorisation key is missing'
             response = self.__endpoint.response_class(
-                response=errMsg, status=401, mimetype='text')
+                response=errMsg, status=HTTPStatusCode.Unauthenticated,
+                mimetype=MIMEType.Text)
             return response
 
         authorisationKey = request.headers[schemas.receiveKeyCodeHeader.AuthKey]
@@ -78,103 +81,23 @@ class KeypadApiController:
         if authorisationKey != 'authKey':
             errMsg = 'Authorisation key is invalid'
             response = self.__endpoint.response_class(
-                response=errMsg, status=401, mimetype='text')
+                response=errMsg, status=HTTPStatusCode.Forbidden,
+                mimetype=MIMEType.Text)
             return response
 
-        # Validate that the json body conforms to the expected schema.
-        # If the message isn't valid then a 400 error should be generated.
-        try:
-            jsonschema.validate(instance=body,
-                                schema=schemas.ReceiveKeyCodeJsonSchema)
+        evt = Event(Evts.EvtType.KeypadKeyCodeEntered, body)
+        self.__eventMgr.QueueEvent(evt)
 
-        except Exception as ex:
-            errMsg = 'Message body validation failed.'
-            response = self.__endpoint.response_class(
-                response=errMsg, status=400, mimetype='text')
-            return response
-
-        keySeq = body[schemas.receiveKeyCodeBody.KeySeq]
-
-        # Read the key code detail from the database.
-        details = self.__db.GetKeycodeDetails(keySeq)
-
-        if details != None:
-            self.__logger.debug('A valid key code received')
-
-            if self.__statusObject.CurrentAlarmState == \
-                self.__statusObject.AlarmState.Triggered:
-                self.__logger.debug(
-                    'Alarm state changed : Unlocked')
-                self.__statusObject.CurrentAlarmState = \
-                    self.__statusObject.AlarmState.Deactivated
-
-            elif self.__statusObject.CurrentAlarmState == \
-                self.__statusObject.AlarmState.Deactivated:
-                self.__logger.debug(
-                    'Alarm state changed : Activated')
-                self.__statusObject.CurrentAlarmState = \
-                    self.__statusObject.AlarmState.Activated
-
-            elif self.__statusObject.CurrentAlarmState == \
-                self.__statusObject.AlarmState.Activated:
-                self.__logger.debug(
-                    'Alarm state changed : Deactivated')
-                self.__statusObject.CurrentAlarmState = \
-                    self.__statusObject.AlarmState.Deactivated
-
-            actions = \
-            {
-                schemas.receiveKeyCodeResponseAction_KeycodeAccepted.AlarmUnlocked \
-                : None,
-            }
-            responseType = ReceiveKeyCodeReturnCode.KeycodeAccepted.value
-
-        else:
-            self.__logger.debug('An invalid key code received')
-
-            self.__statusObject.IncrementFailedEntryAttempts()
-            attempts = self.__statusObject.FailedEntryAttempts
-
-            actions = {}
-
-            # If the attempt failed then send the response of type
-            # receiveKeyCodeResponseAction_KeycodeIncorrect along with any
-            # response actions that have been defined in the configuraution
-            # file.
-            if attempts in self.__config.FailedAttemptResponses:
-                responses = self.__config.FailedAttemptResponses[attempts]
-
-                for response in responses:
-
-                    if response == 'disableKeyPad':
-                        actions[schemas. \
-                        receiveKeyCodeResponseAction_KeycodeIncorrect. \
-                        DisableKeypad] = int(responses[response]['lockTime'])
-
-                    elif response == 'triggerAlarm':
-                        actions[schemas. \
-                        receiveKeyCodeResponseAction_KeycodeIncorrect. \
-                        TriggerAlarm] = None
-                        self.__logger.debug('Alarm triggered!')
-
-                        self.__statusObject.CurrentAlarmState = \
-                            self.__statusObject.AlarmState.Triggered
-
-            responseType = ReceiveKeyCodeReturnCode.KeycodeIncorrect.value
-
-        responseMsg = self.__GenerateReceiveKeyCodeResponse(
-            responseType, actions)
-
-        return self.__endpoint.response_class(response=responseMsg,
+        return self.__endpoint.response_class(response='Ok',
                                               status=HTTPStatusCode.OK,
-                                              mimetype='application/json')
+                                              mimetype=MIMEType.Text)
 
 
     ## Generate a receive key code response message.
     #  @param self The object pointer.
     #  @param returnCode The return code for the response.
     #  @param actions List of actions to do with the response.
-    #  @return Returns a JSON string with return code and actions. 
+    #  @return Returns a JSON string with return code and actions.
     def __GenerateReceiveKeyCodeResponse(self, returnCode, actions):
         responseJson = \
         {

@@ -13,8 +13,20 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 '''
-from centralController.DeviceTypes.BaseDeviceType import BaseDeviceType
+import enum
 
 
-class GenericAlarmSiren(BaseDeviceType):
-    trial = 'test'
+class EvtType(enum.Enum):
+    #------------------------
+    #- Keypad entry events
+    KeypadKeyCodeEntered = 1001
+
+    #------------------------
+    #- Device state change events
+    SensorDeviceStateChange = 2001
+
+
+class SensorDeviceBodyItem:
+    DeviceType = 'deviceType'
+    DeviceName = 'deviceName'
+    State = 'state'

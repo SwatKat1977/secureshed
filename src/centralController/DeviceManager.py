@@ -23,18 +23,19 @@ except ModuleNotFoundError:
     from centralController.EmulatedRaspberryPiIO import GPIO
     RPIO_EMULATED = True
 
- 
+
 class DeviceManager:
-    __slots__ = ['__devices', '__deviceTypeMgr', '__logger']
+    __slots__ = ['__devices', '__deviceTypeMgr', '__eventMgr', '__logger']
 
     Device = collections.namedtuple('Device', 'name hardware deviceType pins')
 
 
     #  @param self The object pointer.
-    def __init__(self, logger, deviceTypeMgr):
+    def __init__(self, logger, deviceTypeMgr, eventMgr):
         self.__logger = logger
         self.__deviceTypeMgr = deviceTypeMgr
         self.__devices = []
+        self.__eventMgr = eventMgr
 
         if RPIO_EMULATED:
             self.__logger.info('Using Raspberry PI IO Emulation...')
@@ -64,7 +65,8 @@ class DeviceManager:
                                    "device type of '%s'", name, deviceType)
                 continue
 
-            deviceInst = deviceTypes[deviceType](self.__logger, GPIO)
+            deviceInst = deviceTypes[deviceType](self.__logger, GPIO,
+                                                 self.__eventMgr)
             newDevice = self.Device(name=name, hardware=hardware,
                                     deviceType=deviceInst, pins=pins)
             self.__devices.append(newDevice)

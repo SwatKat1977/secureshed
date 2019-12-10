@@ -20,8 +20,12 @@
       "attemptNo" : 5,
       "actions":
       [
-        {  
+        {
           "actionType" : "triggerAlarm",
+           "parameters" : []
+        },
+        {
+          "actionType" : "resetAttemptAccount",
            "parameters" : []
         }
       ]

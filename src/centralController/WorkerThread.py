@@ -18,8 +18,8 @@ import threading
 import time
 
 
-## Implementation of thread that handles API calls to the keypad API.
-class IOProcessingThread(threading.Thread):
+## Main worker thread for the central controller.
+class WorkerThread(threading.Thread):
 
     class IOPinState(enum.Enum):
         High = 0
@@ -31,20 +31,18 @@ class IOProcessingThread(threading.Thread):
         return self.__shutdownCompleted
 
 
-    ## KeypadAPIThread class constructor, passing in the network port that the
-    #  API will listen to.
+    ## WorkerThread class constructor.
     #  @param self The object pointer.
     #  @param logger Network port to listen on.
-    #  @param statusObject Network port to listen on.
     #  @param config Network port to listen on.
-    def __init__(self, logger, statusObject, config, deviceManager):
+    def __init__(self, logger, config, deviceManager, eventManager):
         threading.Thread.__init__(self)
         self.__logger = logger
-        self.__statusObject = statusObject
         self.__config = config
+        self.__deviceManager = deviceManager
+        self.__eventManager = eventManager
         self.__shutdownRequested = False
         self.__shutdownCompleted = False
-        self.__deviceManager = deviceManager
 
 
     ## Thread execution function, in this case run the Flask API interface.
@@ -54,20 +52,23 @@ class IOProcessingThread(threading.Thread):
 
         while not self.__shutdownRequested:
             self.__deviceManager.CheckHardwareDevices()
-            time.sleep(2)
+            self.__eventManager.ProcessNextEvent()
+            time.sleep(0.5)
 
         self.__shutdownCompleted = True
 
 
+    #  @param self The object pointer.
     def SignalShutdownRequested(self):
         self.__shutdownRequested = True
+
 
 '''
 RelayPin = 23
 
-GPIO.cleanup() 
+GPIO.cleanup()
 
-GPIO.setmode(GPIO.BCM)  
+GPIO.setmode(GPIO.BCM)
 
 
 GPIO.setup(RelayPin, GPIO.OUT)
@@ -87,26 +88,5 @@ GPIO.output(RelayPin, GPIO.LOW)
 
 time.sleep(10)
 
-GPIO.cleanup() 
-'''
-
-
-'''
-# the pin numbers refer to the board connector not the chip
-GPIO.setmode(GPIO.BCM)
-
-relayPin = 18
-
-print(relayPin)
-GPIO.setup(relayPin, GPIO.IN, pull_up_down = GPIO.PUD_UP) 
-# set up pin ?? (one of the above listed pins) as an input with
-# a pull-up resistor
-
-while True:
-    if GPIO.input(relayPin):
-        print "switch is open"
-    else:
-        print "switch is closed"
-
-    time.sleep(1)
+GPIO.cleanup()
 '''

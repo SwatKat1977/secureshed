@@ -13,21 +13,27 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 '''
-from enum import Enum
 
 
-class FailedCodeAttemptActionType(Enum):
-    disableKeyPad = 'disableKeyPad'
-    triggerAlarm = 'triggerAlarm'
-    resetAttemptAccount = 'resetAttemptAccount'
+## Implementation of an event.
+class Event:
 
-    @classmethod
-    def IsName(cls, name):
-        return name in cls.__members__
+    ## Property getter : Event ID
+    @property
+    def id(self):
+        return self._eventId
 
 
-ActionTypeParams = {
-    FailedCodeAttemptActionType.disableKeyPad.value:  {'lockTime' : int},
-    FailedCodeAttemptActionType.triggerAlarm.value: {},
-    FailedCodeAttemptActionType.resetAttemptAccount: {}
-}
+    ## Property getter : Event body
+    @property
+    def body(self):
+        return self._msgBody
+
+
+    ## Event default constructor.
+    #  @param self The object pointer.
+    #  @param eventID <Description go here>.
+    #  @param msgBody <Description go here>.
+    def __init__(self, eventId, msgBody=None):
+        self._eventId = eventId
+        self._msgBody = msgBody

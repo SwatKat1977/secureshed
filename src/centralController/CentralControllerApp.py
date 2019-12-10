@@ -24,27 +24,30 @@ from centralController.DevicesConfigLoader import DevicesConfigLoader
 from centralController.DeviceManager import DeviceManager
 from centralController.DeviceTypeManager import DeviceTypeManager
 from centralController.KeypadAPIThread import KeypadApiController
-from centralController.IOProcessingThread import IOProcessingThread
-from centralController.StatusObject import StatusObject
+import centralController.Events as Evts
+from centralController.StateManager import StateManager
+from centralController.WorkerThread import WorkerThread
+from common.EventManager import EventManager
 
 
 class CentralControllerApp:
     __slots__ = ['__db', '__configFile', '__currDevices', '__endpoint',
-                 '__keypadApiController', '__ioProcessor', '__logger']
+                 '__eventManager', '__keypadApiController', '__logger',
+                 '__workerThread']
 
 
     def __init__(self, endpoint):
-        self.__endpoint = endpoint
         self.__configFile = os.getenv('CENCON_CONFIG')
-        self.__db = os.getenv('CENCON_DB')
-        self.__logger = None
-        self.__ioProcessor = None
-        self.__keypadApiController = None
         self.__currDevices = None
+        self.__db = os.getenv('CENCON_DB')
+        self.__endpoint = endpoint
+        self.__eventManager = None
+        self.__logger = None
+        self.__keypadApiController = None
+        self.__workerThread = None
 
 
     def StartApp(self):
-
         # Configure the logging for the application.
         formatter = logging.Formatter("%(asctime)s [%(levelname)s] %(message)s",
                                       "%Y-%m-%d %H:%M:%S")
@@ -63,15 +66,28 @@ class CentralControllerApp:
 
         configuration = configManger.ParseConfigFile(self.__configFile)
         if not configuration:
-            print(f"Parse failed, last message : {configManger.lastErrorMsg}")
+            self.__logger.error('Parse failed, last message : %s',
+                                configManger.lastErrorMsg)
             sys.exit(1)
 
-        statusObject = StatusObject()
+        self.__eventManager = EventManager()
 
         controllerDb = ControllerDBInterface()
         if not controllerDb.Connect(self.__db):
             self.__logger.error("Database '%s' is missing!", self.__db)
             sys.exit(1)
+
+        # Build state manager which manages the state of the alarm itself and
+        # how states are changed due to hardware device(s) being triggered.
+        stateManager = StateManager(controllerDb, self.__logger, configuration)
+
+        # Register event: Receive keypad event.
+        self.__eventManager.RegisterEvent(Evts.EvtType.KeypadKeyCodeEntered,
+                                          stateManager.RcvKeypadEvent)
+
+        # Register event: Receive keypad event.
+        self.__eventManager.RegisterEvent(Evts.EvtType.SensorDeviceStateChange,
+                                          stateManager.RcvDeviceEvent)
 
         # Attempt to load the device types plug-ins, if a plug-in cannot be
         # found or is invalid then a warning is logged and it's not loaded.
@@ -88,19 +104,20 @@ class CentralControllerApp:
             self.__logger.error(devicesConfigLoader.lastErrorMsg)
             sys.exit(1)
 
-        deviceManager = DeviceManager(self.__logger, deviceTypeMgr)
+        deviceManager = DeviceManager(self.__logger, deviceTypeMgr,
+                                      self.__eventManager)
         devLst = self.__currDevices[devicesConfigLoader.JsonTopElement.Devices]
         deviceManager.Load(devLst)
         deviceManager.InitialiseHardware()
 
-        #sys.exit(1)
-
-        self.__ioProcessor = IOProcessingThread(self.__logger, statusObject,
-                                                configuration, deviceManager)
-        self.__ioProcessor.start()
+        # Create the IO processing thread which handles IO requests from
+        # hardware devices.
+        self.__workerThread = WorkerThread(self.__logger, configuration,
+                                           deviceManager, self.__eventManager)
+        self.__workerThread.start()
 
         self.__keypadApiController = KeypadApiController(self.__logger,
-                                                         statusObject,
+                                                         self.__eventManager,
                                                          controllerDb,
                                                          configuration,
                                                          self.__endpoint)
@@ -115,9 +132,9 @@ class CentralControllerApp:
 
 
     def __Shutdown(self):
-        self.__ioProcessor.SignalShutdownRequested()
+        self.__workerThread.SignalShutdownRequested()
 
-        while not self.__ioProcessor.shutdownCompleted:
-            time.sleep(5)
+        while not self.__workerThread.shutdownCompleted:
+            time.sleep(1)
 
-        self.__logger.info('IO Processor has Shut down')
+        self.__logger.info('Worker thread has Shut down')
