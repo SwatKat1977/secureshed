@@ -23,10 +23,10 @@ from centralController.ControllerDBInterface import ControllerDBInterface
 from centralController.DevicesConfigLoader import DevicesConfigLoader
 from centralController.DeviceManager import DeviceManager
 from centralController.DeviceTypeManager import DeviceTypeManager
-from common.EventManager import EventManager
 from centralController.KeypadAPIThread import KeypadApiController
 from centralController.IOProcessingThread import IOProcessingThread
-from centralController.StatusObject import StatusObject
+from centralController.StatusObject import EvtType, StateManager
+from common.EventManager import EventManager
 
 
 class CentralControllerApp:
@@ -70,13 +70,20 @@ class CentralControllerApp:
                                 configManger.lastErrorMsg)
             sys.exit(1)
 
-        statusObject = StatusObject()
         self.__eventManager = EventManager()
 
         controllerDb = ControllerDBInterface()
         if not controllerDb.Connect(self.__db):
             self.__logger.error("Database '%s' is missing!", self.__db)
             sys.exit(1)
+
+        # Build state manager which manages the state of the alarm itself and
+        # how states are changed due to hardware device(s) being triggered.
+        stateManager = StateManager(controllerDb, self.__logger, configuration)
+
+        # Register event: Receive keypad event.
+        self.__eventManager.RegisterEvent(EvtType.KeypadKeyCodeEntered,
+                                          stateManager.RcvKeypadEvent)
 
         # Attempt to load the device types plug-ins, if a plug-in cannot be
         # found or is invalid then a warning is logged and it's not loaded.
@@ -100,12 +107,13 @@ class CentralControllerApp:
 
         # Create the IO processing thread which handles IO requests from
         # hardware devices.
-        self.__ioProcessor = IOProcessingThread(self.__logger, statusObject,
-                                                configuration, deviceManager)
+        self.__ioProcessor = IOProcessingThread(self.__logger, configuration,
+                                                deviceManager,
+                                                self.__eventManager)
         self.__ioProcessor.start()
 
         self.__keypadApiController = KeypadApiController(self.__logger,
-                                                         statusObject,
+                                                         self.__eventManager,
                                                          controllerDb,
                                                          configuration,
                                                          self.__endpoint)

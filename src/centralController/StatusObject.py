@@ -58,7 +58,6 @@ class StateManager:
 
 	#  @param self The object pointer.
     def __HandleKeyCodeEnteredEvent(self, eventInst):
-
         body = eventInst.body
 
         # Validate that the json body conforms to the expected schema.
@@ -67,7 +66,6 @@ class StateManager:
             jsonschema.validate(instance=body,
                                 schema=schemas.ReceiveKeyCodeJsonSchema)
 
-        #except Exception as ex:
         except jsonschema.exceptions.ValidationError:
             errMsg = 'Message body validation failed.'
             #response = self.__endpoint.response_class(
@@ -142,76 +140,3 @@ class StateManager:
         #                                      status=HTTPStatusCode.OK,
         #                                      mimetype='application/json')
         return 'ok'
-
-'''
-import logging
-import os
-from centralController.ConfigurationManager import ConfigurationManager
-from centralController.ControllerDBInterface import ControllerDBInterface
-from common.Event import Event
-controllerDbInterface = ControllerDBInterface()
-controllerDbInterface.Connect(os.getenv('CENCON_DB'))
-
-testMsgBody = {"keySequence" : "124"}
-ev = Event(EvtType.KeypadKeyCodeEntered, testMsgBody)
-
-FORMATTER = logging.Formatter("%(asctime)s [%(levelname)s] %(message)s",
-                              "%Y-%m-%d %H:%M:%S")
-LOGGER = logging.getLogger('system log')
-CONSOLESTREAM = logging.StreamHandler()
-CONSOLESTREAM.setFormatter(FORMATTER)
-LOGGER.setLevel(logging.DEBUG)
-LOGGER.addHandler(CONSOLESTREAM)
-
-CONFIGMANAGER = ConfigurationManager()
-CONFIGURATION = CONFIGMANAGER.ParseConfigFile('centralController/configuration.json')
-p = StateManager(controllerDbInterface, LOGGER, CONFIGURATION)
-p.RcvKeypadEvent(ev)
-p.RcvKeypadEvent(ev)
-p.RcvKeypadEvent(ev)
-p.RcvKeypadEvent(ev)
-p.RcvKeypadEvent(ev)
-p.RcvKeypadEvent(ev)
-p.RcvKeypadEvent(ev)
-'''
-
-class StatusObject:
-
-    class AlarmState(enum.Enum):
-        Deactivated = 0
-        Activated = 1
-        Triggered = 2
-
-
-    ## Property getter : Failed entry attempts
-    @property
-    def FailedEntryAttempts(self):
-        return self.__failedEntryAttempts
-
-    ## Property getter : Is authenticated flag.
-    @property
-    def CurrentAlarmState(self):
-        return self.__alarmState
-
-    @CurrentAlarmState.setter
-    def CurrentAlarmState(self, newValue):
-        self.__alarmState = newValue
-
-
-	## StatusObject default constructor.
-	#  @param self The object pointer.
-    def __init__(self):
-        self.__failedEntryAttempts = 0
-        self.__alarmState = self.AlarmState.Deactivated
-
-
-	## Increment the failed entry attempts.
-	#  @param self The object pointer.
-    def IncrementFailedEntryAttempts(self):
-        self.__failedEntryAttempts += 1
-
-
-	## Reset the failed entry attempts.
-	#  @param self The object pointer.
-    def ResetFailedEntryAttempts(self):
-        self.__failedEntryAttempts = 0

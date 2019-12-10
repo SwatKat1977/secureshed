@@ -35,16 +35,15 @@ class IOProcessingThread(threading.Thread):
     #  API will listen to.
     #  @param self The object pointer.
     #  @param logger Network port to listen on.
-    #  @param statusObject Network port to listen on.
     #  @param config Network port to listen on.
-    def __init__(self, logger, statusObject, config, deviceManager):
+    def __init__(self, logger, config, deviceManager, eventManager):
         threading.Thread.__init__(self)
         self.__logger = logger
-        self.__statusObject = statusObject
         self.__config = config
+        self.__deviceManager = deviceManager
+        self.__eventManager = eventManager
         self.__shutdownRequested = False
         self.__shutdownCompleted = False
-        self.__deviceManager = deviceManager
 
 
     ## Thread execution function, in this case run the Flask API interface.
@@ -54,6 +53,7 @@ class IOProcessingThread(threading.Thread):
 
         while not self.__shutdownRequested:
             self.__deviceManager.CheckHardwareDevices()
+            self.__eventManager.ProcessNextEvent()
             time.sleep(0.5)
 
         self.__shutdownCompleted = True
