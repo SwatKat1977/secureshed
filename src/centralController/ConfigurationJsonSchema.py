@@ -31,16 +31,16 @@ ConfigurationJsonSchema = \
         "actionType":
         {
           "type": "string",
-          "enum": ["disableKeyPad", "triggerAlarm"]
+          "enum": ["disableKeyPad", "triggerAlarm", "resetAttemptAccount"]
         },
         "parameters":
         {
           "type": "array",
           "items": { "$ref": "#/definitions/actionParameter" },
           "default": []
-        }            
+        }
       },
-      "required": ["actionType"]    
+      "required": ["actionType"]
     },
 
     "actionParameter":
@@ -51,9 +51,9 @@ ConfigurationJsonSchema = \
       {
         "additionalProperties" : False,
         "key":   { "type": "string" },
-        "value": { "type": "string" }            
+        "value": { "type": "string" }
       },
-      "required": ["key", "value"]    
+      "required": ["key", "value"]
     },
 
     "failedAttemptResponse":
