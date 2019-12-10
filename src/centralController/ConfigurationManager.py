@@ -68,7 +68,7 @@ class ConfigurationManager:
             jsonschema.validate(instance=configJson,
                                 schema=ConfigurationJsonSchema)
 
-        except Exception:
+        except jsonschema.exceptions.ValidationError:
             self.__lastErrorMsg = f"Configuration file {filename} failed " + \
                 "to validate against expected schema.  Please check!"
             return None
@@ -96,13 +96,10 @@ class ConfigurationManager:
         processedResponse = {}
 
         attemptNo = response[self.JSON_failedAttemptResponseAttemptNo]
-        actionsList = []
-
         actions = response[self.JSON_failedAttemptResponseActions]
 
         for action in actions:
             paramsList = action[self.JSON_failedAttemptResponseActionsParams]
-
             actionType = action[self.JSON_failedAttemptResponseActionsType]
 
             processedParams = {}
@@ -133,8 +130,8 @@ class ConfigurationManager:
                             f"{param['value']}"
                         return None
 
-                elif ActionTypeParams[actionType][paramName] == string:
-                    processedParams[paramName] = int(param['value'])
+                elif ActionTypeParams[actionType][paramName] == str:
+                    processedParams[paramName] = param['value']
 
             processedResponse[actionType] = processedParams
 

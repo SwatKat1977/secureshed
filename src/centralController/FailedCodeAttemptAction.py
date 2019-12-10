@@ -19,6 +19,7 @@ from enum import Enum
 class FailedCodeAttemptActionType(Enum):
     disableKeyPad = 'disableKeyPad'
     triggerAlarm = 'triggerAlarm'
+    resetAttemptAccount = 'resetAttemptAccount'
 
     @classmethod
     def IsName(cls, name):
@@ -26,6 +27,7 @@ class FailedCodeAttemptActionType(Enum):
 
 
 ActionTypeParams = {
-    'disableKeyPad' :  {'lockTime' : int},
-    'triggerAlarm' :  {}
+    FailedCodeAttemptActionType.disableKeyPad.value:  {'lockTime' : int},
+    FailedCodeAttemptActionType.triggerAlarm.value: {},
+    FailedCodeAttemptActionType.resetAttemptAccount: {}
 }

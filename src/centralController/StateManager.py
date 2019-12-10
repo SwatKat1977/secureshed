@@ -80,14 +80,17 @@ class StateManager:
             if self.__currAlarmState == self.AlarmState.Triggered:
                 self.__logger.debug('Alarm state changed : Deactivated')
                 self.__currAlarmState = self.AlarmState.Deactivated
+                self.__failedEntryAttempts = 0
 
             elif self.__currAlarmState == self.AlarmState.Deactivated:
                 self.__logger.debug('Alarm state changed : Activated')
                 self.__currAlarmState = self.AlarmState.Activated
+                self.__failedEntryAttempts = 0
 
             elif self.__currAlarmState == self.AlarmState.Activated:
                 self.__logger.debug('Alarm state changed : Deactivated')
                 self.__currAlarmState = self.AlarmState.Deactivated
+                self.__failedEntryAttempts = 0
 
             actions = \
             {
@@ -127,6 +130,8 @@ class StateManager:
                             self.__logger.debug('Alarm triggered!')
                             self.__currAlarmState = self.AlarmState.Triggered
 
+                    elif response == 'resetAttemptAccount':
+                        self.__failedEntryAttempts = 0
 
             #responseType = ReceiveKeyCodeReturnCode.KeycodeIncorrect.value
 
