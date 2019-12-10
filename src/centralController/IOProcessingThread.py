@@ -18,8 +18,8 @@ import threading
 import time
 
 
-## Implementation of thread that handles API calls to the keypad API.
-class IOProcessingThread(threading.Thread):
+## Main worker thread for the central controller.
+class WorkerThread(threading.Thread):
 
     class IOPinState(enum.Enum):
         High = 0
@@ -31,8 +31,7 @@ class IOProcessingThread(threading.Thread):
         return self.__shutdownCompleted
 
 
-    ## KeypadAPIThread class constructor, passing in the network port that the
-    #  API will listen to.
+    ## WorkerThread class constructor.
     #  @param self The object pointer.
     #  @param logger Network port to listen on.
     #  @param config Network port to listen on.
