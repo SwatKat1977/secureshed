@@ -16,7 +16,7 @@ limitations under the License.
 import json
 import jsonschema
 from centralController.Configuration import KeypadAPIConfig, Configuration
-from centralController.ConfigurationJsonSchema import ConfigurationJsonSchema
+from centralController.ConfigurationJsonSchema import CONFIGURATIONJSONSCHEMA
 from centralController.FailedCodeAttemptAction import (FailedCodeAttemptActionType,
                                                        ActionTypeParams)
 
@@ -66,7 +66,7 @@ class ConfigurationManager:
 
         try:
             jsonschema.validate(instance=configJson,
-                                schema=ConfigurationJsonSchema)
+                                schema=CONFIGURATIONJSONSCHEMA)
 
         except jsonschema.exceptions.ValidationError:
             self.__lastErrorMsg = f"Configuration file {filename} failed " + \

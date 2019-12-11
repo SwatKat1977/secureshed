@@ -3,7 +3,10 @@
   {
     "NetworkPort" : 5000
   },
-
+  "AlarmSettings":
+  {
+    "AlarmSetGraceTimeSecs" : 10
+  },
   "failedAttemptResponses":
   [
     {

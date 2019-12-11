@@ -15,97 +15,105 @@ limitations under the License.
 '''
 
 
-ConfigurationJsonSchema = \
+CONFIGURATIONJSONSCHEMA = \
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
+    "$schema": "http://json-schema.org/draft-07/schema#",
 
-  "definitions":
-  {
-    "action":
+    "definitions":
     {
-      "type": "object",
-      "additionalProperties" : False,
-      "properties":
-      {
-        "additionalProperties" : False,
-        "actionType":
+        "action":
         {
-          "type": "string",
-          "enum": ["disableKeyPad", "triggerAlarm", "resetAttemptAccount"]
+            "type": "object",
+            "additionalProperties" : False,
+            "properties":
+            {
+                "additionalProperties" : False,
+                "actionType":
+                {
+                    "type": "string",
+                    "enum": ["disableKeyPad", "triggerAlarm", "resetAttemptAccount"]
+                },
+                "parameters":
+                {
+                    "type": "array",
+                    "items": {"$ref": "#/definitions/actionParameter"},
+                    "default": []
+                }
+            },
+            "required": ["actionType"]
         },
-        "parameters":
+
+        "actionParameter":
         {
-          "type": "array",
-          "items": { "$ref": "#/definitions/actionParameter" },
-          "default": []
+            "type": "object",
+            "additionalProperties" : False,
+            "properties":
+            {
+                "additionalProperties" : False,
+                "key":   {"type": "string"},
+                "value": {"type": "string"}
+            },
+            "required": ["key", "value"]
+        },
+
+        "failedAttemptResponse":
+        {
+            "type": "object",
+            "additionalProperties" : False,
+            "properties":
+            {
+                "additionalProperties" : False,
+                "attemptNo":
+                {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 100
+                },
+                "actions":
+                {
+                    "type": "array",
+                    "items": {"$ref": "#/definitions/action"},
+                    "default": []
+                }
+            },
+            "required" : ["attemptNo", "actions"]
         }
-      },
-      "required": ["actionType"]
     },
 
-    "actionParameter":
-    {
-      "type": "object",
-      "additionalProperties" : False,
-      "properties":
-      {
-        "additionalProperties" : False,
-        "key":   { "type": "string" },
-        "value": { "type": "string" }
-      },
-      "required": ["key", "value"]
-    },
-
-    "failedAttemptResponse":
-    {
-      "type": "object",
-      "additionalProperties" : False,
-      "properties":
-      {
-        "additionalProperties" : False,
-        "attemptNo":
-        {
-          "type": "integer",
-          "minimum": 1,
-          "maximum": 100
-        },
-        "actions":
-        {
-          "type": "array",
-          "items": { "$ref": "#/definitions/action" },
-          "default": []
-        }
-      },
-      "required" : ["attemptNo", "actions"]
-    }
-  },
-
-  "type" : "object",
-  "additionalProperties" : False,
-
-  "properties":
-  {
+    "type" : "object",
     "additionalProperties" : False,
-    "failedAttemptResponses":
+
+    "properties":
     {
-      "type": "array",
-      "items": { "$ref": "#/definitions/failedAttemptResponse" },
-      "default": []
-    },
-    "keypadAPI":
-    {
-      "additionalProperties" : False,
-      "properties":
-      {
         "additionalProperties" : False,
-        "NetworkPort" :
+        "failedAttemptResponses":
         {
-          "type" : "integer",
-          "minimum": 1
+            "type": "array",
+            "items": {"$ref": "#/definitions/failedAttemptResponse"},
+            "default": []
+        },
+        "keypadAPI":
+        {
+            "additionalProperties" : False,
+            "properties":
+            {
+                "additionalProperties" : False,
+                "NetworkPort" :
+                {
+                    "type" : "integer",
+                    "minimum": 1
+                }
+            },
+            "required" : ["NetworkPort"]
+        },
+        "AlarmSettings":
+        {
+            "AlarmSetGraceTimeSecs" :
+            {
+                "type" : "integer",
+                "minimum": 1
+            }
         }
-      },
-      "required" : ["NetworkPort"]
-    }
-  },
-  "required" : ["failedAttemptResponses", "keypadAPI"]
+    },
+    "required" : ["failedAttemptResponses", "keypadAPI"]
 }
