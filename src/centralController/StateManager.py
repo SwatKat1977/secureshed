@@ -21,7 +21,7 @@ from common.Event import Event
 
 
 class StateManager:
-    __slots__ = ['__config', '__currAlarmState', '__db',
+    __slots__ = ['__config', '__currAlarmState', '__db', '__eventMgr',
                  '__failedEntryAttempts', '__logger']
 
     class AlarmState(enum.Enum):
@@ -31,10 +31,11 @@ class StateManager:
 
 
 	#  @param self The object pointer.
-    def __init__(self, controllerDb, logger, config):
+    def __init__(self, controllerDb, logger, config, eventMgr):
         self.__config = config
         self.__currAlarmState = self.AlarmState.Deactivated
         self.__db = controllerDb
+        self.__eventMgr = eventMgr
         self.__failedEntryAttempts = 0
         self.__logger = logger
 
@@ -172,5 +173,5 @@ class StateManager:
             self.__logger.debug(logMsg)
             self.__currAlarmState = self.AlarmState.Triggered
 
-            ##e = Event(Evts.EvtType.ActivateSiren, None)
-            ##self.
+            e = Event(Evts.EvtType.ActivateSiren, None)
+            self.__eventMgr.QueueEvent(e)

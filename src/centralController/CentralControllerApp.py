@@ -79,7 +79,8 @@ class CentralControllerApp:
 
         # Build state manager which manages the state of the alarm itself and
         # how states are changed due to hardware device(s) being triggered.
-        stateManager = StateManager(controllerDb, self.__logger, configuration)
+        stateManager = StateManager(controllerDb, self.__logger, configuration,
+                                    self.__eventManager)
 
         # Attempt to load the device types plug-ins, if a plug-in cannot be
         # found or is invalid then a warning is logged and it's not loaded.
