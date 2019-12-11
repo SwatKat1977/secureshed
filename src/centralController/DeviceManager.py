@@ -15,6 +15,7 @@ limitations under the License.
 '''
 import collections
 from centralController.DevicesConfigLoader import DevicesConfigLoader
+import centralController.Events as Evts
 
 try:
     import RPi.GPIO as GPIO
@@ -123,4 +124,5 @@ class DeviceManager:
 
     #  @param self The object pointer.
     def ReceiveEvent(self, eventInst):
-        raise NotImplementedError
+        if eventInst.id == Evts.EvtType.ActivateSiren:
+            self.__logger.error('activate siren')
