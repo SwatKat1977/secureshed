@@ -25,11 +25,11 @@
       [
         {
           "actionType" : "triggerAlarm",
-           "parameters" : []
+          "parameters" : []
         },
         {
           "actionType" : "resetAttemptAccount",
-           "parameters" : []
+          "parameters" : []
         }
       ]
     }
