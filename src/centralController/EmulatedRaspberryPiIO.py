@@ -201,8 +201,9 @@ class GPIO:
     @staticmethod
     def output(pin, state):
         # pylint: disable=C0103
+
         pinId = f'{GPIO.PinEntryGPIOPrefix}{pin}'
-        newValue = GPIO.PinState.high if state == 1 else GPIO.PinState.low
+        newValue = GPIO.PinState.High if state == 1 else GPIO.PinState.Low
         GPIO.CurrentPinOutStates[pinId] = newValue
 
 
@@ -214,7 +215,6 @@ class GPIO:
                 return hashlib.md5(fileContents).hexdigest()
 
         except IOError as ex:
-            print(ex)
             return None
 
 
