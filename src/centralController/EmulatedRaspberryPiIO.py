@@ -155,10 +155,10 @@ class GPIO:
     ##########################
 
     ## RPi.GPIO pin state : Low.
-    LOW = 301
+    LOW = 0
 
     ## RPi.GPIO pin state : High.
-    HIGH = 302
+    HIGH = 1
 
 
     PUD_UP = 401
