@@ -24,5 +24,5 @@ class BaseDeviceType:
         raise NotImplementedError
 
 
-    def ReceiveEvent(self, eventId, event):
+    def ReceiveEvent(self, eventInst):
         raise NotImplementedError

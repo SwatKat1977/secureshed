@@ -1,15 +1,15 @@
 {
     "devices": [
         {
-            "name": "{'type': 'string'}",
+            "name": "Internal Alarm Siren",
             "hardware": "siren",
-            "deviceType": "string'}",
+            "deviceType": "GenericAlarmSiren",
             "enabled": true,
             "pins":
             [
                 {
-                    "ioPin": "GPIO18",
-                    "identifier": "sensorPin"
+                    "ioPin": "GPIO23",
+                    "identifier": "sirenPin"
                 }
             ]
         },

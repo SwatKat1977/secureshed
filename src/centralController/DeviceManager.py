@@ -15,6 +15,7 @@ limitations under the License.
 '''
 import collections
 from centralController.DevicesConfigLoader import DevicesConfigLoader
+import centralController.Events as Evts
 
 try:
     import RPi.GPIO as GPIO
@@ -65,11 +66,18 @@ class DeviceManager:
                                    "device type of '%s'", name, deviceType)
                 continue
 
-            deviceInst = deviceTypes[deviceType](self.__logger, GPIO,
-                                                 self.__eventMgr)
-            newDevice = self.Device(name=name, hardware=hardware,
-                                    deviceType=deviceInst, pins=pins)
-            self.__devices.append(newDevice)
+            try:
+                deviceInst = deviceTypes[deviceType](self.__logger, GPIO,
+                                                    self.__eventMgr)
+                newDevice = self.Device(name=name, hardware=hardware,
+                                        deviceType=deviceInst, pins=pins)
+                self.__devices.append(newDevice)
+
+            except TypeError:
+                self.__logger.warn("Ignoring device '%s' as unable to " +\
+                                   "instantiate device type of '%s'", name,
+                                   deviceType)
+                continue
 
 
     #  @param self The object pointer.
@@ -106,9 +114,27 @@ class DeviceManager:
 
             except NotImplementedError:
                 self.__logger.error("Device name '%s' plug-in does not " +\
-                    "implement Initialise() so cannot be used.", device.name)
+                    "implement CheckDevice() so cannot be used.", device.name)
 
 
     #  @param self The object pointer.
     def CleanupDevices(self):
         GPIO.cleanup()
+
+
+    #  @param self The object pointer.
+    def ReceiveEvent(self, eventInst):
+        # Event : Activate siren.
+        if eventInst.id == Evts.EvtType.ActivateSiren:
+            sirens = [s for s in self.__devices if s.hardware == 'siren']
+
+            for siren in sirens:
+                self.__logger.info("Activating alarm siren '%s'", siren.name)
+                siren.deviceType.ReceiveEvent(eventInst)
+
+        if eventInst.id == Evts.EvtType.DeactivateSiren:
+            sirens = [s for s in self.__devices if s.hardware == 'siren']
+
+            for siren in sirens:
+                self.__logger.info("Deactivating alarm siren '%s'", siren.name)
+                siren.deviceType.ReceiveEvent(eventInst)

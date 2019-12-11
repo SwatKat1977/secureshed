@@ -31,19 +31,21 @@ from common.EventManager import EventManager
 
 
 class CentralControllerApp:
-    __slots__ = ['__db', '__configFile', '__currDevices', '__endpoint',
-                 '__eventManager', '__keypadApiController', '__logger',
-                 '__workerThread']
+    __slots__ = ['__configFile', '__currDevices', '__db', '__deviceMgr',
+                 '__endpoint', '__eventManager', '__keypadApiController',
+                 '__logger', '__stateMgr', '__workerThread']
 
 
     def __init__(self, endpoint):
         self.__configFile = os.getenv('CENCON_CONFIG')
         self.__currDevices = None
         self.__db = os.getenv('CENCON_DB')
+        self.__deviceMgr = None
         self.__endpoint = endpoint
         self.__eventManager = None
-        self.__logger = None
         self.__keypadApiController = None
+        self.__logger = None
+        self.__stateMgr = None
         self.__workerThread = None
 
 
@@ -79,15 +81,8 @@ class CentralControllerApp:
 
         # Build state manager which manages the state of the alarm itself and
         # how states are changed due to hardware device(s) being triggered.
-        stateManager = StateManager(controllerDb, self.__logger, configuration)
-
-        # Register event: Receive keypad event.
-        self.__eventManager.RegisterEvent(Evts.EvtType.KeypadKeyCodeEntered,
-                                          stateManager.RcvKeypadEvent)
-
-        # Register event: Receive keypad event.
-        self.__eventManager.RegisterEvent(Evts.EvtType.SensorDeviceStateChange,
-                                          stateManager.RcvDeviceEvent)
+        self.__stateMgr = StateManager(controllerDb, self.__logger, configuration,
+                                       self.__eventManager)
 
         # Attempt to load the device types plug-ins, if a plug-in cannot be
         # found or is invalid then a warning is logged and it's not loaded.
@@ -104,16 +99,18 @@ class CentralControllerApp:
             self.__logger.error(devicesConfigLoader.lastErrorMsg)
             sys.exit(1)
 
-        deviceManager = DeviceManager(self.__logger, deviceTypeMgr,
+        self.__deviceMgr = DeviceManager(self.__logger, deviceTypeMgr,
                                       self.__eventManager)
         devLst = self.__currDevices[devicesConfigLoader.JsonTopElement.Devices]
-        deviceManager.Load(devLst)
-        deviceManager.InitialiseHardware()
+        self.__deviceMgr.Load(devLst)
+        self.__deviceMgr.InitialiseHardware()
+
+        self.__RegisterEventCallbacks()
 
         # Create the IO processing thread which handles IO requests from
         # hardware devices.
         self.__workerThread = WorkerThread(self.__logger, configuration,
-                                           deviceManager, self.__eventManager)
+                                           self.__deviceMgr, self.__eventManager)
         self.__workerThread.start()
 
         self.__keypadApiController = KeypadApiController(self.__logger,
@@ -121,6 +118,33 @@ class CentralControllerApp:
                                                          controllerDb,
                                                          configuration,
                                                          self.__endpoint)
+
+
+    def __RegisterEventCallbacks(self):
+
+        # =============================
+        # == Register event : Keypad ==
+        # =============================
+
+        # Register event: Receive keypad event.
+        self.__eventManager.RegisterEvent(Evts.EvtType.KeypadKeyCodeEntered,
+                                          self.__stateMgr.RcvKeypadEvent)
+
+        # Register event: Receive keypad event.
+        self.__eventManager.RegisterEvent(Evts.EvtType.SensorDeviceStateChange,
+                                          self.__stateMgr.RcvDeviceEvent)
+
+        # ===============================
+        # == Register event : Hardware ==
+        # ===============================
+
+        # Register event: Activate alarm sirens.
+        self.__eventManager.RegisterEvent(Evts.EvtType.ActivateSiren,
+                                          self.__deviceMgr.ReceiveEvent)
+
+        # Register event: Deactivate alarm sirens.
+        self.__eventManager.RegisterEvent(Evts.EvtType.DeactivateSiren,
+                                          self.__deviceMgr.ReceiveEvent)
 
 
     def __SignalHandler(self, signum, frame):

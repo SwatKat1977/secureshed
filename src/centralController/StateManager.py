@@ -17,10 +17,11 @@ import enum
 import jsonschema
 import APIs.Keypad.JsonSchemas as schemas
 import centralController.Events as Evts
+from common.Event import Event
 
 
 class StateManager:
-    __slots__ = ['__config', '__currAlarmState', '__db',
+    __slots__ = ['__config', '__currAlarmState', '__db', '__eventMgr',
                  '__failedEntryAttempts', '__logger']
 
     class AlarmState(enum.Enum):
@@ -29,30 +30,37 @@ class StateManager:
         Triggered = 2
 
 
-	#  @param self The object pointer.
-    def __init__(self, controllerDb, logger, config):
+    ## StateManager class default constructor.
+    #  @param self The object pointer.
+    #  @param controllerDb Database controller interface instance.
+    #  @param logger Logger instance.
+    #  @param config Configuration items in json format.
+    #  @param eventMgr Event manager instance.
+    def __init__(self, controllerDb, logger, config, eventMgr):
         self.__config = config
         self.__currAlarmState = self.AlarmState.Deactivated
         self.__db = controllerDb
+        self.__eventMgr = eventMgr
         self.__failedEntryAttempts = 0
         self.__logger = logger
 
 
-	#  @param self The object pointer.
+    ## Received events from the keypad.
+    #  @param self The object pointer.
     def RcvKeypadEvent(self, eventInst):
 
         if eventInst.id == Evts.EvtType.KeypadKeyCodeEntered:
             self.__HandleKeyCodeEnteredEvent(eventInst)
 
 
-	#  @param self The object pointer.
+    #  @param self The object pointer.
     def RcvDeviceEvent(self, eventInst):
 
         if eventInst.id == Evts.EvtType.SensorDeviceStateChange:
             self.__HandleSensorDeviceStateChangeEvent(eventInst)
 
 
-	#  @param self The object pointer.
+    #  @param self The object pointer.
     def __HandleKeyCodeEnteredEvent(self, eventInst):
         body = eventInst.body
 
@@ -76,17 +84,19 @@ class StateManager:
 
         if details is not None:
             if self.__currAlarmState == self.AlarmState.Triggered:
-                self.__logger.info('Alarm state has been deactivated')
+                self.__logger.info('A triggered alarm has been deactivated')
                 self.__currAlarmState = self.AlarmState.Deactivated
                 self.__failedEntryAttempts = 0
+                evt = Event(Evts.EvtType.DeactivateSiren, None)
+                self.__eventMgr.QueueEvent(evt)
 
             elif self.__currAlarmState == self.AlarmState.Deactivated:
-                self.__logger.info('Alarm state has been activated')
+                self.__logger.info('The alarm has been activated')
                 self.__currAlarmState = self.AlarmState.Activated
                 self.__failedEntryAttempts = 0
 
             elif self.__currAlarmState == self.AlarmState.Activated:
-                self.__logger.info('Alarm state has been deactivated')
+                self.__logger.info('The alarm has been deactivated')
                 self.__currAlarmState = self.AlarmState.Deactivated
                 self.__failedEntryAttempts = 0
 
@@ -154,7 +164,7 @@ class StateManager:
         # logging the change for reference.
         if self.__currAlarmState == self.AlarmState.Deactivated:
             logMsg = f"{deviceName} was {stateStr}, although alarm isn't on"
-            self.__logger.debug(logMsg)
+            self.__logger.info(logMsg)
             return
 
         # If the trigger has has already been triggered then opening or closing
@@ -162,11 +172,14 @@ class StateManager:
         # the even occurred.
         if self.__currAlarmState == self.AlarmState.Triggered:
             logMsg = f"{deviceName} was {stateStr}, alarm already triggered"
-            self.__logger.debug(logMsg)
+            self.__logger.info(logMsg)
             return
 
         elif self.__currAlarmState == self.AlarmState.Activated:
             logMsg = f"Activity on {deviceName} ({stateStr}) has triggerd " +\
                 "the alarm!"
-            self.__logger.debug(logMsg)
+            self.__logger.info(logMsg)
             self.__currAlarmState = self.AlarmState.Triggered
+
+            evt = Event(Evts.EvtType.ActivateSiren, None)
+            self.__eventMgr.QueueEvent(evt)

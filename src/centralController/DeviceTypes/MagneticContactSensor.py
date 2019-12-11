@@ -63,8 +63,8 @@ class MagneticContactSensor(BaseDeviceType):
             self.__isTriggered = contactState
 
             stateMsg = "open" if contactState else "closed"
-            self.__logger.debug("Device '%s' changed state to %s",
-                                self.__deviceName, stateMsg)
+            self.__logger.info("Device '%s' changed state to %s",
+                               self.__deviceName, stateMsg)
 
             evtBody = {
                 Evts.SensorDeviceBodyItem.DeviceType: 'Magnetic Contact Sensor',
