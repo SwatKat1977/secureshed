@@ -28,6 +28,7 @@ class EvtType(enum.Enum):
     #------------------------
     #- Siren related events
     ActivateSiren = 3001
+    DeactivateSiren = 3002
 
 
 class SensorDeviceBodyItem:
