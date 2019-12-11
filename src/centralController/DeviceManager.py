@@ -113,7 +113,7 @@ class DeviceManager:
 
             except NotImplementedError:
                 self.__logger.error("Device name '%s' plug-in does not " +\
-                    "implement Initialise() so cannot be used.", device.name)
+                    "implement CheckDevice() so cannot be used.", device.name)
 
 
     #  @param self The object pointer.
