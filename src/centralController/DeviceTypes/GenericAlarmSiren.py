@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 '''
 from centralController.DeviceTypes.BaseDeviceType import BaseDeviceType
+import centralController.Events as Evts
 
 
 class GenericAlarmSiren(BaseDeviceType):
@@ -58,35 +59,9 @@ class GenericAlarmSiren(BaseDeviceType):
         pass
 
 
-
     def ReceiveEvent(self, eventInst):
-        raise NotImplementedError
+        if eventInst.id == Evts.EvtType.ActivateSiren:
+            self.__hardwareIO.output(self.__ioPin, self.__hardwareIO.LOW)
 
-
-'''
-RelayPin = 23
-
-GPIO.cleanup()
-
-GPIO.setmode(GPIO.BCM)
-
-
-GPIO.setup(RelayPin, GPIO.OUT)
-GPIO.output(RelayPin, GPIO.HIGH)
-print('SETUP relay')
-time.sleep(10)
-
-print('Activating')
-GPIO.output(RelayPin, GPIO.LOW)
-time.sleep(10)
-print('De-activating')
-GPIO.output(RelayPin, GPIO.HIGH)
-
-time.sleep(10)
-print('Activating')
-GPIO.output(RelayPin, GPIO.LOW)
-
-time.sleep(10)
-
-GPIO.cleanup()
-'''
+        elif eventInst.id == Evts.EvtType.DeactivateSiren:
+            self.__hardwareIO.output(self.__ioPin, self.__hardwareIO.HIGH)
