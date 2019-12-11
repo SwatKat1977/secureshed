@@ -81,14 +81,6 @@ class CentralControllerApp:
         # how states are changed due to hardware device(s) being triggered.
         stateManager = StateManager(controllerDb, self.__logger, configuration)
 
-        # Register event: Receive keypad event.
-        self.__eventManager.RegisterEvent(Evts.EvtType.KeypadKeyCodeEntered,
-                                          stateManager.RcvKeypadEvent)
-
-        # Register event: Receive keypad event.
-        self.__eventManager.RegisterEvent(Evts.EvtType.SensorDeviceStateChange,
-                                          stateManager.RcvDeviceEvent)
-
         # Attempt to load the device types plug-ins, if a plug-in cannot be
         # found or is invalid then a warning is logged and it's not loaded.
         deviceTypeMgr = DeviceTypeManager(self.__logger)
@@ -109,6 +101,22 @@ class CentralControllerApp:
         devLst = self.__currDevices[devicesConfigLoader.JsonTopElement.Devices]
         deviceManager.Load(devLst)
         deviceManager.InitialiseHardware()
+
+        # ==============================
+        # == Register event callbacks ==
+        # ==============================
+
+        # Register event: Receive keypad event.
+        self.__eventManager.RegisterEvent(Evts.EvtType.KeypadKeyCodeEntered,
+                                          stateManager.RcvKeypadEvent)
+
+        # Register event: Receive keypad event.
+        self.__eventManager.RegisterEvent(Evts.EvtType.SensorDeviceStateChange,
+                                          stateManager.RcvDeviceEvent)
+
+        # Register event: Receive keypad event.
+        self.__eventManager.RegisterEvent(Evts.EvtType.ActivateSiren,
+                                          deviceManager.ReceiveEvent)
 
         # Create the IO processing thread which handles IO requests from
         # hardware devices.

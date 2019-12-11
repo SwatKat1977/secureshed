@@ -119,3 +119,8 @@ class DeviceManager:
     #  @param self The object pointer.
     def CleanupDevices(self):
         GPIO.cleanup()
+
+
+    #  @param self The object pointer.
+    def ReceiveEvent(self, eventInst):
+        raise NotImplementedError

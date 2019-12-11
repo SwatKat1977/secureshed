@@ -17,6 +17,7 @@ import enum
 import jsonschema
 import APIs.Keypad.JsonSchemas as schemas
 import centralController.Events as Evts
+from common.Event import Event
 
 
 class StateManager:
@@ -170,3 +171,6 @@ class StateManager:
                 "the alarm!"
             self.__logger.debug(logMsg)
             self.__currAlarmState = self.AlarmState.Triggered
+
+            ##e = Event(Evts.EvtType.ActivateSiren, None)
+            ##self.
