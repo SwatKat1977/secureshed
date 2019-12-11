@@ -81,6 +81,8 @@ class StateManager:
                 self.__logger.info('Alarm state has been deactivated')
                 self.__currAlarmState = self.AlarmState.Deactivated
                 self.__failedEntryAttempts = 0
+                evt = Event(Evts.EvtType.DeactivateSiren, None)
+                self.__eventMgr.QueueEvent(evt)
 
             elif self.__currAlarmState == self.AlarmState.Deactivated:
                 self.__logger.info('Alarm state has been activated')
@@ -173,5 +175,5 @@ class StateManager:
             self.__logger.debug(logMsg)
             self.__currAlarmState = self.AlarmState.Triggered
 
-            e = Event(Evts.EvtType.ActivateSiren, None)
-            self.__eventMgr.QueueEvent(e)
+            evt = Event(Evts.EvtType.ActivateSiren, None)
+            self.__eventMgr.QueueEvent(evt)
