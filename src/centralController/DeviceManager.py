@@ -124,5 +124,17 @@ class DeviceManager:
 
     #  @param self The object pointer.
     def ReceiveEvent(self, eventInst):
+        # Event : Activate siren.
         if eventInst.id == Evts.EvtType.ActivateSiren:
-            self.__logger.error('activate siren')
+            sirens = [s for s in self.__devices if s.hardware == 'siren']
+
+            for siren in sirens:
+                self.__logger.info("Activating alarm siren '%s'", siren.name)
+                siren.deviceType.ReceiveEvent(eventInst)
+
+        if eventInst.id == Evts.EvtType.DeactivateSiren:
+            sirens = [s for s in self.__devices if s.hardware == 'siren']
+
+            for siren in sirens:
+                self.__logger.info("Deactivating alarm siren '%s'", siren.name)
+                siren.deviceType.ReceiveEvent(eventInst)
