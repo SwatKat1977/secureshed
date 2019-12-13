@@ -15,7 +15,7 @@ limitations under the License.
 '''
 import json
 import jsonschema
-from centralController.Configuration import KeypadAPIConfig, Configuration
+from centralController.Configuration import Configuration
 from centralController.ConfigurationJsonSchema import CONFIGURATIONJSONSCHEMA
 from centralController.FailedCodeAttemptAction import (FailedCodeAttemptActionType,
                                                        ActionTypeParams)
@@ -23,14 +23,30 @@ from centralController.FailedCodeAttemptAction import (FailedCodeAttemptActionTy
 
 class ConfigurationManager:
 
+    # -----------------------------
+    # -- Top-level json elements --
+    # -----------------------------
+    JSON_AlarmSettings = 'alarmSettings'
     JSON_keypadAPI = 'keypadAPI'
-    JSON_keypadAPI_Port = 'NetworkPort'
     JSON_failedAttemptResponses = 'failedAttemptResponses'
 
+    # -----------------------------
+    # -- Keypad Api sub-elements --
+    # -----------------------------
+    JSON_keypadAPI_Port = 'networkPort'
+
+    # ------------------------------------------
+    # -- Failed attempt tesponse sub-elements --
+    # ------------------------------------------
     JSON_failedAttemptResponseAttemptNo = 'attemptNo'
     JSON_failedAttemptResponseActions = 'actions'
     JSON_failedAttemptResponseActionsType = 'actionType'
     JSON_failedAttemptResponseActionsParams = 'parameters'
+
+    # ---------------------------------
+    # -- Alarm settings sub-elements --
+    # ---------------------------------
+    JSON_AlarmSettingsAlarmSetGraceTimeSecs = 'AlarmSetGraceTimeSecs'
 
 
     ## Property getter : Last error message
@@ -74,7 +90,7 @@ class ConfigurationManager:
             return None
 
         keypadApiNetworkPort = configJson[self.JSON_keypadAPI][self.JSON_keypadAPI_Port]
-        keypadAPIConfig = KeypadAPIConfig(keypadApiNetworkPort)
+        keypadAPIConfig = Configuration.KeypadAPICfg(keypadApiNetworkPort)
 
         failedAttemptResponses = {}
 
@@ -88,7 +104,11 @@ class ConfigurationManager:
             attemptNo, response = processedResp
             failedAttemptResponses[attemptNo] = response
 
-        return Configuration(keypadAPIConfig, failedAttemptResponses)
+        alarmSetGraceTimeSecs = configJson[self.JSON_AlarmSettings][self.JSON_AlarmSettingsAlarmSetGraceTimeSecs]
+        alarmSettingsCfg = Configuration.AlarmSettingsCfg(AlarmSetGraceTimeSecs=alarmSetGraceTimeSecs)
+
+        return Configuration(alarmSettingsCfg, keypadAPIConfig,
+                         failedAttemptResponses)
 
 
     def __ProcessFailedCodeResponse(self, response):

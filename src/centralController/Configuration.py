@@ -16,12 +16,14 @@ limitations under the License.
 import collections
 
 
-KeypadAPIConfig = collections.namedtuple('KeypadAPIConfig', 'networkPort')
-
-
 class Configuration:
-    __slots__ = ['__failedAttemptResponses', '__keypadApiConfig']
+    __slots__ = ['__alarmSettingsConfig', '__failedAttemptResponses',
+                 '__keypadApiConfig']
 
+    KeypadAPICfg = collections.namedtuple('KeypadAPIConfig', 'networkPort')
+
+    AlarmSettingsCfg = collections.namedtuple('AlarmSettingsConfig',
+                                              'AlarmSetGraceTimeSecs')
 
     ## Property getter : Keypad API config
     #  @param self The object pointer.
@@ -29,8 +31,13 @@ class Configuration:
     def keypadApiConfig(self):
         return self.__keypadApiConfig
 
-    ## Property getter : Failed code entry attempt responses
+
     #  @param self The object pointer.
+    @property
+    def AlarmSettingsConfig(self):
+        return self.__alarmSettingsConfig
+
+
     @property
     def failedAttemptResponses(self):
         return self.__failedAttemptResponses
@@ -40,9 +47,12 @@ class Configuration:
     #  @param self The object pointer.
     #  @param keypadAPIConfig Configuration items for keypad api.
     #  @param failedAttemptResponses Responses when an attempt fails.
-    def __init__(self, keypadAPIConfig, failedAttemptResponses):
-        if not isinstance(keypadAPIConfig, KeypadAPIConfig):
-            raise TypeError('keypadAPIConfig param not type keypadAPIConfig')
+    def __init__(self, alarmSettingsConfig, keypadAPIConfig,
+                 failedAttemptResponses):
+        if not isinstance(keypadAPIConfig, self.KeypadAPICfg):
+            raise TypeError('keypadAPIConfig param not type KeypadAPICfg')
+
+        self.__alarmSettingsConfig = alarmSettingsConfig
 
         self.__keypadApiConfig = keypadAPIConfig
 

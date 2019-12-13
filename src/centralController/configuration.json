@@ -1,9 +1,9 @@
 {
   "keypadAPI" :
   {
-    "NetworkPort" : 5000
+    "networkPort" : 5000
   },
-  "AlarmSettings":
+  "alarmSettings":
   {
     "AlarmSetGraceTimeSecs" : 10
   },
@@ -25,11 +25,11 @@
       [
         {
           "actionType" : "triggerAlarm",
-          "parameters" : []
+           "parameters" : []
         },
         {
           "actionType" : "resetAttemptAccount",
-          "parameters" : []
+           "parameters" : []
         }
       ]
     }
