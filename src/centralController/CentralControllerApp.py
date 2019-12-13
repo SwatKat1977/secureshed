@@ -110,7 +110,9 @@ class CentralControllerApp:
         # Create the IO processing thread which handles IO requests from
         # hardware devices.
         self.__workerThread = WorkerThread(self.__logger, configuration,
-                                           self.__deviceMgr, self.__eventManager)
+                                           self.__deviceMgr,
+                                           self.__eventManager,
+                                           self.__stateMgr)
         self.__workerThread.start()
 
         self.__keypadApiController = KeypadApiController(self.__logger,

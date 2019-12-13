@@ -16,6 +16,7 @@ limitations under the License.
 import collections
 import enum
 import time
+import uuid
 import jsonschema
 import APIs.Keypad.JsonSchemas as schemas
 import centralController.Events as Evts
@@ -28,7 +29,7 @@ class StateManager:
                  '__failedEntryAttempts', '__logger', '__transientStates']
 
     TransientStateEntry = collections.namedtuple('TransientStateEntry',
-                                                 'TransientState body')
+                                                 'id TransientState body')
 
     class AlarmState(enum.Enum):
         Deactivated = 0
@@ -67,6 +68,29 @@ class StateManager:
             self.__HandleSensorDeviceStateChangeEvent(eventInst)
 
 
+    def UpdateTransitoryEvents(self):
+
+        # List of event id's that need to be removed
+        idList = []
+
+        # 'InAlarmSetGraceTime' Events have expiry, check them.
+        evts = [evt for evt in self.__transientStates if \
+            evt.TransientState == \
+                TransState.TransientState.InAlarmSetGraceTime]
+        if evts:
+            currTimestamp = time.time()
+
+            for eventEntry in evts:
+                if currTimestamp > eventEntry.body['expires']:
+                    idList.append(eventEntry.id)
+
+        # Final stage is to remove all any of the transactions that have been
+        # marked for removal.
+        if idList:
+            self.__transientStates = [evt for evt in \
+                self.__transientStates if evt.id not in idList]
+
+
     #  @param self The object pointer.
     def __HandleKeyCodeEnteredEvent(self, eventInst):
         body = eventInst.body
@@ -96,6 +120,7 @@ class StateManager:
                 self.__failedEntryAttempts = 0
                 evt = Event(Evts.EvtType.DeactivateSiren, None)
                 self.__eventMgr.QueueEvent(evt)
+                self.__DeactivateAlarm()
 
             elif self.__currAlarmState == self.AlarmState.Deactivated:
                 self.__logger.info('The alarm has been activated')
@@ -144,7 +169,7 @@ class StateManager:
 
                         if self.__currAlarmState != self.AlarmState.Triggered:
                             self.__logger.info('|=> Alarm has been triggered!')
-                            self.__currAlarmState = self.AlarmState.Triggered
+                            self.__TriggerAlarm()
 
                     elif response == 'resetAttemptAccount':
                         self.__failedEntryAttempts = 0
@@ -168,7 +193,7 @@ class StateManager:
             'expires': time.time() +
                        self.__config.AlarmSettingsConfig.AlarmSetGraceTimeSecs
         }
-        evt = self.TransientStateEntry(
+        evt = self.TransientStateEntry(id=uuid.uuid1().hex,
             TransientState=TransState.TransientState.InAlarmSetGraceTime,
             body=transientStatebody)
         self.__transientStates.append(evt)
@@ -179,9 +204,10 @@ class StateManager:
         self.__currAlarmState = self.AlarmState.Deactivated
         self.__failedEntryAttempts = 0
 
-        evtsToRemove = [evt for evt in self.__transientStates if \
-            evt.TransientState == TransState.TransientState.InAlarmSetGraceTime]
-        print(evtsToRemove)
+        # Remove any 'InAlarmSetGraceTime' transient state events once the
+        # alarm has been deactivated.
+        self.__transientStates = [evt for evt in self.__transientStates if \
+            evt.TransientState != TransState.TransientState.InAlarmSetGraceTime]
 
 
     #  @param self The object pointer.

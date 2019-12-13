@@ -35,7 +35,7 @@ class WorkerThread(threading.Thread):
     #  @param self The object pointer.
     #  @param logger Network port to listen on.
     #  @param config Network port to listen on.
-    def __init__(self, logger, config, deviceManager, eventManager, stateMsg):
+    def __init__(self, logger, config, deviceManager, eventManager, stateMsr):
         threading.Thread.__init__(self)
         self.__logger = logger
         self.__config = config
@@ -43,7 +43,7 @@ class WorkerThread(threading.Thread):
         self.__eventManager = eventManager
         self.__shutdownRequested = False
         self.__shutdownCompleted = False
-        self.__stateMgr = stateMsg
+        self.__stateMgr = stateMsr
 
 
     ## Thread execution function, in this case run the Flask API interface.
