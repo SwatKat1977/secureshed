@@ -61,32 +61,3 @@ class WorkerThread(threading.Thread):
     #  @param self The object pointer.
     def SignalShutdownRequested(self):
         self.__shutdownRequested = True
-
-
-'''
-RelayPin = 23
-
-GPIO.cleanup()
-
-GPIO.setmode(GPIO.BCM)
-
-
-GPIO.setup(RelayPin, GPIO.OUT)
-GPIO.output(RelayPin, GPIO.HIGH)
-print('SETUP relay')
-time.sleep(10)
-
-print('Activating')
-GPIO.output(RelayPin, GPIO.LOW)
-time.sleep(10)
-print('De-activating')
-GPIO.output(RelayPin, GPIO.HIGH)
-
-time.sleep(10)
-print('Activating')
-GPIO.output(RelayPin, GPIO.LOW)
-
-time.sleep(10)
-
-GPIO.cleanup()
-'''
