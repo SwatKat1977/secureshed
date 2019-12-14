@@ -149,6 +149,19 @@ class CentralControllerApp:
                                           self.__deviceMgr.ReceiveEvent)
 
 
+        # =========================================
+        # == Register event : Alarm state change ==
+        # =========================================
+
+        # Register event: Alarm activated.
+        self.__eventManager.RegisterEvent(Evts.EvtType.AlarmActivated,
+                                          self.__deviceMgr.ReceiveEvent)
+
+        # Register event: Alarm activated.
+        self.__eventManager.RegisterEvent(Evts.EvtType.AlarmDeactivated,
+                                          self.__deviceMgr.ReceiveEvent)
+
+
     def __SignalHandler(self, signum, frame):
         #pylint: disable=unused-argument
 
