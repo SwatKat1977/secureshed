@@ -189,10 +189,9 @@ class StateManager:
     def __TriggerAlarm(self):
         self.__currAlarmState = self.AlarmState.Activated
 
-        transientStatebody = {
-            'expires': time.time() +
+        expTimestamp = time.time() + \
                        self.__config.AlarmSettingsConfig.AlarmSetGraceTimeSecs
-        }
+        transientStatebody = { 'expires': expTimestamp }
         evt = self.TransientStateEntry(id=uuid.uuid1().hex,
             TransientState=TransState.TransientState.InAlarmSetGraceTime,
             body=transientStatebody)
