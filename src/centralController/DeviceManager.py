@@ -127,29 +127,49 @@ class DeviceManager:
     def ReceiveEvent(self, eventInst):
         # Event : Activate siren.
         if eventInst.id == Evts.EvtType.ActivateSiren:
-            sirens = [s for s in self.__devices if s.hardware == 'siren']
-
-            for siren in sirens:
-                self.__logger.info("Activating alarm siren '%s'", siren.name)
-                siren.deviceType.ReceiveEvent(eventInst)
+            self.__ProcessActivateSirenEvent(eventInst)
 
         elif eventInst.id == Evts.EvtType.DeactivateSiren:
-            sirens = [s for s in self.__devices if s.hardware == 'siren']
-
-            for siren in sirens:
-                self.__logger.info("Deactivating alarm siren '%s'", siren.name)
-                siren.deviceType.ReceiveEvent(eventInst)
+            self.__ProcessDeactivateSirenEvent(eventInst)
 
         elif eventInst.id == Evts.EvtType.AlarmActivated:
-            self.__logger.info("Received alarm activated event...")
-
-            sensors = [s for s in self.__devices if s.hardware == 'sensor']
-            for sensor in sensors:
-                try:
-                    sensor.deviceType.ReceiveEvent(eventInst)
-                except NotImplementedError:
-                    self.__logger.info("Device '%s' missing ReceiveEvent()",
-                                       sensor.name)
+            self.__ProcessAlarmActivatedEvent(eventInst)
 
         elif eventInst.id == Evts.EvtType.AlarmDeactivated:
-            self.__logger.info("Received alarm deactivated event...")
+            self.__ProcessAlarmDeactivatedEvent(eventInst)
+
+
+    #  @param self The object pointer.
+    def __ProcessActivateSirenEvent(self, eventInst):
+        sirens = [s for s in self.__devices if s.hardware == 'siren']
+
+        for siren in sirens:
+            self.__logger.info("Activating alarm siren '%s'", siren.name)
+            siren.deviceType.ReceiveEvent(eventInst)
+
+
+    #  @param self The object pointer.
+    def __ProcessDeactivateSirenEvent(self, eventInst):
+        sirens = [s for s in self.__devices if s.hardware == 'siren']
+
+        for siren in sirens:
+            self.__logger.info("Deactivating alarm siren '%s'", siren.name)
+            siren.deviceType.ReceiveEvent(eventInst)
+
+
+    #  @param self The object pointer.
+    def __ProcessAlarmActivatedEvent(self, eventInst):
+
+        sensors = [s for s in self.__devices if s.hardware == 'sensor']
+        for sensor in sensors:
+            try:
+                sensor.deviceType.ReceiveEvent(eventInst)
+
+            except NotImplementedError:
+                self.__logger.info("Device '%s' missing ReceiveEvent()",
+                                   sensor.name)
+
+
+    #  @param self The object pointer.
+    def __ProcessAlarmDeactivatedEvent(self, eventInst):
+        self.__logger.info("Received alarm deactivated event: %s", eventInst)
