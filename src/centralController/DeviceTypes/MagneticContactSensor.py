@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 '''
+import time
 from centralController.DeviceTypes.BaseDeviceType import BaseDeviceType
 import centralController.Events as Evts
 from common.Event import Event
@@ -27,6 +28,7 @@ class MagneticContactSensor(BaseDeviceType):
         self.__hardwareIO = hardwareIO
         self.__isTriggered = False
         self.__deviceName = None
+        self.__openGraceTimeout = None
 
 
     ExpectedPinId = 'sensorPin'
@@ -59,6 +61,15 @@ class MagneticContactSensor(BaseDeviceType):
     def CheckDevice(self):
         contactState = self.__hardwareIO.input(self.__ioPin)
 
+        currTime = time.time()
+
+        if self.__openGraceTimeout:
+            if currTime <= self.__openGraceTimeout:
+                self.__isTriggered = False
+                return
+
+            self.__openGraceTimeout = None
+
         if self.__isTriggered != contactState:
             self.__isTriggered = contactState
 
@@ -73,3 +84,9 @@ class MagneticContactSensor(BaseDeviceType):
             }
             evt = Event(Evts.EvtType.SensorDeviceStateChange, evtBody)
             self.__eventMgr.QueueEvent(evt)
+
+
+    def ReceiveEvent(self, eventInst):
+        if eventInst.id == Evts.EvtType.AlarmActivated:
+            self.__logger.info("Device '%s' AlarmActivated", self.__deviceName)
+            self.__openGraceTimeout = eventInst.body['alarmSetGraceExpiry']

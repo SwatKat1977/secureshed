@@ -68,7 +68,7 @@ class DeviceManager:
 
             try:
                 deviceInst = deviceTypes[deviceType](self.__logger, GPIO,
-                                                    self.__eventMgr)
+                                                     self.__eventMgr)
                 newDevice = self.Device(name=name, hardware=hardware,
                                         deviceType=deviceInst, pins=pins)
                 self.__devices.append(newDevice)
@@ -119,6 +119,7 @@ class DeviceManager:
 
     #  @param self The object pointer.
     def CleanupDevices(self):
+        self.__logger.error("Cleaning up hardware devices")
         GPIO.cleanup()
 
 
@@ -132,9 +133,23 @@ class DeviceManager:
                 self.__logger.info("Activating alarm siren '%s'", siren.name)
                 siren.deviceType.ReceiveEvent(eventInst)
 
-        if eventInst.id == Evts.EvtType.DeactivateSiren:
+        elif eventInst.id == Evts.EvtType.DeactivateSiren:
             sirens = [s for s in self.__devices if s.hardware == 'siren']
 
             for siren in sirens:
                 self.__logger.info("Deactivating alarm siren '%s'", siren.name)
                 siren.deviceType.ReceiveEvent(eventInst)
+
+        elif eventInst.id == Evts.EvtType.AlarmActivated:
+            self.__logger.info("Received alarm activated event...")
+
+            sensors = [s for s in self.__devices if s.hardware == 'sensor']
+            for sensor in sensors:
+                try:
+                    sensor.deviceType.ReceiveEvent(eventInst)
+                except NotImplementedError:
+                    self.__logger.info("Device '%s' missing ReceiveEvent()",
+                                       sensor.name)
+
+        elif eventInst.id == Evts.EvtType.AlarmDeactivated:
+            self.__logger.info("Received alarm deactivated event...")

@@ -191,11 +191,15 @@ class StateManager:
 
         expTimestamp = time.time() + \
                        self.__config.AlarmSettingsConfig.AlarmSetGraceTimeSecs
-        transientStatebody = { 'expires': expTimestamp }
+        transientStatebody = {'expires': expTimestamp}
         evt = self.TransientStateEntry(id=uuid.uuid1().hex,
             TransientState=TransState.TransientState.InAlarmSetGraceTime,
             body=transientStatebody)
         self.__transientStates.append(evt)
+
+        alarmSetEvtBody = {'alarmSetGraceExpiry': expTimestamp}
+        activateEvt = Event(Evts.EvtType.AlarmActivated, alarmSetEvtBody)
+        self.__eventMgr.QueueEvent(activateEvt)
 
 
     #  @param self The object pointer.
