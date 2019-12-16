@@ -73,16 +73,8 @@ class StateManager:
         # List of event id's that need to be removed
         idList = []
 
-        # 'InAlarmSetGraceTime' Events have expiry, check them.
-        evts = [evt for evt in self.__transientStates if \
-            evt.TransientState == \
-                TransState.TransientState.InAlarmSetGraceTime]
-        if evts:
-            currTimestamp = time.time()
 
-            for eventEntry in evts:
-                if currTimestamp > eventEntry.body['expires']:
-                    idList.append(eventEntry.id)
+        ## Transitory events go here....
 
         # Final stage is to remove all any of the transactions that have been
         # marked for removal.
@@ -189,7 +181,8 @@ class StateManager:
     def __TriggerAlarm(self):
         self.__currAlarmState = self.AlarmState.Activated
 
-        expTimestamp = time.time() + \
+        currTime = time.time()
+        expTimestamp = currTime + \
                        self.__config.AlarmSettingsConfig.AlarmSetGraceTimeSecs
         transientStatebody = {'expires': expTimestamp}
         evt = self.TransientStateEntry(id=uuid.uuid1().hex,

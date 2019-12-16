@@ -16,4 +16,4 @@ limitations under the License.
 import enum
 
 class TransientState(enum.Enum):
-    InAlarmSetGraceTime = 0
+    pass
