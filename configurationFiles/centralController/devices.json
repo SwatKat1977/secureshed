@@ -31,6 +31,7 @@
             "hardware": "sensor",
             "deviceType": "MagneticContactSensor",
             "enabled": true,
+            "triggerGracePeriodSecs": 12,
             "pins":
             [
                 {

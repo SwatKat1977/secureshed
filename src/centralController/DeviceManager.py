@@ -28,7 +28,8 @@ except ModuleNotFoundError:
 class DeviceManager:
     __slots__ = ['__devices', '__deviceTypeMgr', '__eventMgr', '__logger']
 
-    Device = collections.namedtuple('Device', 'name hardware deviceType pins')
+    Device = collections.namedtuple('Device',
+                                    'name hardware deviceType pins triggerGracePeriod')
 
 
     #  @param self The object pointer.
@@ -57,6 +58,13 @@ class DeviceManager:
                                    name)
                 continue
 
+            try:
+                triggerGracePeriod = \
+                    device[DevicesConfigLoader.DeviceElement.TriggerGracePeriodSecs]
+
+            except KeyError:
+                triggerGracePeriod = None
+
             pins = device[DevicesConfigLoader.DeviceElement.Pins]
             hardware = device[DevicesConfigLoader.DeviceElement.Hardware]
             deviceType = device[DevicesConfigLoader.DeviceElement.DeviceType]
@@ -70,7 +78,8 @@ class DeviceManager:
                 deviceInst = deviceTypes[deviceType](self.__logger, GPIO,
                                                      self.__eventMgr)
                 newDevice = self.Device(name=name, hardware=hardware,
-                                        deviceType=deviceInst, pins=pins)
+                                        deviceType=deviceInst, pins=pins,
+                                        triggerGracePeriod=triggerGracePeriod)
                 self.__devices.append(newDevice)
 
             except TypeError:
