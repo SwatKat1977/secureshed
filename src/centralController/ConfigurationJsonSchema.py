@@ -105,15 +105,7 @@ CONFIGURATIONJSONSCHEMA = \
                 }
             },
             "required" : ["networkPort"]
-        },
-        "alarmSettings":
-        {
-            "AlarmSetGraceTimeSecs" :
-            {
-                "type" : "integer",
-                "minimum": 1
-            }
         }
     },
-    "required" : ["alarmSettings", "failedAttemptResponses", "keypadAPI"]
+    "required" : ["failedAttemptResponses", "keypadAPI"]
 }

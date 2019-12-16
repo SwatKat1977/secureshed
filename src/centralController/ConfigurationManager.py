@@ -104,11 +104,7 @@ class ConfigurationManager:
             attemptNo, response = processedResp
             failedAttemptResponses[attemptNo] = response
 
-        alarmSetGraceTimeSecs = configJson[self.JSON_AlarmSettings][self.JSON_AlarmSettingsAlarmSetGraceTimeSecs]
-        alarmSettingsCfg = Configuration.AlarmSettingsCfg(AlarmSetGraceTimeSecs=alarmSetGraceTimeSecs)
-
-        return Configuration(alarmSettingsCfg, keypadAPIConfig,
-                         failedAttemptResponses)
+        return Configuration(keypadAPIConfig, failedAttemptResponses)
 
 
     def __ProcessFailedCodeResponse(self, response):
