@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 '''
+import enum
 import time
 from centralController.DeviceTypes.BaseDeviceType import BaseDeviceType
 import centralController.Events as Evts
@@ -20,6 +21,11 @@ from common.Event import Event
 
 
 class MagneticContactSensor(BaseDeviceType):
+
+    class GracePeriodType(enum.Enum):
+        NoGracePeriod = 0
+        AlarmSet = 1
+        AlarmTrigger = 2
 
     def __init__(self, logger, hardwareIO, eventMgr):
         self.__eventMgr = eventMgr
@@ -30,8 +36,7 @@ class MagneticContactSensor(BaseDeviceType):
         self.__deviceName = None
         self.__graceTimeout = None
         self.__additionalParams = None
-        self.__alarmActive = False
-        self.__inGracePeriod = False
+        self.__gracePeriodType = self.GracePeriodType.NoGracePeriod
 
 
     ExpectedPinId = 'sensorPin'
@@ -103,7 +108,7 @@ class MagneticContactSensor(BaseDeviceType):
                     graceSecs
                 self.__logger.debug("Alarm activated, device '%s' is in " +\
                     "grace period of %s seconds", self.__deviceName, graceSecs)
-                self.__alarmActive = True
+                self.__gracePeriodType = self.GracePeriodType.AlarmSet
 
         elif eventInst.id == Evts.EvtType.AlarmDeactivated:
-            self.__alarmActive = False
+            self.__gracePeriodType = self.GracePeriodType.NoGracePeriod
