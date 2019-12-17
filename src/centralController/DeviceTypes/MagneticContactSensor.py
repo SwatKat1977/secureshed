@@ -72,12 +72,16 @@ class MagneticContactSensor(BaseDeviceType):
 
         currTime = time.time()
 
-        if self.__graceTimeout:
+        # If we are in the alarmed set grace period then the triggered flag is
+        # not changable until the grace period has expired.  Once it has then
+        # revert the grace period type which means if the sensor is in a
+        # triggered state (open) then an alarm event would be raised.
+        if self.__gracePeriodType == self.GracePeriodType.AlarmSet:
             if currTime <= self.__graceTimeout:
                 self.__isTriggered = False
                 return
 
-            self.__graceTimeout = None
+            self.__gracePeriodType = self.GracePeriodType.NoGracePeriod
 
         if self.__isTriggered != contactState:
 
