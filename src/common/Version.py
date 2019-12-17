@@ -15,3 +15,5 @@ limitations under the License.
 '''
 
 VERSION = '0.1.0 (pre-alpha)'
+
+COPYRIGHT = '2019'

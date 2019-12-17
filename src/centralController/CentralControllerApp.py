@@ -28,6 +28,7 @@ import centralController.Events as Evts
 from centralController.StateManager import StateManager
 from centralController.WorkerThread import WorkerThread
 from common.EventManager import EventManager
+from common.Version import COPYRIGHT, VERSION
 
 
 class CentralControllerApp:
@@ -61,8 +62,10 @@ class CentralControllerApp:
 
         signal.signal(signal.SIGINT, self.__SignalHandler)
 
-        self.__logger.info('Configuration file : %s', self.__configFile)
-        self.__logger.info('Database           : %s', self.__db)
+        self.__logger.info('Secure Shed Central Controller V%s', VERSION)
+        self.__logger.info('Copyright %s Secure Shed Project Dev Team',
+                           COPYRIGHT)
+        self.__logger.info('Licensed under the Apache License, Version 2.0')
 
         configManger = ConfigurationManager()
 
@@ -71,6 +74,12 @@ class CentralControllerApp:
             self.__logger.error('Parse failed, last message : %s',
                                 configManger.lastErrorMsg)
             sys.exit(1)
+
+        self.__logger.info('=== Configuration Parameters ===')
+        self.__logger.info('Environment Variables:')
+        self.__logger.info('|=> Configuration file : %s', self.__configFile)
+        self.__logger.info('|=> Database           : %s', self.__db)
+        self.__logger.info('================================')
 
         self.__eventManager = EventManager()
 
