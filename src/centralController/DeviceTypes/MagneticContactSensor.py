@@ -30,6 +30,8 @@ class MagneticContactSensor(BaseDeviceType):
         self.__deviceName = None
         self.__graceTimeout = None
         self.__additionalParams = None
+        self.__alarmActive = False
+        self.__inGracePeriod = False
 
 
     ExpectedPinId = 'sensorPin'
@@ -73,6 +75,11 @@ class MagneticContactSensor(BaseDeviceType):
             self.__graceTimeout = None
 
         if self.__isTriggered != contactState:
+
+            #if self.__alarmActive:
+            #if contactState == :
+            #    pass
+
             self.__isTriggered = contactState
 
             stateMsg = "open" if contactState else "closed"
@@ -96,3 +103,7 @@ class MagneticContactSensor(BaseDeviceType):
                     graceSecs
                 self.__logger.debug("Alarm activated, device '%s' is in " +\
                     "grace period of %s seconds", self.__deviceName, graceSecs)
+                self.__alarmActive = True
+
+        elif eventInst.id == Evts.EvtType.AlarmDeactivated:
+            self.__alarmActive = False
