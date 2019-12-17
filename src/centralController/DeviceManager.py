@@ -96,7 +96,13 @@ class DeviceManager:
 
         for device in self.__devices:
             try:
-                if not device.deviceType.Initialise(device.name, device.pins):
+                additionalParams = {
+                    'triggerGracePeriodSecs': device.triggerGracePeriod
+                }
+                self.__logger.error("additionalParams: %s", additionalParams)
+
+                if not device.deviceType.Initialise(device.name, device.pins,
+                                                    additionalParams):
                     self.__logger.error("Device plug-in '%s' initialisation" +\
                         " failed so cannot be used.", device.name)
                     continue
@@ -107,6 +113,9 @@ class DeviceManager:
                 self.__logger.error("Device name '%s' plug-in does not " +\
                     "implement Initialise() so cannot be used.", device.name)
 
+            except TypeError:
+                self.__logger.error("Device name '%s' plug-in has syntax " +\
+                    "error(s) so cannot be used.", device.name)
 
         self.__devices = devices
 

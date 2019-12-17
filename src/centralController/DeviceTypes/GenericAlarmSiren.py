@@ -31,7 +31,7 @@ class GenericAlarmSiren(BaseDeviceType):
         self.__deviceName = None
 
 
-    def Initialise(self, deviceName, pins):
+    def Initialise(self, deviceName, pins, additionalParams):
         self.__deviceName = deviceName
 
         pinPrefix = 'GPIO'

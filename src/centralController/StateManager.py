@@ -73,7 +73,6 @@ class StateManager:
         # List of event id's that need to be removed
         idList = []
 
-
         ## Transitory events go here....
 
         # Final stage is to remove all any of the transactions that have been
@@ -181,16 +180,7 @@ class StateManager:
     def __TriggerAlarm(self):
         self.__currAlarmState = self.AlarmState.Activated
 
-        currTime = time.time()
-        expTimestamp = currTime + \
-                       self.__config.AlarmSettingsConfig.AlarmSetGraceTimeSecs
-        transientStatebody = {'expires': expTimestamp}
-        evt = self.TransientStateEntry(id=uuid.uuid1().hex,
-            TransientState=TransState.TransientState.InAlarmSetGraceTime,
-            body=transientStatebody)
-        self.__transientStates.append(evt)
-
-        alarmSetEvtBody = {'alarmSetGraceExpiry': expTimestamp}
+        alarmSetEvtBody = {'activationTimestamp': time.time()}
         activateEvt = Event(Evts.EvtType.AlarmActivated, alarmSetEvtBody)
         self.__eventMgr.QueueEvent(activateEvt)
 

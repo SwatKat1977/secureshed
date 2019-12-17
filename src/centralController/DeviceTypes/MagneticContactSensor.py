@@ -28,14 +28,16 @@ class MagneticContactSensor(BaseDeviceType):
         self.__hardwareIO = hardwareIO
         self.__isTriggered = False
         self.__deviceName = None
-        self.__openGraceTimeout = None
+        self.__graceTimeout = None
+        self.__additionalParams = None
 
 
     ExpectedPinId = 'sensorPin'
 
 
-    def Initialise(self, deviceName, pins):
+    def Initialise(self, deviceName, pins, additionalParams):
         self.__deviceName = deviceName
+        self.__additionalParams = additionalParams
 
         pinPrefix = 'GPIO'
 
@@ -63,12 +65,12 @@ class MagneticContactSensor(BaseDeviceType):
 
         currTime = time.time()
 
-        if self.__openGraceTimeout:
-            if currTime <= self.__openGraceTimeout:
+        if self.__graceTimeout:
+            if currTime <= self.__graceTimeout:
                 self.__isTriggered = False
                 return
 
-            self.__openGraceTimeout = None
+            self.__graceTimeout = None
 
         if self.__isTriggered != contactState:
             self.__isTriggered = contactState
@@ -88,5 +90,9 @@ class MagneticContactSensor(BaseDeviceType):
 
     def ReceiveEvent(self, eventInst):
         if eventInst.id == Evts.EvtType.AlarmActivated:
-            self.__logger.info("Device '%s' AlarmActivated", self.__deviceName)
-            self.__openGraceTimeout = eventInst.body['alarmSetGraceExpiry']
+            if 'triggerGracePeriodSecs' in self.__additionalParams:
+                graceSecs = self.__additionalParams['triggerGracePeriodSecs']
+                self.__graceTimeout = eventInst.body['activationTimestamp'] +\
+                    graceSecs
+                self.__logger.debug("Alarm activated, device '%s' is in " +\
+                    "grace period of %s seconds", self.__deviceName, graceSecs)
