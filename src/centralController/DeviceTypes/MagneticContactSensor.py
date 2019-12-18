@@ -21,12 +21,16 @@ from common.Event import Event
 
 
 class MagneticContactSensor(BaseDeviceType):
+    SensorName = 'Magnetic Contact Sensor'
 
     class GracePeriodType(enum.Enum):
-        NoGracePeriod = 0
-        AlarmSet = 1
-        AlarmTrigger = 2
+        AlarmActivate = 0
+        AlarmInactivate = 1
+        AlarmSetPeriod = 2
+        AlarmUnsetPeriod = 3
 
+
+    #  @param self The object pointer.
     def __init__(self, logger, hardwareIO, eventMgr):
         self.__eventMgr = eventMgr
         self.__logger = logger
@@ -36,12 +40,13 @@ class MagneticContactSensor(BaseDeviceType):
         self.__deviceName = None
         self.__graceTimeout = None
         self.__additionalParams = None
-        self.__gracePeriodType = self.GracePeriodType.NoGracePeriod
+        self.__gracePeriodType = self.GracePeriodType.AlarmInactivate
 
 
     ExpectedPinId = 'sensorPin'
 
 
+    #  @param self The object pointer.
     def Initialise(self, deviceName, pins, additionalParams):
         self.__deviceName = deviceName
         self.__additionalParams = additionalParams
@@ -67,52 +72,74 @@ class MagneticContactSensor(BaseDeviceType):
         return True
 
 
+    #  @param self The object pointer.
     def CheckDevice(self):
         contactState = self.__hardwareIO.input(self.__ioPin)
 
+        transitionedFronSetState = False
         currTime = time.time()
 
         # If we are in the alarmed set grace period then the triggered flag is
         # not changable until the grace period has expired.  Once it has then
         # revert the grace period type which means if the sensor is in a
         # triggered state (open) then an alarm event would be raised.
-        if self.__gracePeriodType == self.GracePeriodType.AlarmSet:
+        if self.__gracePeriodType == self.GracePeriodType.AlarmSetPeriod:
             if currTime <= self.__graceTimeout:
                 self.__isTriggered = False
                 return
 
-            self.__gracePeriodType = self.GracePeriodType.NoGracePeriod
+            self.__gracePeriodType = self.GracePeriodType.AlarmActivate
+            transitionedFronSetState = True
+
+        elif self.__gracePeriodType == self.GracePeriodType.AlarmUnsetPeriod:
+            if currTime <= self.__graceTimeout:
+                self.__isTriggered = False
+                return
+
+            self.__logger.debug("Device '%s' grace period ended...",
+                                self.__deviceName)
+            self.__gracePeriodType = self.GracePeriodType.AlarmActivate
+            transitionedFronSetState = True
 
         if self.__isTriggered != contactState:
+            graceSecs = self.__additionalParams['triggerGracePeriodSecs']
+            if contactState and not transitionedFronSetState and graceSecs and \
+                    self.__gracePeriodType == self.GracePeriodType.AlarmActivate:
+                self.__gracePeriodType = self.GracePeriodType.AlarmUnsetPeriod
+                self.__logger.info("Device '%s' sensor triggered, entered " +\
+                    "grace period of %s seconds", self.__deviceName, graceSecs)
+                self.__graceTimeout = time.time() + graceSecs
 
-            #if self.__alarmActive:
-            #if contactState == :
-            #    pass
+            else:
+                self.__isTriggered = contactState
 
-            self.__isTriggered = contactState
-
-            stateMsg = "open" if contactState else "closed"
-            self.__logger.info("Device '%s' changed state to %s",
-                               self.__deviceName, stateMsg)
-
-            evtBody = {
-                Evts.SensorDeviceBodyItem.DeviceType: 'Magnetic Contact Sensor',
-                Evts.SensorDeviceBodyItem.DeviceName: self.__deviceName,
-                Evts.SensorDeviceBodyItem.State: self.__isTriggered
-            }
-            evt = Event(Evts.EvtType.SensorDeviceStateChange, evtBody)
-            self.__eventMgr.QueueEvent(evt)
+                stateMsg = "open" if contactState else "closed"
+                self.__logger.info("Device '%s' changed state to %s",
+                                   self.__deviceName, stateMsg)
+                self.__GenerateDeviceStateChangeEvt()
 
 
+    #  @param self The object pointer.
     def ReceiveEvent(self, eventInst):
         if eventInst.id == Evts.EvtType.AlarmActivated:
             if 'triggerGracePeriodSecs' in self.__additionalParams:
                 graceSecs = self.__additionalParams['triggerGracePeriodSecs']
                 self.__graceTimeout = eventInst.body['activationTimestamp'] +\
                     graceSecs
-                self.__logger.debug("Alarm activated, device '%s' is in " +\
+                self.__logger.info("Alarm activated, device '%s' is in " +\
                     "grace period of %s seconds", self.__deviceName, graceSecs)
-                self.__gracePeriodType = self.GracePeriodType.AlarmSet
+                self.__gracePeriodType = self.GracePeriodType.AlarmSetPeriod
 
         elif eventInst.id == Evts.EvtType.AlarmDeactivated:
-            self.__gracePeriodType = self.GracePeriodType.NoGracePeriod
+            self.__gracePeriodType = self.GracePeriodType.AlarmInactivate
+
+
+    #  @param self The object pointer.
+    def __GenerateDeviceStateChangeEvt(self):
+        evtBody = {
+            Evts.SensorDeviceBodyItem.DeviceType: self.SensorName,
+            Evts.SensorDeviceBodyItem.DeviceName: self.__deviceName,
+            Evts.SensorDeviceBodyItem.State: self.__isTriggered
+        }
+        evt = Event(Evts.EvtType.SensorDeviceStateChange, evtBody)
+        self.__eventMgr.QueueEvent(evt)
