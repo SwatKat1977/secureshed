@@ -1,9 +1,8 @@
 {
   "keypadAPI" :
   {
-    "NetworkPort" : 5000
+    "networkPort" : 5000
   },
-
   "failedAttemptResponses":
   [
     {

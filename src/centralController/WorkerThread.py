@@ -35,7 +35,7 @@ class WorkerThread(threading.Thread):
     #  @param self The object pointer.
     #  @param logger Network port to listen on.
     #  @param config Network port to listen on.
-    def __init__(self, logger, config, deviceManager, eventManager):
+    def __init__(self, logger, config, deviceManager, eventManager, stateMsr):
         threading.Thread.__init__(self)
         self.__logger = logger
         self.__config = config
@@ -43,6 +43,7 @@ class WorkerThread(threading.Thread):
         self.__eventManager = eventManager
         self.__shutdownRequested = False
         self.__shutdownCompleted = False
+        self.__stateMgr = stateMsr
 
 
     ## Thread execution function, in this case run the Flask API interface.
@@ -51,6 +52,7 @@ class WorkerThread(threading.Thread):
         self.__logger.info('starting IO processing thread')
 
         while not self.__shutdownRequested:
+            self.__stateMgr.UpdateTransitoryEvents()
             self.__deviceManager.CheckHardwareDevices()
             self.__eventManager.ProcessNextEvent()
             time.sleep(0.5)
@@ -61,32 +63,3 @@ class WorkerThread(threading.Thread):
     #  @param self The object pointer.
     def SignalShutdownRequested(self):
         self.__shutdownRequested = True
-
-
-'''
-RelayPin = 23
-
-GPIO.cleanup()
-
-GPIO.setmode(GPIO.BCM)
-
-
-GPIO.setup(RelayPin, GPIO.OUT)
-GPIO.output(RelayPin, GPIO.HIGH)
-print('SETUP relay')
-time.sleep(10)
-
-print('Activating')
-GPIO.output(RelayPin, GPIO.LOW)
-time.sleep(10)
-print('De-activating')
-GPIO.output(RelayPin, GPIO.HIGH)
-
-time.sleep(10)
-print('Activating')
-GPIO.output(RelayPin, GPIO.LOW)
-
-time.sleep(10)
-
-GPIO.cleanup()
-'''

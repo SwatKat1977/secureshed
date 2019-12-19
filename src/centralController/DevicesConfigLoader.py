@@ -31,6 +31,7 @@ class DevicesConfigLoader:
         Name = 'name'
         Pins = 'pins'
         Enabled = 'enabled'
+        TriggerGracePeriodSecs = 'triggerGracePeriodSecs'
 
     class DevicePinsElement:
         IoPin = 'ioPin'
@@ -109,6 +110,11 @@ class DevicesConfigLoader:
                     {
                         "type": "array",
                         "items": {"$ref": f"#/definitions/{DeviceElement.Pins}"}
+                    },
+                    DeviceElement.TriggerGracePeriodSecs:
+                    {
+                        "type": "integer",
+                        "minimum": 1
                     }
                 },
                 "additionalProperties": False,

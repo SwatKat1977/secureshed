@@ -28,7 +28,8 @@ except ModuleNotFoundError:
 class DeviceManager:
     __slots__ = ['__devices', '__deviceTypeMgr', '__eventMgr', '__logger']
 
-    Device = collections.namedtuple('Device', 'name hardware deviceType pins')
+    Device = collections.namedtuple('Device',
+                                    'name hardware deviceType pins triggerGracePeriod')
 
 
     #  @param self The object pointer.
@@ -57,6 +58,13 @@ class DeviceManager:
                                    name)
                 continue
 
+            try:
+                triggerGracePeriod = \
+                    device[DevicesConfigLoader.DeviceElement.TriggerGracePeriodSecs]
+
+            except KeyError:
+                triggerGracePeriod = None
+
             pins = device[DevicesConfigLoader.DeviceElement.Pins]
             hardware = device[DevicesConfigLoader.DeviceElement.Hardware]
             deviceType = device[DevicesConfigLoader.DeviceElement.DeviceType]
@@ -68,9 +76,10 @@ class DeviceManager:
 
             try:
                 deviceInst = deviceTypes[deviceType](self.__logger, GPIO,
-                                                    self.__eventMgr)
+                                                     self.__eventMgr)
                 newDevice = self.Device(name=name, hardware=hardware,
-                                        deviceType=deviceInst, pins=pins)
+                                        deviceType=deviceInst, pins=pins,
+                                        triggerGracePeriod=triggerGracePeriod)
                 self.__devices.append(newDevice)
 
             except TypeError:
@@ -87,7 +96,13 @@ class DeviceManager:
 
         for device in self.__devices:
             try:
-                if not device.deviceType.Initialise(device.name, device.pins):
+                additionalParams = {
+                    'triggerGracePeriodSecs': device.triggerGracePeriod
+                }
+                self.__logger.error("additionalParams: %s", additionalParams)
+
+                if not device.deviceType.Initialise(device.name, device.pins,
+                                                    additionalParams):
                     self.__logger.error("Device plug-in '%s' initialisation" +\
                         " failed so cannot be used.", device.name)
                     continue
@@ -98,6 +113,9 @@ class DeviceManager:
                 self.__logger.error("Device name '%s' plug-in does not " +\
                     "implement Initialise() so cannot be used.", device.name)
 
+            except TypeError:
+                self.__logger.error("Device name '%s' plug-in has syntax " +\
+                    "error(s) so cannot be used.", device.name)
 
         self.__devices = devices
 
@@ -119,6 +137,7 @@ class DeviceManager:
 
     #  @param self The object pointer.
     def CleanupDevices(self):
+        self.__logger.error("Cleaning up hardware devices")
         GPIO.cleanup()
 
 
@@ -126,15 +145,49 @@ class DeviceManager:
     def ReceiveEvent(self, eventInst):
         # Event : Activate siren.
         if eventInst.id == Evts.EvtType.ActivateSiren:
-            sirens = [s for s in self.__devices if s.hardware == 'siren']
+            self.__ProcessActivateSirenEvent(eventInst)
 
-            for siren in sirens:
-                self.__logger.info("Activating alarm siren '%s'", siren.name)
-                siren.deviceType.ReceiveEvent(eventInst)
+        elif eventInst.id == Evts.EvtType.DeactivateSiren:
+            self.__ProcessDeactivateSirenEvent(eventInst)
 
-        if eventInst.id == Evts.EvtType.DeactivateSiren:
-            sirens = [s for s in self.__devices if s.hardware == 'siren']
+        elif eventInst.id == Evts.EvtType.AlarmActivated:
+            self.__ProcessAlarmActivatedEvent(eventInst)
 
-            for siren in sirens:
-                self.__logger.info("Deactivating alarm siren '%s'", siren.name)
-                siren.deviceType.ReceiveEvent(eventInst)
+        elif eventInst.id == Evts.EvtType.AlarmDeactivated:
+            self.__ProcessAlarmDeactivatedEvent(eventInst)
+
+
+    #  @param self The object pointer.
+    def __ProcessActivateSirenEvent(self, eventInst):
+        sirens = [s for s in self.__devices if s.hardware == 'siren']
+
+        for siren in sirens:
+            self.__logger.info("Activating alarm siren '%s'", siren.name)
+            siren.deviceType.ReceiveEvent(eventInst)
+
+
+    #  @param self The object pointer.
+    def __ProcessDeactivateSirenEvent(self, eventInst):
+        sirens = [s for s in self.__devices if s.hardware == 'siren']
+
+        for siren in sirens:
+            self.__logger.info("Deactivating alarm siren '%s'", siren.name)
+            siren.deviceType.ReceiveEvent(eventInst)
+
+
+    #  @param self The object pointer.
+    def __ProcessAlarmActivatedEvent(self, eventInst):
+
+        sensors = [s for s in self.__devices if s.hardware == 'sensor']
+        for sensor in sensors:
+            try:
+                sensor.deviceType.ReceiveEvent(eventInst)
+
+            except NotImplementedError:
+                self.__logger.info("Device '%s' missing ReceiveEvent()",
+                                   sensor.name)
+
+
+    #  @param self The object pointer.
+    def __ProcessAlarmDeactivatedEvent(self, eventInst):
+        self.__logger.info("Received alarm deactivated event: %s", eventInst)

@@ -13,16 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 '''
+import enum
 
-class BaseDeviceType:
-
-    def Initialise(self, deviceName, pins, additionalParams):
-        raise NotImplementedError
-
-
-    def CheckDevice(self):
-        raise NotImplementedError
-
-
-    def ReceiveEvent(self, eventInst):
-        raise NotImplementedError
+class TransientState(enum.Enum):
+    pass

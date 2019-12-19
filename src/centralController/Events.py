@@ -30,6 +30,11 @@ class EvtType(enum.Enum):
     ActivateSiren = 3001
     DeactivateSiren = 3002
 
+    #------------------------
+    #- Alarm state change events
+    AlarmActivated = 4001
+    AlarmDeactivated = 4002
+
 
 class SensorDeviceBodyItem:
     DeviceType = 'deviceType'
