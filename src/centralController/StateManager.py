@@ -24,6 +24,7 @@ import centralController.TransientState as TransState
 from common.Event import Event
 
 
+## Implementation of an alarm state management class.
 class StateManager:
     __slots__ = ['__config', '__currAlarmState', '__db', '__eventMgr',
                  '__failedEntryAttempts', '__logger', '__transientStates']
@@ -31,9 +32,14 @@ class StateManager:
     TransientStateEntry = collections.namedtuple('TransientStateEntry',
                                                  'id TransientState body')
 
+    ## Alarm state enumeration.
     class AlarmState(enum.Enum):
+        ## Alarm state : alarm is deactivated.
         Deactivated = 0
+
+        ## Alarm state : alarm is activated.
         Activated = 1
+
         Triggered = 2
 
 
@@ -55,6 +61,7 @@ class StateManager:
 
     ## Received events from the keypad.
     #  @param self The object pointer.
+    #  @param eventInst Receieved keypad event.
     def RcvKeypadEvent(self, eventInst):
 
         if eventInst.id == Evts.EvtType.KeypadKeyCodeEntered:
