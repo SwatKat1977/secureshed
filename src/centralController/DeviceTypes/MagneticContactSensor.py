@@ -133,6 +133,7 @@ class MagneticContactSensor(BaseDeviceType):
     ## Recieve events from the event manager, these include the change of the
     #  the alarms state (activate/deactivated etc.).
     #  @param self The object pointer.
+    #  @param eventInst Event instance.
     def ReceiveEvent(self, eventInst):
         if eventInst.id == Evts.EvtType.AlarmActivated:
             if 'triggerGracePeriodSecs' in self.__additionalParams:

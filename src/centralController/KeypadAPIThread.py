@@ -27,13 +27,15 @@ class KeypadApiController:
 
     __slots__ = ['__config', '__db', '__endpoint', '__eventMgr', '__logger']
 
-
     ## KeypadAPIThread class constructor, passing in the network port that the
     #  API will listen to.
     #  @param self The object pointer.
-    #  @param listeningPort Network port to listen on.
+    #  @param logger Logger instance.
+    #  @param eventMgr Event management class instance.
+    #  @param controllerDb Central controller internal database.
+    #  @param config Configuration items.
+    #  @param endpoint REST api endpoint instance.
     def __init__(self, logger, eventMgr, controllerDb, config, endpoint):
-
         self.__config = config
         self.__db = controllerDb
         self.__endpoint = endpoint
