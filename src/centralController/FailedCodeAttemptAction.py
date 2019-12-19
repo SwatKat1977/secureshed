@@ -13,19 +13,21 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 '''
-import sys
-sys.path.append('..')
-import time
-from KeypadAPIThread import KeypadAPIThread
+from enum import Enum
 
 
-### https://stackoverflow.com/questions/23110383/how-to-dynamically-build-a-json-object-with-python
+class FailedCodeAttemptActionType(Enum):
+    disableKeyPad = 'disableKeyPad'
+    triggerAlarm = 'triggerAlarm'
+    resetAttemptAccount = 'resetAttemptAccount'
 
-server = KeypadAPIThread(5000)
-server.start()
+    @classmethod
+    def IsName(cls, name):
+        return name in cls.__members__
 
-#while True:
-#    pass
 
-time.sleep(60)
-server.shutdown()
+ActionTypeParams = {
+    FailedCodeAttemptActionType.disableKeyPad.value:  {'lockTime' : int},
+    FailedCodeAttemptActionType.triggerAlarm.value: {},
+    FailedCodeAttemptActionType.resetAttemptAccount: {}
+}

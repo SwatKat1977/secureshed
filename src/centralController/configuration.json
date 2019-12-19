@@ -1,0 +1,33 @@
+{
+  "keypadAPI" :
+  {
+    "networkPort" : 5000
+  },
+  "failedAttemptResponses":
+  [
+    {
+      "attemptNo" : 3,
+      "actions":
+      [
+        {
+          "actionType" : "disableKeyPad",
+          "parameters" : [{ "key": "lockTime", "value": "3" }]
+        }
+      ]
+    },
+    {
+      "attemptNo" : 5,
+      "actions":
+      [
+        {
+          "actionType" : "triggerAlarm",
+           "parameters" : []
+        },
+        {
+          "actionType" : "resetAttemptAccount",
+           "parameters" : []
+        }
+      ]
+    }
+  ]
+}

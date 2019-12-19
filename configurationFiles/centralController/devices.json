@@ -1,0 +1,44 @@
+{
+    "devices": [
+        {
+            "name": "Internal Alarm Siren",
+            "hardware": "siren",
+            "deviceType": "GenericAlarmSiren",
+            "enabled": true,
+            "pins":
+            [
+                {
+                    "ioPin": "GPIO23",
+                    "identifier": "sirenPin"
+                }
+            ]
+        },
+        {
+            "name": "Side Door sensor",
+            "hardware": "siren",
+            "deviceType": "string'",
+            "enabled": false,
+            "pins":
+            [
+                {
+                    "ioPin": "GPIO18",
+                    "identifier": "sensorPin"
+                }
+            ]
+        },
+        {
+            "name": "Garage door sensor",
+            "hardware": "sensor",
+            "deviceType": "MagneticContactSensor",
+            "enabled": true,
+            "triggerGracePeriodSecs": 12,
+            "pins":
+            [
+                {
+                    "ioPin": "GPIO18",
+                    "identifier": "sensorPin"
+                }
+            ]
+        }
+    ]
+}

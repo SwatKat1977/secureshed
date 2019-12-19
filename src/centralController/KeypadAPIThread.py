@@ -14,70 +14,63 @@ See the License for the specific language governing permissions and
 limitations under the License.
 '''
 import json
-import threading
-from flask import Flask, request, abort
-from werkzeug.serving import make_server
-import jsonschema
+from flask import request
 import APIs.Keypad.JsonSchemas as schemas
-from APIs.Keypad.ReceiveKeyCodeReturnCode import ReceiveKeyCodeReturnCode
+import centralController.Events as Evts
+from common.APIClient.HTTPStatusCode import HTTPStatusCode
+from common.APIClient.MIMEType import MIMEType
+from common.Event import Event
 
 
 ## Implementation of thread that handles API calls to the keypad API.
-class KeypadAPIThread(threading.Thread):
+class KeypadApiController:
 
-    KeypadAPIEndpoint = Flask(__name__)
+    __slots__ = ['__config', '__db', '__endpoint', '__eventMgr', '__logger']
 
 
     ## KeypadAPIThread class constructor, passing in the network port that the
     #  API will listen to.
     #  @param self The object pointer.
     #  @param listeningPort Network port to listen on.
-    def __init__(self, listeningPort):
-        threading.Thread.__init__(self)
-        self.srv = make_server('127.0.0.1', listeningPort,
-            KeypadAPIThread.KeypadAPIEndpoint)
-        KeypadAPIThread.KeypadAPIEndpoint.debug = True
-        self.ctx = KeypadAPIThread.KeypadAPIEndpoint.app_context()
-        self.ctx.push()
+    def __init__(self, logger, eventMgr, controllerDb, config, endpoint):
 
+        self.__config = config
+        self.__db = controllerDb
+        self.__endpoint = endpoint
+        self.__logger = logger
+        self.__eventMgr = eventMgr
 
-    ## Thread execution function, in this case run the Flask API interface.
-    #  @param self The object pointer.
-    def run(self):
-        self.srv.serve_forever()
-
-
-    ## Thread shutdown function to stop the keypad API endpoint interface.
-    #  @param self The object pointer.
-    def shutdown(self):
-        self.srv.shutdown()
+        # Add route : /receiveKeyCode
+        self.__endpoint.add_url_rule('/receiveKeyCode', methods=['POST'],
+                                     view_func=self.__ReceiveKeyCode)
 
 
     ## API route : receiveKeyCode
     #  Recieve a key code from the keypad.  This is for unlocking/disabling the
     #  alarm system.
     #  Return codes:
-    #  * 200 (OK) - code accepted, trip alarm, disable keypad.
+    #  * 200 (OK) - code accepted, rejected or refused.
     #  * 400 (Bad Request) - Missing or invalid json body or validation failed.
     #  * 401 (Unauthenticated) - Missing or invalid authentication key.
-    @KeypadAPIEndpoint.route('/receiveKeyCode',methods = ['POST'])
-    def ReceiveKeyCode():
+    def __ReceiveKeyCode(self):
 
         # Check for that the message body ia of type application/json and that
         # there is one, if not report a 400 error status with a human-readable.
         body = request.get_json()
-        if body == None:
+        if not body:
             errMsg = 'Missing/invalid json body'
-            response = KeypadAPIThread.KeypadAPIEndpoint.response_class(
-                response=errMsg, status=400, mimetype='text')
+            response = self.__endpoint.response_class(
+                response=errMsg, status=HTTPStatusCode.BadRequest,
+                mimetype=MIMEType.Text)
             return response
 
         # Verify that an authorisation key exists in the requet header, if not
-        # then return a 401 error with a human-readable reasoning. 
+        # then return a 401 error with a human-readable reasoning.
         if schemas.receiveKeyCodeHeader.AuthKey not in request.headers:
             errMsg = 'Authorisation key is missing'
-            response = KeypadAPIThread.KeypadAPIEndpoint.response_class(
-                response=errMsg, status=401, mimetype='text')
+            response = self.__endpoint.response_class(
+                response=errMsg, status=HTTPStatusCode.Unauthenticated,
+                mimetype=MIMEType.Text)
             return response
 
         authorisationKey = request.headers[schemas.receiveKeyCodeHeader.AuthKey]
@@ -87,47 +80,28 @@ class KeypadAPIThread(threading.Thread):
         # code of 401 (Unauthenticated) is returned.
         if authorisationKey != 'authKey':
             errMsg = 'Authorisation key is invalid'
-            response = KeypadAPIThread.KeypadAPIEndpoint.response_class(
-                response=errMsg, status=401, mimetype='text')
+            response = self.__endpoint.response_class(
+                response=errMsg, status=HTTPStatusCode.Forbidden,
+                mimetype=MIMEType.Text)
             return response
 
-        # Validate that the json body conforms to the expected schema.
-        # If the message isn't valid then a 400 error should be generated.        
-        try:
-            jsonschema.validate(instance = body,
-                schema = schemas.ReceiveKeyCodeJsonSchema)
+        evt = Event(Evts.EvtType.KeypadKeyCodeEntered, body)
+        self.__eventMgr.QueueEvent(evt)
 
-        except Exception as ex:
-            errMsg = 'Message body validation failed.'
-            response = KeypadAPIThread.KeypadAPIEndpoint.response_class(
-                response=errMsg, status=400, mimetype='text')
-            return response
-
-        keySeq = body[schemas.receiveKeyCodeBody.KeySeq]
-        KeypadAPIThread.KeypadAPIEndpoint.logger.info(f"keySequence : {keySeq}")
-
-        actions = \
-        {
-            schemas.receiveKeyCodeResponseAction.DisableKeypad : 30,
-            schemas.receiveKeyCodeResponseAction.AlarmUnlocked : None,
-        }
-        responseMsg = KeypadAPIThread.__GenerateReceiveKeyCodeResponse(
-            ReceiveKeyCodeReturnCode.KeycodeRefused.value, actions)
-
-        return KeypadAPIThread.KeypadAPIEndpoint.response_class(
-                response = responseMsg, status = 200,
-                mimetype = 'application/json')
+        return self.__endpoint.response_class(response='Ok',
+                                              status=HTTPStatusCode.OK,
+                                              mimetype=MIMEType.Text)
 
 
     ## Generate a receive key code response message.
     #  @param self The object pointer.
     #  @param returnCode The return code for the response.
     #  @param actions List of actions to do with the response.
-    #  @return Returns a JSON string with return code and actions. 
-    def __GenerateReceiveKeyCodeResponse(returnCode, actions):
+    #  @return Returns a JSON string with return code and actions.
+    def __GenerateReceiveKeyCodeResponse(self, returnCode, actions):
         responseJson = \
         {
             schemas.receiveKeyCodeResponse.ReturnCode : returnCode,
-            schemas.receiveKeyCodeResponse.Actions : actions    
+            schemas.receiveKeyCodeResponse.Actions : actions
         }
         return json.dumps(responseJson)

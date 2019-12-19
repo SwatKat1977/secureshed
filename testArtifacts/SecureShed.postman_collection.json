@@ -1,0 +1,56 @@
+{
+	"info": {
+		"_postman_id": "926e8da6-c1d0-4ee9-8cc8-32fa56f22319",
+		"name": "Secure Shed",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Central Controller",
+			"item": [
+				{
+					"name": "Receive Key Code",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "authorisationKey",
+								"value": "authKey",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"keySequence\" : \"124\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:2020/receiveKeyCode",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "2020",
+							"path": [
+								"receiveKeyCode"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		}
+	],
+	"protocolProfileBehavior": {}
+}
