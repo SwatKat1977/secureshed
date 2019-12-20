@@ -156,7 +156,14 @@ class GPIO:
     ## RPi.GPIO numbering systems : Board numbers.
     BOARD = 102
 
+    #########################
+    # -- RPi.GPIO pin mode --
+    #########################
+
+    ## RPi.GPIO pin mode : Input (e.g. senors).
     IN = 201
+
+    ## RPi.GPIO pin mode : Output (e.g. relay).
     OUT = 202
 
     ##########################
