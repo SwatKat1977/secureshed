@@ -200,6 +200,7 @@ class KeypadPanel(wx.Panel):
 
 
     #  @param self The object pointer.
+    #  @param actions Actions when keycode is incorrect.
     def __HandleKeycodeIncorrectActions(self, actions):
         print('[DEBUG[ Incorrect keycode event..')
 
@@ -220,7 +221,7 @@ class KeypadPanel(wx.Panel):
     #  reverting all of the changes made during disabling of it.
     #  @param self The object pointer.
     #  @param unused Required parameter for wxTimer but not used.
-    def __keypadDisabledTimedOut(self, unused = None):
+    def __keypadDisabledTimedOut(self, unused=None):
         self.__keypadDisableTimer.Stop()
 
         for button, defaultValues in self.__defaultButtonDetails.items():
@@ -240,4 +241,3 @@ class KeypadPanel(wx.Panel):
             button.SetLabel('')
 
         self.__keypadDisableTimer.Start(timeoutSecs * 1000)
-
