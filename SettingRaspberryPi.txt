@@ -1,0 +1,27 @@
+##############
+# Basic configuration
+##############
+
+* Change hostname to centralcontroller bt going into raspi-config by typing
+'sudo raspi-config', selecting 'Network Options' and then 'Hostname'.
+
+* Update the apt-get packages by typeing 'sudo apt-get update'.
+
+
+##############
+# Install apt-get packages
+##############
+
+* Install the following packages:
+git : type 'sudo apt-get install git'
+python pip : type 'sudo apt-get install python3-pip'
+python Raspberry Pi IO library : type 'sudo apt-get install python3-rpi.gpio'
+sqlite3 : type 'sudo apt-get install sqlite3'
+
+
+##############
+# Install python 3 libraries
+##############
+
+flask : type 'sudo pip3 install flask'
+flask : type 'sudo pip3 install jsonschema'
