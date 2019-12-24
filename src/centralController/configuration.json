@@ -1,4 +1,8 @@
 {
+  "general":
+  {
+    "devicesConfigFile": "../configurationFiles/centralController/devices.json"
+  },
   "keypadAPI" :
   {
     "networkPort" : 5000
