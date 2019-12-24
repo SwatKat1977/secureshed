@@ -1,0 +1,1 @@
+ls -A1 *.py | xargs pylint
