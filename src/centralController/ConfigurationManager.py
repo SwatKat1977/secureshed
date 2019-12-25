@@ -98,9 +98,6 @@ class ConfigurationManager:
         keypadApiNetworkPort = configJson[self.JSON_keypadAPI][self.JSON_keypadAPI_Port]
         keypadAPIConfig = Configuration.KeypadAPICfg(keypadApiNetworkPort)
 
-        # JSON_GeneralSettings
-        #    JSON_GeneralSettings_DevicesConfigFile = 'devicesConfigFile'
-
         generalSetting = configJson[self.JSON_GeneralSettings]
         devicesCfgFile = generalSetting[self.JSON_GeneralSettings_DevicesConfigFile]
         generalSettingsCfg = Configuration.GeneralSettings(devicesCfgFile)
