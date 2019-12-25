@@ -109,7 +109,7 @@ class CentralControllerApp:
             sys.exit(1)
 
         self.__deviceMgr = DeviceManager(self.__logger, deviceTypeMgr,
-                                      self.__eventManager)
+                                         self.__eventManager)
         devLst = self.__currDevices[devicesConfigLoader.JsonTopElement.Devices]
         self.__deviceMgr.Load(devLst)
         self.__deviceMgr.InitialiseHardware()

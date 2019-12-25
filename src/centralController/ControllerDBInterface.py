@@ -48,7 +48,7 @@ class ControllerDBInterface:
         try:
             dburi = 'file:{}?mode=rw'.format(pathname2url(dbName))
             self.__dbObj = sqlite3.connect(dburi, uri=True,
-                check_same_thread=False)
+                                           check_same_thread=False)
 
         except sqlite3.OperationalError:
             self.__lastErrMsg = f'Unable to connect to database {dbName}'
@@ -57,7 +57,7 @@ class ControllerDBInterface:
         self.__dbName = dbName
         self.__isConnected = True
         self.__cursor = self.__dbObj.cursor()
-        
+
         return True
 
 
@@ -67,7 +67,7 @@ class ControllerDBInterface:
 
         if not details:
             return None
-        
+
         cols, vals = details
         return dict(zip(cols, vals))
 
@@ -90,7 +90,7 @@ class ControllerDBInterface:
         # flag is set to true, otherwise get all of them.
         res = self.__cursor.fetchone() if fetchOnlyOne == True \
             else self.__cursor.fetchall()
- 
+
         return None if res == None else (columnNames, res)
 
 
