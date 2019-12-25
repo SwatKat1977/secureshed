@@ -45,6 +45,7 @@ class Configuration:
     ## Default constructor for Configuration class.
     #  @param self The object pointer.
     #  @param keypadAPIConfig Configuration items for keypad api.
+    #  @param generalSettings General settings configuration items.
     #  @param failedAttemptResponses Responses when an attempt fails.
     def __init__(self, keypadAPIConfig, generalSettings, failedAttemptResponses):
         if not isinstance(keypadAPIConfig, self.KeypadAPICfg):
