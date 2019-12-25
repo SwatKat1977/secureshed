@@ -21,20 +21,21 @@ class ControllerDBInterface:
 
     ## Property getter : Database name
     @property
-    def DatabaseName(self):
+    def databaseName(self):
         return self.__dbName
 
     ## Property getter : Is connected to database flag
     @property
-    def IsConnected(self):
+    def isConnected(self):
         return self.__isConnected
 
     ## Property getter : Last error message
     @property
-    def LastErrorMsg(self):
+    def lastErrorMsg(self):
         return self.__lastErrMsg
 
 
+    #  @param self The object pointer.
     def __init__(self):
         self.__dbName = ''
         self.__isConnected = ''
@@ -43,6 +44,7 @@ class ControllerDBInterface:
         self.__cursor = ''
 
 
+    #  @param self The object pointer.
     def Connect(self, dbName):
 
         try:
@@ -61,6 +63,7 @@ class ControllerDBInterface:
         return True
 
 
+    #  @param self The object pointer.
     def GetKeycodeDetails(self, keycode):
         query = "SELECT IsMasterKey FROM KeyCodes WHERE KeyCode=?"
         details = self.__ExecuteWithReturn(query, (keycode,), True)
@@ -72,29 +75,34 @@ class ControllerDBInterface:
         return dict(zip(cols, vals))
 
 
+    #  @param self The object pointer.
     def __ExecuteWithoutReturn(self, query, values=(), commit=True):
-        if self.__ExecuteSQL(query, values) == False:
+        if not self.__ExecuteSql(query, values):
             return False
 
-        if commit == True:
+        if commit:
             self.__dbObj.commit()
 
+        return True
 
+
+    #  @param self The object pointer.
     def __ExecuteWithReturn(self, query, values=(), fetchOnlyOne=False):
-        if self.__ExecuteSQL(query, values) == False:
+        if not self.__ExecuteSql(query, values):
             return None
 
         columnNames = list(map(lambda x: x[0], self.__cursor.description))
 
         # Get the results from the query, either just one if the fetchOnlyOne
         # flag is set to true, otherwise get all of them.
-        res = self.__cursor.fetchone() if fetchOnlyOne == True \
+        res = self.__cursor.fetchone() if fetchOnlyOne \
             else self.__cursor.fetchall()
 
-        return None if res == None else (columnNames, res)
+        return None if not res else (columnNames, res)
 
 
-    def __ExecuteSQL(self, query, values):
+    #  @param self The object pointer.
+    def __ExecuteSql(self, query, values):
         try:
             self.__cursor.execute(query, values)
 
