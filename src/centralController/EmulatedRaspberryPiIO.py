@@ -19,10 +19,15 @@ import json
 import jsonschema
 
 
+## Simulation of the Raspberry GPIO package.
 class GPIO:
 
+    ## Enumerated of the state of a pin.
     class PinState(enum.Enum):
+        ## Pin is in low state.
         Low = 0
+
+        ## Pin is in high state.
         High = 1
 
     # |============================|
@@ -72,6 +77,7 @@ class GPIO:
     ## IO pin state constant : Low.
     IOPinStateElement_Low = 'low'
 
+    ## Definition of the pinout json file's schema to validate against.
     PinOutJsonFileSchema = {
         "$schema": "http://json-schema.org/draft-07/schema#",
         "definitions":
@@ -121,6 +127,7 @@ class GPIO:
         "additionalProperties": False
     }
 
+    ## The current simulated state of the IO pins.
     CurrentPinOutStates = {
         PinEntryGPIO05Element : PinState.High,
         PinEntryGPIO06Element : PinState.High,
@@ -132,8 +139,10 @@ class GPIO:
         PinEntryGPIO25Element : PinState.High
     }
 
+    ## Last MD5 for the pinout file.
     PinOutFileHash = None
 
+    ## File and location of the pin out file.
     PinOutFile = 'centralController/pinOutFile.json'
 
 
@@ -147,7 +156,14 @@ class GPIO:
     ## RPi.GPIO numbering systems : Board numbers.
     BOARD = 102
 
+    #########################
+    # -- RPi.GPIO pin mode --
+    #########################
+
+    ## RPi.GPIO pin mode : Input (e.g. senors).
     IN = 201
+
+    ## RPi.GPIO pin mode : Output (e.g. relay).
     OUT = 202
 
     ##########################
@@ -191,6 +207,9 @@ class GPIO:
         pass
 
 
+    ## Simulation of the Raspberry Pi GPIO input() function for testing
+    #  purposes.
+    #  @param pin Pin to check the state of.
     @staticmethod
     def input(pin):
         # pylint: disable=C0103
@@ -198,6 +217,8 @@ class GPIO:
         return GPIO.CurrentPinOutStates[pinId].value
 
 
+    ## Simulation of the Raspberry Pi GPIO output() function for testing
+    #  purposes.
     @staticmethod
     def output(pin, state):
         # pylint: disable=C0103
@@ -207,6 +228,10 @@ class GPIO:
         GPIO.CurrentPinOutStates[pinId] = newValue
 
 
+    ## Generate a MD5 hash of the pinout state file, this is to allow the file
+    #  to be checked to see if has changed between last checks.
+    #  of the Raspberry Pi GPIO output() function for testing
+    #  @returns MD5 hash if the file was hashed correctly, otherwise None.
     @staticmethod
     def HashPinoutFile(pinoutFile):
         try:
@@ -214,10 +239,16 @@ class GPIO:
                 fileContents = fileHandle.read()
                 return hashlib.md5(fileContents).hexdigest()
 
-        except IOError as ex:
+        except IOError:
             return None
 
 
+    ## Read the json contents of the simulated pinout file and return it along
+    #  with an error status (if there is one).
+    # @returns Returns a tuple of (status, pinoutFileContents), If the read was
+    # successful status is an empty string and file contents is the contents of
+    # the pinout file in json format.  If read fails then the status is a
+    # human-readable string with the error status and file contents is None.
     @staticmethod
     def ReadPinoutFile():
         try:
@@ -247,6 +278,9 @@ class GPIO:
         return ('', readJson)
 
 
+    ## Update the simulated states of the Raspberry Pi GPIO pins only if the
+    #  MD5 hash of the file has changed.
+    #  @param logger Instance of the logger object.
     @staticmethod
     def UpdateFromPinOutFile(logger):
         newHash = GPIO.HashPinoutFile(GPIO.PinOutFile)

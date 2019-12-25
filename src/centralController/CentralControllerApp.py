@@ -101,7 +101,7 @@ class CentralControllerApp:
         # Load the devices configuration file which contains the devices
         # attached to the alarm.  The devices are matched to the device types
         # loaded above.
-        devicesCfg = '../configurationFiles/centralController/devices.json'
+        devicesCfg = configuration.generalSettings.devicesConfigFile
         devicesConfigLoader = DevicesConfigLoader()
         self.__currDevices = devicesConfigLoader.ReadDevicesConfigFile(devicesCfg)
         if not self.__currDevices:
@@ -109,7 +109,7 @@ class CentralControllerApp:
             sys.exit(1)
 
         self.__deviceMgr = DeviceManager(self.__logger, deviceTypeMgr,
-                                      self.__eventManager)
+                                         self.__eventManager)
         devLst = self.__currDevices[devicesConfigLoader.JsonTopElement.Devices]
         self.__deviceMgr.Load(devLst)
         self.__deviceMgr.InitialiseHardware()

@@ -34,7 +34,10 @@ class WorkerThread(threading.Thread):
     ## WorkerThread class constructor.
     #  @param self The object pointer.
     #  @param logger Network port to listen on.
-    #  @param config Network port to listen on.
+    #  @param config Configuration items.
+    #  @param deviceManager Device hardware management class.
+    #  @param eventManager Event management class instance.
+    #  @param stateMsr Statement management class instance.
     def __init__(self, logger, config, deviceManager, eventManager, stateMsr):
         threading.Thread.__init__(self)
         self.__logger = logger

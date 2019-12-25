@@ -99,7 +99,6 @@ class DeviceManager:
                 additionalParams = {
                     'triggerGracePeriodSecs': device.triggerGracePeriod
                 }
-                self.__logger.error("additionalParams: %s", additionalParams)
 
                 if not device.deviceType.Initialise(device.name, device.pins,
                                                     additionalParams):

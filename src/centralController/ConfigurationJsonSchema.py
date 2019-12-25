@@ -105,7 +105,20 @@ CONFIGURATIONJSONSCHEMA = \
                 }
             },
             "required" : ["networkPort"]
+        },
+        "generalSettings":
+        {
+            "additionalProperties" : False,
+            "properties":
+            {
+                "additionalProperties" : False,
+                "devicesConfigFile":
+                {
+                    "type" : "string"
+                }
+            },
+            "required" : ["devicesConfigFile"]
         }
     },
-    "required" : ["failedAttemptResponses", "keypadAPI"]
+    "required" : ["failedAttemptResponses", "keypadAPI", "generalSettings"]
 }

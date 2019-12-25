@@ -28,12 +28,18 @@ class ConfigurationManager:
     # -----------------------------
     JSON_AlarmSettings = 'alarmSettings'
     JSON_keypadAPI = 'keypadAPI'
+    JSON_GeneralSettings = 'generalSettings'
     JSON_failedAttemptResponses = 'failedAttemptResponses'
 
     # -----------------------------
     # -- Keypad Api sub-elements --
     # -----------------------------
     JSON_keypadAPI_Port = 'networkPort'
+
+    # -----------------------------
+    # -- General settings sub-elements --
+    # -----------------------------
+    JSON_GeneralSettings_DevicesConfigFile = 'devicesConfigFile'
 
     # ------------------------------------------
     # -- Failed attempt tesponse sub-elements --
@@ -92,6 +98,10 @@ class ConfigurationManager:
         keypadApiNetworkPort = configJson[self.JSON_keypadAPI][self.JSON_keypadAPI_Port]
         keypadAPIConfig = Configuration.KeypadAPICfg(keypadApiNetworkPort)
 
+        generalSetting = configJson[self.JSON_GeneralSettings]
+        devicesCfgFile = generalSetting[self.JSON_GeneralSettings_DevicesConfigFile]
+        generalSettingsCfg = Configuration.GeneralSettings(devicesCfgFile)
+
         failedAttemptResponses = {}
 
         for resp in configJson[self.JSON_failedAttemptResponses]:
@@ -104,7 +114,8 @@ class ConfigurationManager:
             attemptNo, response = processedResp
             failedAttemptResponses[attemptNo] = response
 
-        return Configuration(keypadAPIConfig, failedAttemptResponses)
+        return Configuration(keypadAPIConfig, generalSettingsCfg,
+                             failedAttemptResponses)
 
 
     def __ProcessFailedCodeResponse(self, response):
