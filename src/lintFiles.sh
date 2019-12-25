@@ -1,1 +1,2 @@
-ls -A1 *.py | xargs pylint
+#!/bin/bash
+ls -A1 $1/*.py | xargs pylint -v
