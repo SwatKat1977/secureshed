@@ -50,11 +50,11 @@ class KeypadPanel(wx.Panel):
 
         # Key sequence pressed.
         self.__keySequence = ''
-        
+
         # Create sequence timer object and bind the timeout event.
         self.__sequenceTimer = wx.Timer(self)
         self.Bind(wx.EVT_TIMER, self.__TimeoutEvent, self.__sequenceTimer)
- 
+
         self.__CreateUI()
 
 
@@ -63,14 +63,13 @@ class KeypadPanel(wx.Panel):
     def __CreateUI(self):
         # Sizer that all of the buttons will be place into.
         main_sizer = wx.BoxSizer(wx.VERTICAL)
-        
         font = wx.Font(12, wx.MODERN, wx.NORMAL, wx.NORMAL)
 
         self.__buttonsList = {}
         self.__defaultButtonDetails = {}
 
         # Array with the order and labels for the buttons.  There are two
-        # special buttons: 
+        # special buttons:
         # * Go - enters the passcode that has typed in.
         # * Reset - Resets the sequence entered.
         buttons = [['7', '8', '9'],
@@ -122,10 +121,11 @@ class KeypadPanel(wx.Panel):
 
         self.__keySequence = self.__keySequence + pressedKeyValue
 
- 
+
     ## Reset the keypad, which involves clearing key sequence.
      #  @param self The object pointer.
-    def __ResetKeypad(self, event = None):
+     #  @param event Unused.
+    def __ResetKeypad(self, event=None):
         self.__keySequence = ''
 
 
@@ -185,7 +185,7 @@ class KeypadPanel(wx.Panel):
     #  pressed.
     #  @param self The object pointer.
     #  @param event Unused.
-    def __TimeoutEvent(self, event = None):
+    def __TimeoutEvent(self, event=None):
         self.__ResetKeypad()
         self.__sequenceTimer.Stop()
 
@@ -193,11 +193,13 @@ class KeypadPanel(wx.Panel):
     ## Currently we don't do anything with this action except write a debug
     #  message.
     #  @param self The object pointer.
+    #  @param actions Actions when refused.
     def __HandleKeycodeRefusedActions(self, actions):
         print('[DEBUG] The keycode was refused!')
 
 
     #  @param self The object pointer.
+    #  @param actions Actions when keycode is incorrect.
     def __HandleKeycodeIncorrectActions(self, actions):
         print('[DEBUG[ Incorrect keycode event..')
 
@@ -209,6 +211,7 @@ class KeypadPanel(wx.Panel):
 
     ## STUB
     #  @param self The object pointer.
+    #  @param actions Unused.
     def __HandleKeycodeAcceptedActions(self, actions):
         print('KeycodeAccepted')
 
@@ -217,7 +220,7 @@ class KeypadPanel(wx.Panel):
     #  reverting all of the changes made during disabling of it.
     #  @param self The object pointer.
     #  @param unused Required parameter for wxTimer but not used.
-    def __keypadDisabledTimedOut(self, unused = None):
+    def __keypadDisabledTimedOut(self, unused=None):
         self.__keypadDisableTimer.Stop()
 
         for button, defaultValues in self.__defaultButtonDetails.items():
@@ -237,4 +240,3 @@ class KeypadPanel(wx.Panel):
             button.SetLabel('')
 
         self.__keypadDisableTimer.Start(timeoutSecs * 1000)
-

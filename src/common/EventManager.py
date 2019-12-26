@@ -72,7 +72,7 @@ class EventManager:
     ## Process the next event, if any exists.  An error will be generated if
     #  the event ID is invalid (should never happen).
     #  @param self The object pointer.
-    #  @returnsReturn codes:
+    #  @returns Return codes:
     #    EventManagerStatusCode.Success
     #    EventManagerStatusCode.InvalidEventID
     def ProcessNextEvent(self):

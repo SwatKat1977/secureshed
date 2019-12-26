@@ -32,8 +32,8 @@ class Event:
 
     ## Event default constructor.
     #  @param self The object pointer.
-    #  @param eventID <Description go here>.
-    #  @param msgBody <Description go here>.
+    #  @param eventId Id of event.
+    #  @param msgBody Optional message body for event.
     def __init__(self, eventId, msgBody=None):
         self._eventId = eventId
         self._msgBody = msgBody

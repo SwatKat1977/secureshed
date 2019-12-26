@@ -22,6 +22,8 @@ from centralController.CentralControllerApp import CentralControllerApp
 ## Flask startup function.
 #  @param test_config Unused.
 def create_app(test_config=None):
+    # pylint: disable=W0613,E1101,C0103
+
     app = Flask(__name__)
 
     if not os.getenv('CENCON_CONFIG'):
