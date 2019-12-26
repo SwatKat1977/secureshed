@@ -24,7 +24,6 @@ from common.Event import Event
 
 ## Implementation of thread that handles API calls to the keypad API.
 class KeypadApiController:
-
     __slots__ = ['__config', '__db', '__endpoint', '__eventMgr', '__logger']
 
     ## KeypadAPIThread class constructor, passing in the network port that the

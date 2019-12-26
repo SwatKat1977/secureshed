@@ -63,7 +63,6 @@ class KeypadPanel(wx.Panel):
     def __CreateUI(self):
         # Sizer that all of the buttons will be place into.
         main_sizer = wx.BoxSizer(wx.VERTICAL)
-
         font = wx.Font(12, wx.MODERN, wx.NORMAL, wx.NORMAL)
 
         self.__buttonsList = {}
