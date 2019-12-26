@@ -20,8 +20,7 @@ from ControlPanelFrame import ControlPanelFrame
 
 
 if __name__ == '__main__':
-    app = wx.App(False)
+    APP = wx.App(False)
 
-
-    frame = ControlPanelFrame()
-    app.MainLoop()
+    FRAME = ControlPanelFrame()
+    APP.MainLoop()
