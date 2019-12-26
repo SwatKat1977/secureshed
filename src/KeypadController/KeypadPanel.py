@@ -22,7 +22,6 @@ import APIs.Keypad.JsonSchemas as JsonSchemas
 from APIs.Keypad.ReceiveKeyCodeReturnCode import ReceiveKeyCodeReturnCode
 
 
-
 ## Panel that implements a numbered keypad.
 class KeypadPanel(wx.Panel):
 
