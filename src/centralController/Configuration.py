@@ -56,4 +56,3 @@ class Configuration:
         self.__failedAttemptResponses = failedAttemptResponses
 
         self.__generalSettings = generalSettings
-
