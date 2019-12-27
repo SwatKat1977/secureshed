@@ -37,5 +37,5 @@ CONFIGURATIONJSONSCHEMA = \
             "required" : ["endpoint"]
         }
     },
-    "required" : ["centralControllerSettings"]
+    "required" : ["centralController"]
 }
