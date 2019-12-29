@@ -21,7 +21,10 @@ from ConfigurationJsonSchema import CONFIGURATIONJSONSCHEMA
 
 CentralController = collections.namedtuple('CentralController',
                                            'endpoint authKey')
-Configuration = collections.namedtuple('Configuration', 'centralController')
+GuiSettings = collections.namedtuple('GuiSettings',
+                                     'fullscreen')
+Configuration = collections.namedtuple('Configuration',
+                                       'centralController gui')
 
 
 class ConfigurationManager:
@@ -30,12 +33,18 @@ class ConfigurationManager:
     # -- Top-level json elements --
     # -----------------------------
     JSON_CentralControllerSettings = 'centralController'
+    JSON_GuiSettings = 'gui'
 
     # ----------------------------------------------
     # -- Central controller settings sub-elements --
     # ----------------------------------------------
     JSON_CentralControllerSettings_Endpoint = 'endpoint'
     JSON_CentralControllerSettings_AuthKey = 'authorisationKey'
+
+    # -------------------------------
+    # -- GUI settings sub-elements --
+    # -------------------------------
+    JSON_Gui_Fullscreen = 'fullscreen'
 
 
     ## Property getter : Last error message
@@ -81,8 +90,10 @@ class ConfigurationManager:
             return None
 
         centralController = self.__ProcessCentralControllerSection(configJson)
+        guiSection = self.__ProcessGuiSection(configJson)
 
-        return Configuration(centralController=centralController)
+        return Configuration(centralController=centralController,
+                             gui=guiSection)
 
 
     #  @param self The object pointer.
@@ -92,3 +103,11 @@ class ConfigurationManager:
         authKey = sctn[self.JSON_CentralControllerSettings_AuthKey]
 
         return CentralController(endpoint, authKey)
+
+
+    #  @param self The object pointer.
+    def __ProcessGuiSection(self, config):
+        sctn = config[self.JSON_GuiSettings]
+        fullscreen = sctn[self.JSON_Gui_Fullscreen]
+
+        return GuiSettings(fullscreen)

@@ -39,7 +39,27 @@ CONFIGURATIONJSONSCHEMA = \
                 }
             },
             "required" : ["authorisationKey", "endpoint"]
+        },
+        "gui":
+        {
+            "additionalProperties" : False,
+            "properties":
+            {
+                "fullscreen":
+                {
+                    "type" : "boolean"
+                }
+            },
+            "required" : ["fullscreen"]
         }
     },
-    "required" : ["centralController"]
+    "required" : ["centralController", "gui"]
 }
+
+'''
+    "gui":
+    {
+        "fullscreen": false
+    }
+}
+'''
