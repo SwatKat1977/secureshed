@@ -38,7 +38,7 @@ class KeypadPanel(wx.Panel):
 
         self.__config = configuration
 
-        self.__authorisationKey = 'authKey'
+        self.__authorisationKey = self.__config.centralController.authKey
 
         self.__keypadDisableTimer = wx.Timer(self)
         self.Bind(wx.EVT_TIMER, self.__keypadDisabledTimedOut,

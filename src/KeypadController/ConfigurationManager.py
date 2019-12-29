@@ -19,7 +19,8 @@ import jsonschema
 from ConfigurationJsonSchema import CONFIGURATIONJSONSCHEMA
 
 
-CentralController = collections.namedtuple('CentralController', 'endpoint')
+CentralController = collections.namedtuple('CentralController',
+                                           'endpoint authKey')
 Configuration = collections.namedtuple('Configuration', 'centralController')
 
 
@@ -34,6 +35,7 @@ class ConfigurationManager:
     # -- Central controller settings sub-elements --
     # ----------------------------------------------
     JSON_CentralControllerSettings_Endpoint = 'endpoint'
+    JSON_CentralControllerSettings_AuthKey = 'authorisationKey'
 
 
     ## Property getter : Last error message
@@ -87,4 +89,6 @@ class ConfigurationManager:
     def __ProcessCentralControllerSection(self, config):
         sctn = config[self.JSON_CentralControllerSettings]
         endpoint = sctn[self.JSON_CentralControllerSettings_Endpoint]
-        return CentralController(endpoint)
+        authKey = sctn[self.JSON_CentralControllerSettings_AuthKey]
+
+        return CentralController(endpoint, authKey)

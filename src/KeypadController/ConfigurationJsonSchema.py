@@ -29,12 +29,16 @@ CONFIGURATIONJSONSCHEMA = \
             "additionalProperties" : False,
             "properties":
             {
+                "authorisationKey":
+                {
+                    "type" : "string"
+                },
                 "endpoint":
                 {
                     "type" : "string"
                 }
             },
-            "required" : ["endpoint"]
+            "required" : ["authorisationKey", "endpoint"]
         }
     },
     "required" : ["centralController"]
