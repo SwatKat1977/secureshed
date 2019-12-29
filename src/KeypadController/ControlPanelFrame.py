@@ -19,9 +19,9 @@ from KeypadPanel import KeypadPanel
 
 class ControlPanelFrame(wx.Frame):
 
-    def __init__(self):
+    def __init__(self, configuration):
         super().__init__(None, title="", size=(350, 375))
-        panel = KeypadPanel(self)
+        panel = KeypadPanel(self, configuration)
 
         #self.ShowFullScreen(True)
         #self.Maximize(True)

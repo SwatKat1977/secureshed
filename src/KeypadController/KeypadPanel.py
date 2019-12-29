@@ -32,8 +32,11 @@ class KeypadPanel(wx.Panel):
     ## KeypadPanel class constructor.
     #  @param self The object pointer.
     #  @param parent Parent of the wxPython panel.
-    def __init__(self, parent):
+    #  @param configuration Configuration items.
+    def __init__(self, parent, configuration):
         super().__init__(parent)
+
+        self.__config = configuration
 
         self.__authorisationKey = 'authKey'
 
@@ -45,7 +48,8 @@ class KeypadPanel(wx.Panel):
             'authorisationKey' : self.__authorisationKey
         }
 
-        self.__APIClient = APIEndpointClient('http://127.0.0.1:5000/')
+        endpoint = self.__config.centralController.endpoint
+        self.__APIClient = APIEndpointClient(endpoint)
 
         # Key sequence pressed.
         self.__keySequence = ''

@@ -88,9 +88,3 @@ class ConfigurationManager:
         sctn = config[self.JSON_CentralControllerSettings]
         endpoint = sctn[self.JSON_CentralControllerSettings_Endpoint]
         return CentralController(endpoint)
-
-
-testCls = ConfigurationManager()
-x = testCls.ParseConfigFile('configuration.json')
-print(x)
-print(testCls.lastErrorMsg)

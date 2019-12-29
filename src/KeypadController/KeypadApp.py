@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 '''
 import wx
+from ConfigurationManager import ConfigurationManager
 from ControlPanelFrame import ControlPanelFrame
 
 
@@ -25,9 +26,16 @@ class KeypadApp:
 
     def StartApp(self):
 
+        configMgr = ConfigurationManager()
+        config = configMgr.ParseConfigFile('configuration.json')
+
+        if not config:
+            print(f'[ERROR] {configMgr.lastErrorMsg}')
+            return
+
         guiApp = wx.App(False)
 
-        frame = ControlPanelFrame()
+        frame = ControlPanelFrame(config)
         frame.Show()
 
         guiApp.MainLoop()
