@@ -20,7 +20,7 @@ from ConfigurationJsonSchema import CONFIGURATIONJSONSCHEMA
 
 
 CentralController = collections.namedtuple('CentralController', 'endpoint')
-Configuration = collections.namedtuple('Configuration', 'CentralController')
+Configuration = collections.namedtuple('Configuration', 'centralController')
 
 
 class ConfigurationManager:
@@ -28,7 +28,7 @@ class ConfigurationManager:
     # -----------------------------
     # -- Top-level json elements --
     # -----------------------------
-    JSON_CentralControllerSettings = 'centralControllerSettings'
+    JSON_CentralControllerSettings = 'centralController'
 
     # ----------------------------------------------
     # -- Central controller settings sub-elements --
@@ -78,75 +78,16 @@ class ConfigurationManager:
                 f"Msg: {ex}"
             return None
 
-        keypadApiNetworkPort = configJson[self.JSON_keypadAPI][self.JSON_keypadAPI_Port]
-        keypadAPIConfig = Configuration.KeypadAPICfg(keypadApiNetworkPort)
+        centralController = self.__ProcessCentralControllerSection(configJson)
 
-        generalSetting = configJson[self.JSON_GeneralSettings]
-        devicesCfgFile = generalSetting[self.JSON_GeneralSettings_DevicesConfigFile]
-        generalSettingsCfg = Configuration.GeneralSettings(devicesCfgFile)
-
-        failedAttemptResponses = {}
-
-        for resp in configJson[self.JSON_failedAttemptResponses]:
-
-            processedResp = self.__ProcessFailedCodeResponse(resp)
-
-            if processedResp is None:
-                return None
-
-            attemptNo, response = processedResp
-            failedAttemptResponses[attemptNo] = response
-
-        return Configuration(keypadAPIConfig, generalSettingsCfg,
-                             failedAttemptResponses)
+        return Configuration(centralController=centralController)
 
 
     #  @param self The object pointer.
-    def __ProcessFailedCodeResponse(self, response):
-
-        processedResponse = {}
-
-        attemptNo = response[self.JSON_failedAttemptResponseAttemptNo]
-        actions = response[self.JSON_failedAttemptResponseActions]
-
-        for action in actions:
-            paramsList = action[self.JSON_failedAttemptResponseActionsParams]
-            actionType = action[self.JSON_failedAttemptResponseActionsType]
-
-            processedParams = {}
-
-            # This should never happen, but verify is the action type is known
-            # about, throwing an error if not.
-            if not FailedCodeAttemptActionType.IsName(actionType):
-                self.__lastErrorMsg = f'Action type {actionType} not valid'
-                return None
-
-            # Extract the name of all of the parameters for the action out and
-            # then verify they are all valid.
-            paramKeys = [d['key'] for d in paramsList]
-            if not all(elem in ActionTypeParams[actionType].keys() for elem in paramKeys):
-                self.__lastErrorMsg = f'Action type {actionType} has an invalid ' +\
-                    'list of parameters'
-                return None
-
-            for param in paramsList:
-                paramName = param['key']
-
-                if ActionTypeParams[actionType][paramName] == int:
-                    try:
-                        processedParams[paramName] = int(param['value'])
-                    except ValueError:
-                        self.__lastErrorMsg = f'Parameter {paramName} has ' +\
-                            'an invalid type, expecting integer, value is ' +\
-                            f"{param['value']}"
-                        return None
-
-                elif ActionTypeParams[actionType][paramName] == str:
-                    processedParams[paramName] = param['value']
-
-            processedResponse[actionType] = processedParams
-
-        return (attemptNo, processedResponse)
+    def __ProcessCentralControllerSection(self, config):
+        sctn = config[self.JSON_CentralControllerSettings]
+        endpoint = sctn[self.JSON_CentralControllerSettings_Endpoint]
+        return CentralController(endpoint)
 
 
 testCls = ConfigurationManager()
