@@ -6,6 +6,6 @@
     },
     "gui":
     {
-        "fullscreen": false
+        "fullscreen": true
     }
 }

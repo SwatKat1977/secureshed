@@ -23,6 +23,7 @@ class ControlPanelFrame(wx.Frame):
         super().__init__(None, title="", size=(350, 375))
         panel = KeypadPanel(self, configuration)
 
-        #self.ShowFullScreen(True)
-        #self.Maximize(True)
+        if configuration.gui.fullscreen:
+            self.ShowFullScreen(True)
+            self.Maximize(True)
 
