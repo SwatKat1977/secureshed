@@ -15,12 +15,13 @@ limitations under the License.
 '''
 import sys
 sys.path.append('..')
-import wx
-from ControlPanelFrame import ControlPanelFrame
+from KeypadApp import KeypadApp
+
+
+def Main():
+    app = KeypadApp()
+    app.StartApp()
 
 
 if __name__ == '__main__':
-    APP = wx.App(False)
-
-    FRAME = ControlPanelFrame()
-    APP.MainLoop()
+    Main()
