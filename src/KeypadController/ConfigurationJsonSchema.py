@@ -48,9 +48,19 @@ CONFIGURATIONJSONSCHEMA = \
                 "fullscreen":
                 {
                     "type" : "boolean"
+                },
+                "windowWidth":
+                {
+                    "type" : "integer",
+                    "minimum": 1
+                },
+                "windowHeight":
+                {
+                    "type" : "integer",
+                    "minimum": 1
                 }
             },
-            "required" : ["fullscreen"]
+            "required" : ["fullscreen", "windowHeight", "windowWidth"]
         }
     },
     "required" : ["centralController", "gui"]

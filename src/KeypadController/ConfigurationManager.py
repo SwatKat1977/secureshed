@@ -22,7 +22,8 @@ from ConfigurationJsonSchema import CONFIGURATIONJSONSCHEMA
 CentralController = collections.namedtuple('CentralController',
                                            'endpoint authKey')
 GuiSettings = collections.namedtuple('GuiSettings',
-                                     'fullscreen')
+                                     'fullscreen windowHeight windowWidth')
+
 Configuration = collections.namedtuple('Configuration',
                                        'centralController gui')
 
@@ -45,7 +46,8 @@ class ConfigurationManager:
     # -- GUI settings sub-elements --
     # -------------------------------
     JSON_Gui_Fullscreen = 'fullscreen'
-
+    JSON_Gui_WindowHeight = 'windowHeight'
+    JSON_Gui_WindowWidth = 'windowWidth'
 
     ## Property getter : Last error message
     @property
@@ -109,5 +111,7 @@ class ConfigurationManager:
     def __ProcessGuiSection(self, config):
         sctn = config[self.JSON_GuiSettings]
         fullscreen = sctn[self.JSON_Gui_Fullscreen]
+        windowHeight = sctn[self.JSON_Gui_WindowHeight]
+        windowWidth = sctn[self.JSON_Gui_WindowWidth]
 
-        return GuiSettings(fullscreen)
+        return GuiSettings(fullscreen, windowHeight, windowWidth)

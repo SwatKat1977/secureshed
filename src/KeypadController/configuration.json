@@ -6,6 +6,8 @@
     },
     "gui":
     {
-        "fullscreen": true
+        "fullscreen": false,
+        "windowWidth": 300,
+        "windowHeight": 200
     }
 }
