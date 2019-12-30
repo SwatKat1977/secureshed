@@ -35,7 +35,8 @@ class KeypadApp:
 
         guiApp = wx.App(False)
 
-        frame = ControlPanelFrame(config)
+        windowSize = (config.gui.windowWidth, config.gui.windowHeight)
+        frame = ControlPanelFrame(config, windowSize)
         frame.Show()
 
         guiApp.MainLoop()

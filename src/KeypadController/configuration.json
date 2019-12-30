@@ -7,7 +7,7 @@
     "gui":
     {
         "fullscreen": false,
-        "windowWidth": 300,
-        "windowHeight": 200
+        "windowWidth": 350,
+        "windowHeight": 350
     }
 }
