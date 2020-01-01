@@ -19,18 +19,19 @@ from ControlPanelFrame import ControlPanelFrame
 
 
 class KeypadApp:
+    __slots__ = ['__configMgr']
 
     def __init__(self):
-        pass
+        self.__configMgr = None
 
 
     def StartApp(self):
 
-        configMgr = ConfigurationManager()
-        config = configMgr.ParseConfigFile('configuration.json')
+        self.__configMgr = ConfigurationManager()
+        config = self.__configMgr.ParseConfigFile('configuration.json')
 
         if not config:
-            print(f'[ERROR] {configMgr.lastErrorMsg}')
+            print(f'[ERROR] {self.__configMgr.lastErrorMsg}')
             return
 
         guiApp = wx.App(False)
@@ -40,3 +41,8 @@ class KeypadApp:
         frame.Show()
 
         guiApp.MainLoop()
+
+
+    def StopApp(self):
+        print('Keypad application stopped')
+        self.__configMgr = None

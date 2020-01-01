@@ -38,15 +38,14 @@ class KeypadPanel(wx.Panel):
 
         self.__config = configuration
 
+        # The central controller requires a secret authorisation key, this is
+        # sent as part of the request header and is defined as part of the
+        # configuration file.
         self.__authorisationKey = self.__config.centralController.authKey
 
         self.__keypadDisableTimer = wx.Timer(self)
         self.Bind(wx.EVT_TIMER, self.__KeypadDisabledTimedOut,
                   self.__keypadDisableTimer)
-
-        self.__additionalHeaders = {
-            'authorisationKey' : self.__authorisationKey
-        }
 
         endpoint = self.__config.centralController.endpoint
         self.__APIClient = APIEndpointClient(endpoint)
@@ -143,6 +142,10 @@ class KeypadPanel(wx.Panel):
     def __TryTransmittingKeyCode(self, event):
         # pylint: disable=W0613
 
+        additionalHeaders = {
+            'authorisationKey' : self.__authorisationKey
+        }
+
         if not self.__keySequence:
             return
 
@@ -155,7 +158,7 @@ class KeypadPanel(wx.Panel):
 
         response = self.__APIClient.SendPostMsg('receiveKeyCode',
                                                 MIMEType.JSON,
-                                                self.__additionalHeaders,
+                                                additionalHeaders,
                                                 jsonBody)
 
         if not response:

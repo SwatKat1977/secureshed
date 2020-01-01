@@ -21,6 +21,7 @@ from KeypadApp import KeypadApp
 def Main():
     app = KeypadApp()
     app.StartApp()
+    app.StopApp()
 
 
 if __name__ == '__main__':
