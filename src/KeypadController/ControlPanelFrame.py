@@ -18,12 +18,15 @@ from KeypadPanel import KeypadPanel
 
 
 class ControlPanelFrame(wx.Frame):
+    # pylint: disable=R0901
+    # pylint: disable=R0903
 
     def __init__(self, configuration, frameSize):
+        # pylint: disable=W0612
+
         super().__init__(None, title="", size=frameSize)
         panel = KeypadPanel(self, configuration)
 
         if configuration.gui.fullscreen:
             self.ShowFullScreen(True)
             self.Maximize(True)
-

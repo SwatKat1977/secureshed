@@ -1,8 +1,8 @@
 {
     "centralController":
     {
-        "authorisationKey": "TestKey",
-        "endpoint": "http://127.0.0.1:5000/"
+        "authorisationKey": "authKey",
+        "endpoint": "http://127.0.0.1:2020/"
     },
     "gui":
     {

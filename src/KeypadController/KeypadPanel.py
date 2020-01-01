@@ -41,7 +41,7 @@ class KeypadPanel(wx.Panel):
         self.__authorisationKey = self.__config.centralController.authKey
 
         self.__keypadDisableTimer = wx.Timer(self)
-        self.Bind(wx.EVT_TIMER, self.__keypadDisabledTimedOut,
+        self.Bind(wx.EVT_TIMER, self.__KeypadDisabledTimedOut,
                   self.__keypadDisableTimer)
 
         self.__additionalHeaders = {
@@ -58,16 +58,16 @@ class KeypadPanel(wx.Panel):
         self.__sequenceTimer = wx.Timer(self)
         self.Bind(wx.EVT_TIMER, self.__TimeoutEvent, self.__sequenceTimer)
 
-        self.__CreateUI()
+        self.__CreateUserInterface()
 
 
     ## Create the keypad user interface.
     #  @param self The object pointer.
-    def __CreateUI(self):
+    def __CreateUserInterface(self):
         # Sizer that all of the buttons will be place into.
         mainSizer = wx.BoxSizer(wx.VERTICAL)
 
-        font = wx.Font(12, wx.MODERN, wx.NORMAL, wx.NORMAL)
+        #font = wx.Font(12, wx.MODERN, wx.NORMAL, wx.NORMAL)
 
         self.__buttonsList = {}
         self.__defaultButtonDetails = {}
@@ -164,14 +164,20 @@ class KeypadPanel(wx.Panel):
 
         # 400 Bad Request : Missing or invalid json body or validation failed.
         if response.status_code == HTTPStatusCode.BadRequest:
+            # TODO : Add a log message here
             return
 
         # 401 Unauthenticated : Missing or invalid authentication key.
         if response.status_code == HTTPStatusCode.Unauthenticated:
+            # TODO : Add a log message here
             return
 
         # 200 OK : code accepted, code incorrect or code refused.
         if response.status_code == HTTPStatusCode.OK:
+
+            print(f'REsponse text: {response.text}')
+            print(f'--> KeycodeAccepted: {ReceiveKeyCodeReturnCode.KeycodeAccepted.value}')
+            print(f'REsponse text: {response.text}')
 
             responseText = json.loads(response.text)
 
@@ -233,7 +239,7 @@ class KeypadPanel(wx.Panel):
     #  reverting all of the changes made during disabling of it.
     #  @param self The object pointer.
     #  @param unused Required parameter for wxTimer but not used.
-    def __keypadDisabledTimedOut(self, unused=None):
+    def __KeypadDisabledTimedOut(self, unused=None):
         self.__keypadDisableTimer.Stop()
 
         for button, defaultValues in self.__defaultButtonDetails.items():

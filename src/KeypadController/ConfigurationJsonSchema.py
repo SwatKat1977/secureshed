@@ -65,11 +65,3 @@ CONFIGURATIONJSONSCHEMA = \
     },
     "required" : ["centralController", "gui"]
 }
-
-'''
-    "gui":
-    {
-        "fullscreen": false
-    }
-}
-'''
