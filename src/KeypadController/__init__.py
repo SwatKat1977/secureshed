@@ -15,7 +15,10 @@ limitations under the License.
 '''
 import sys
 sys.path.append('..')
+import flask
 from KeypadApp import KeypadApp
+
+flaskApp = flask.Flask(__name__)
 
 
 def Main():
