@@ -13,36 +13,46 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 '''
-import wx
-from ConfigurationManager import ConfigurationManager
-from ControlPanelFrame import ControlPanelFrame
+import logging
+import signal
+import sys
+from KeypadController.ConfigurationManager import ConfigurationManager
+from KeypadController.ControlPanelFrame import ControlPanelFrame
+from KeypadController.GuiThread import GuiThread
 
 
 class KeypadApp:
-    __slots__ = ['__configMgr']
+    __slots__ = ['__configMgr', '__guiThread', '__logger']
 
     def __init__(self):
         self.__configMgr = None
+        self.__guiThread = None
+
+        formatter = logging.Formatter("%(asctime)s [%(levelname)s] %(message)s",
+                                      "%Y-%m-%d %H:%M:%S")
+        self.__logger = logging.getLogger('system log')
+        consoleStream = logging.StreamHandler()
+        consoleStream.setFormatter(formatter)
+        self.__logger.setLevel(logging.DEBUG)
+        self.__logger.addHandler(consoleStream)
 
 
     def StartApp(self):
 
         self.__configMgr = ConfigurationManager()
-        config = self.__configMgr.ParseConfigFile('configuration.json')
+        config = self.__configMgr.ParseConfigFile('KeypadController/configuration.json')
 
         if not config:
             print(f'[ERROR] {self.__configMgr.lastErrorMsg}')
             return
 
-        guiApp = wx.App(False)
+        signal.signal(signal.SIGINT, self.__SignalHandler)
 
-        windowSize = (config.gui.windowWidth, config.gui.windowHeight)
-        frame = ControlPanelFrame(config, windowSize)
-        frame.Show()
-
-        guiApp.MainLoop()
+        self.__guiThread = GuiThread(self, config)
 
 
-    def StopApp(self):
-        print('Keypad application stopped')
-        self.__configMgr = None
+    def __SignalHandler(self, signum, frame):
+        #pylint: disable=unused-argument
+
+        self.__logger.info('Keypad application stopped')
+        sys.exit(1)

@@ -16,7 +16,7 @@ limitations under the License.
 import collections
 import json
 import jsonschema
-from ConfigurationJsonSchema import CONFIGURATIONJSONSCHEMA
+from KeypadController.ConfigurationJsonSchema import CONFIGURATIONJSONSCHEMA
 
 
 CentralController = collections.namedtuple('CentralController',

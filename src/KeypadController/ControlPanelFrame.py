@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 '''
 import wx
-from KeypadPanel import KeypadPanel
+from KeypadController.KeypadPanel import KeypadPanel
 
 
 class ControlPanelFrame(wx.Frame):
