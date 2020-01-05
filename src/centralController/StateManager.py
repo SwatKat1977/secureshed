@@ -197,10 +197,13 @@ class StateManager:
         self.__currAlarmState = self.AlarmState.Deactivated
         self.__failedEntryAttempts = 0
 
+        evt = Event(Evts.EvtType.AlarmDeactivated)
+        self.__eventMgr.QueueEvent(evt)
+
         # Remove any 'InAlarmSetGraceTime' transient state events once the
         # alarm has been deactivated.
-        self.__transientStates = [evt for evt in self.__transientStates if \
-            evt.TransientState != TransState.TransientState.InAlarmSetGraceTime]
+        #self.__transientStates = [evt for evt in self.__transientStates if \
+        #    evt.TransientState != TransState.TransientState.InAlarmSetGraceTime]
 
 
     #  @param self The object pointer.

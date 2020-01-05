@@ -176,7 +176,6 @@ class DeviceManager:
 
     #  @param self The object pointer.
     def __ProcessAlarmActivatedEvent(self, eventInst):
-
         sensors = [s for s in self.__devices if s.hardware == 'sensor']
         for sensor in sensors:
             try:
@@ -189,4 +188,11 @@ class DeviceManager:
 
     #  @param self The object pointer.
     def __ProcessAlarmDeactivatedEvent(self, eventInst):
-        self.__logger.info("Received alarm deactivated event: %s", eventInst)
+        sensors = [s for s in self.__devices if s.hardware == 'sensor']
+        for sensor in sensors:
+            try:
+                sensor.deviceType.ReceiveEvent(eventInst)
+
+            except NotImplementedError:
+                self.__logger.info("Device '%s' missing ReceiveEvent()",
+                                   sensor.name)
