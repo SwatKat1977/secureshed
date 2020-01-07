@@ -16,6 +16,7 @@ limitations under the License.
 import multiprocessing
 import wx
 from KeypadController.Gui.ControlPanelFrame import ControlPanelFrame
+from KeypadController.KeypadStateObject import KeypadStateObject
 
 
 ##### https://pastebin.com/ZWKMeABY
@@ -29,13 +30,15 @@ class GuiThread():
 
         self.__app = app
         self.__config = config
-        self.__stateObject = stateObject
 
-        self.event = multiprocessing.Event()
         self._processingQueue = multiprocessing.Queue()
+        stateObject.processingQueue = self._processingQueue
+
+        initialPanelSel = (KeypadStateObject.PanelType.CommunicationsLost, {})
+        self._processingQueue.put(initialPanelSel)
+
         self.__process = multiprocessing.Process(target=self.OpenKeypadGui,
-                                                 args=(self._processingQueue,
-                                                       self.event))
+                                                 args=(self._processingQueue,))
         self.__process.daemon = True
         self.__process.start()
 
@@ -47,18 +50,17 @@ class GuiThread():
 
 
     #  @param self The object pointer.
-    def OpenKeypadGui(self, _processingQueue, _event):
+    def OpenKeypadGui(self, processingQueue):
         app = wx.App()
 
         fsize = (400, 400)
-        self.__modal = ControlPanelFrame(self.__config, fsize,
-                                         self.__stateObject)
-        self.__modal.Show()
+        panelFrame = ControlPanelFrame(self.__config, fsize,
+                                       processingQueue)
+        panelFrame.Show()
 
         app.MainLoop()
 
 
     #  @param self The object pointer.
-    def UpdateProgress(self):
-        curVal = getattr(self.objWithProgressAttribute, self.progressAttributeName)
+    def UpdatePanelSelection(self, newPanelSelection):
         self._q.put(curVal)

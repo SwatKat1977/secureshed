@@ -13,10 +13,13 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 '''
+import multiprocessing
+import queue
 import wx
 from KeypadController.Gui.KeypadPanel import KeypadPanel
 from KeypadController.Gui.LockedPanel import LockedPanel
 from KeypadController.Gui.CommsLostPanel import CommsLostPanel
+from KeypadController.KeypadStateObject import KeypadStateObject
 
 
 class ControlPanelFrame(wx.Frame):
@@ -25,12 +28,13 @@ class ControlPanelFrame(wx.Frame):
 
 
     #  @param self The object pointer.
-    def __init__(self, configuration, frameSize, stateObject):
+    def __init__(self, configuration, frameSize, processingQueue):
         # pylint: disable=W0612
         super().__init__(None, title="", size=frameSize)
 
-        self.__stateObject = stateObject
-        self.__currentPanel = self.__stateObject.currentPanel
+        self.__processingQueue = processingQueue
+
+        self.__currentPanelSel = self.__processingQueue.get(timeout=0.05)
 
         self.__keypadPanel = KeypadPanel(self, configuration)
         self.__keypadPanel.Hide()
@@ -62,25 +66,36 @@ class ControlPanelFrame(wx.Frame):
     def __CheckPanel(self, event):
         # pylint: disable=W0613
 
-        retrievedCurPanel = self.__stateObject.currentPanel
+        try:
+            retrievedCurPanel = self.__processingQueue.get(timeout=0.05)
 
-        if self.__currentPanel != retrievedCurPanel:
-            self.__currentPanel = retrievedCurPanel
+        except queue.Empty:
+            return
+
+        if self.__currentPanelSel != retrievedCurPanel:
+            self.__currentPanelSel = retrievedCurPanel
             self.__DisplayPanel()
 
 
     #  @param self The object pointer.
     def __DisplayPanel(self):
+        self.__commsLostPanel.Hide()
         self.__keypadPanel.Hide()
         self.__keypadLockedPanel.Hide()
 
-        if self.__currentPanel == self.__stateObject.PanelType.KeypadIsLocked:
+        panel, _ = self.__currentPanelSel
+        print(panel)
+
+        if panel == KeypadStateObject.PanelType.KeypadIsLocked:
             self.__keypadLockedPanel.Show()
 
-        elif self.__currentPanel == self.__stateObject.PanelType.CommunicationsLost:
+        elif panel == KeypadStateObject.PanelType.CommunicationsLost:
             self.__commsLostPanel.Show()
 
-        elif self.__currentPanel == self.__stateObject.PanelType.Keypad:
+        elif panel == KeypadStateObject.PanelType.Keypad:
             self.__keypadPanel.Show()
+
+        else:
+            Errrr
 
         self.__sizer.Layout()

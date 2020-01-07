@@ -13,13 +13,12 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 '''
-import json
 from flask import request
+import jsonschema
 import APIs.Keypad.JsonSchemas as schemas
-import centralController.Events as Evts
 from common.APIClient.HTTPStatusCode import HTTPStatusCode
 from common.APIClient.MIMEType import MIMEType
-from common.Event import Event
+from KeypadController.KeypadStateObject import KeypadStateObject
 
 
 ## Implementation of thread that handles API calls to the keypad API.
@@ -44,6 +43,59 @@ class KeypadApiController:
         self.__endpoint.add_url_rule('/receiveCentralControllerPing', methods=['POST'],
                                      view_func=self.__ReceiveCentralControllerPing)
 
+        # Add route : /receiveKeyCode
+        self.__endpoint.add_url_rule('/receiveKeypadLock', methods=['POST'],
+                                     view_func=self.__ReceiveKeypadLock)
 
+
+    #  @param self The object pointer.
     def __ReceiveCentralControllerPing(self):
-        pass
+        # We should only change the state if the current state is
+        # 'CommunicationsLost', changing otherwise is unsafe and may result in
+        # unexpected behaviour.
+        currentPanel, _ = self.__stateObject.currentPanel
+        if currentPanel != KeypadStateObject.PanelType.CommunicationsLost:
+            errMsg = 'Keypad not in communications lost state'
+            return self.__endpoint.response_class(response=errMsg,
+                                                  status=HTTPStatusCode.BadRequest,
+                                                  mimetype=MIMEType.Text)
+
+        self.__stateObject.currentPanel = (KeypadStateObject.PanelType.Keypad, {})
+
+        self.__logger.info("Received an 'alive ping' from central controller")
+        return self.__endpoint.response_class(response='OK',
+                                              status=HTTPStatusCode.OK,
+                                              mimetype=MIMEType.Text)
+
+
+    #  @param self The object pointer.
+    def __ReceiveKeypadLock(self):
+
+        # Check for that if a message body exists and if so, is it in a json
+        # MIME type, if not report a 400 error status with a human-readable.
+        body = request.get_json()
+        if not body:
+            errMsg = 'Missing/invalid json body'
+            return self.__endpoint.response_class(response=errMsg,
+                                                  status=HTTPStatusCode.BadRequest,
+                                                  mimetype=MIMEType.Text)
+
+        try:
+            jsonschema.validate(instance=body,
+                                schema=schemas.RECEIVEKEYPADLOCKSCHEMA)
+
+        except jsonschema.exceptions.ValidationError as ex:
+            lastErrorMsg = f"ReceiveKeypadLockReq message failed validation" +\
+                           f"alidation, reason: {ex}"
+            self.__logger.error(lastErrorMsg)
+            return self.__endpoint.response_class(response=lastErrorMsg,
+                                                  status=HTTPStatusCode.BadRequest,
+                                                  mimetype=MIMEType.Text)
+
+        lockTime = body['lockTime']
+        newPanel = {KeypadStateObject.PanelType.KeypadIsLocked, lockTime}
+        self.__stateObject.currentPanel = newPanel
+
+        return self.__endpoint.response_class(response='OK',
+                                              status=HTTPStatusCode.OK,
+                                              mimetype=MIMEType.Text)

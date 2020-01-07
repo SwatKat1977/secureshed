@@ -22,8 +22,6 @@ from KeypadController.KeypadApiController import KeypadApiController
 from KeypadController.KeypadStateObject import KeypadStateObject
 
 
-#def __init__(self, logger, config, endpoint, stateObject):
-
 class KeypadApp:
     __slots__ = ['__configMgr', '__guiThread', '__logger', '__stateObject']
 
@@ -41,10 +39,8 @@ class KeypadApp:
 
         self.__stateObject = KeypadStateObject()
 
-        #self. KeypadApiController = KeypadApiController()
 
-
-    def StartApp(self):
+    def StartApp(self, keypadApiEndpoint):
 
         self.__configMgr = ConfigurationManager()
         config = self.__configMgr.ParseConfigFile('KeypadController/configuration.json')
@@ -52,6 +48,10 @@ class KeypadApp:
         if not config:
             print(f'[ERROR] {self.__configMgr.lastErrorMsg}')
             return
+
+        keypadApiController = KeypadApiController(self.__logger, config,
+                                                  keypadApiEndpoint,
+                                                  self.__stateObject)
 
         signal.signal(signal.SIGINT, self.__SignalHandler)
 

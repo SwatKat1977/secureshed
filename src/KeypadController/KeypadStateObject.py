@@ -17,7 +17,7 @@ import enum
 
 
 class KeypadStateObject:
-    __slots__ = ['__currentPanel', '__keypadCode']
+    __slots__ = ['__currentPanel', '__keypadCode', '__processingQueue']
 
     class PanelType(enum.Enum):
         KeypadIsLocked = 0
@@ -39,8 +39,19 @@ class KeypadStateObject:
     @currentPanel.setter
     def currentPanel(self, newPanelType):
         self.__currentPanel = newPanelType
+        self.__processingQueue.put(newPanelType)
+
+
+    @property
+    def processingQueue(self):
+        return self.__processingQueue
+
+    @processingQueue.setter
+    def processingQueue(self, processingQueue):
+        self.__processingQueue = processingQueue
 
 
     def __init__(self):
         self.__keypadCode = ''
-        self.__currentPanel = self.PanelType.CommunicationsLost
+        self.__currentPanel = (self.PanelType.CommunicationsLost, {})
+        self.__processingQueue = None

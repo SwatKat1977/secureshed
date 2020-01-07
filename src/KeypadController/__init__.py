@@ -25,6 +25,6 @@ def create_app(test_config=None):
     app = flask.Flask(__name__)
 
     keypadApp = KeypadApp()
-    keypadApp.StartApp()
+    keypadApp.StartApp(app)
 
     return app
