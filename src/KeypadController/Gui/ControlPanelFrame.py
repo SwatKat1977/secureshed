@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 '''
 import wx
-from KeypadController.KeypadPanel import KeypadPanel
+from KeypadController.Gui.KeypadPanel import KeypadPanel
 from KeypadController.Gui.LockedPanel import LockedPanel
 from KeypadController.Gui.CommsLostPanel import CommsLostPanel
 

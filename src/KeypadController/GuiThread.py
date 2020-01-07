@@ -15,7 +15,7 @@ limitations under the License.
 '''
 import multiprocessing
 import wx
-from KeypadController.ControlPanelFrame import ControlPanelFrame
+from KeypadController.Gui.ControlPanelFrame import ControlPanelFrame
 
 
 ##### https://pastebin.com/ZWKMeABY
