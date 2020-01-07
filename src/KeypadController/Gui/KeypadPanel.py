@@ -1,5 +1,5 @@
 '''
-Copyright 2019 Secure Shed Project Dev Team
+Copyright 2019-2020 Secure Shed Project Dev Team
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import APIs.Keypad.JsonSchemas as JsonSchemas
 from APIs.Keypad.ReceiveKeyCodeReturnCode import ReceiveKeyCodeReturnCode
 
 
-
 ## Panel that implements a numbered keypad.
 class KeypadPanel(wx.Panel):
 
@@ -33,20 +32,23 @@ class KeypadPanel(wx.Panel):
     ## KeypadPanel class constructor.
     #  @param self The object pointer.
     #  @param parent Parent of the wxPython panel.
-    def __init__(self, parent):
+    #  @param configuration Configuration items.
+    def __init__(self, parent, configuration):
         super().__init__(parent)
 
-        self.__authorisationKey = 'authKey'
+        self.__config = configuration
+
+        # The central controller requires a secret authorisation key, this is
+        # sent as part of the request header and is defined as part of the
+        # configuration file.
+        self.__authorisationKey = self.__config.centralController.authKey
 
         self.__keypadDisableTimer = wx.Timer(self)
-        self.Bind(wx.EVT_TIMER, self.__keypadDisabledTimedOut,
-            self.__keypadDisableTimer)
+        self.Bind(wx.EVT_TIMER, self.__KeypadDisabledTimedOut,
+                  self.__keypadDisableTimer)
 
-        self.__additionalHeaders = {
-            'authorisationKey' : self.__authorisationKey
-        }
-
-        self.__APIClient = APIEndpointClient('http://127.0.0.1:5000/')
+        endpoint = self.__config.centralController.endpoint
+        self.__APIClient = APIEndpointClient(endpoint)
 
         # Key sequence pressed.
         self.__keySequence = ''
@@ -55,16 +57,16 @@ class KeypadPanel(wx.Panel):
         self.__sequenceTimer = wx.Timer(self)
         self.Bind(wx.EVT_TIMER, self.__TimeoutEvent, self.__sequenceTimer)
 
-        self.__CreateUI()
+        self.__CreateUserInterface()
 
 
     ## Create the keypad user interface.
     #  @param self The object pointer.
-    def __CreateUI(self):
+    def __CreateUserInterface(self):
         # Sizer that all of the buttons will be place into.
-        main_sizer = wx.BoxSizer(wx.VERTICAL)
+        mainSizer = wx.BoxSizer(wx.VERTICAL)
 
-        font = wx.Font(12, wx.MODERN, wx.NORMAL, wx.NORMAL)
+        #font = wx.Font(12, wx.MODERN, wx.NORMAL, wx.NORMAL)
 
         self.__buttonsList = {}
         self.__defaultButtonDetails = {}
@@ -78,14 +80,14 @@ class KeypadPanel(wx.Panel):
                    ['1', '2', '3'],
                    ['0', 'GO', 'Reset']]
 
-        for label_list in buttons:
-            btn_sizer = wx.BoxSizer()
-            for label in label_list:
+        for labelList in buttons:
+            btnSizer = wx.BoxSizer()
+            for label in labelList:
                 button = wx.Button(self, label=label)
-                btn_sizer.Add(button, 1, wx.ALIGN_CENTER|wx.EXPAND, 0)
+                btnSizer.Add(button, 1, wx.ALIGN_CENTER|wx.EXPAND, 0)
                 self.__buttonsList[button] = button
 
-                self.__defaultButtonDetails[button]  = \
+                self.__defaultButtonDetails[button] = \
                 {
                     'backgroundColour' : button.GetBackgroundColour(),
                     'label' : label
@@ -100,9 +102,9 @@ class KeypadPanel(wx.Panel):
                 else:
                     button.Bind(wx.EVT_BUTTON, self.__PressKey)
 
-            main_sizer.Add(btn_sizer, 1, wx.ALIGN_CENTER|wx.EXPAND)
+            mainSizer.Add(btnSizer, 1, wx.ALIGN_CENTER|wx.EXPAND)
 
-        self.SetSizer(main_sizer)
+        self.SetSizer(mainSizer)
 
 
     ## A key is pressed event handler.  If this is the 1st key in the sequence
@@ -117,7 +119,7 @@ class KeypadPanel(wx.Panel):
         pressedKey = event.GetEventObject()
         pressedKeyValue = pressedKey.GetLabel()
 
-        if len(self.__keySequence) == 0:
+        if not self.__keySequence:
             self.__sequenceTimer.Start(self.SequenceTimeout * 1000)
 
         self.__keySequence = self.__keySequence + pressedKeyValue
@@ -127,6 +129,8 @@ class KeypadPanel(wx.Panel):
      #  @param self The object pointer.
      #  @param event Unused.
     def __ResetKeypad(self, event=None):
+        # pylint: disable=W0613
+
         self.__keySequence = ''
 
 
@@ -136,7 +140,13 @@ class KeypadPanel(wx.Panel):
     #  @param self The object pointer.
     #  @param event Unused.
     def __TryTransmittingKeyCode(self, event):
-        if len(self.__keySequence) == 0:
+        # pylint: disable=W0613
+
+        additionalHeaders = {
+            'authorisationKey' : self.__authorisationKey
+        }
+
+        if not self.__keySequence:
             return
 
         keySeq = self.__keySequence
@@ -147,22 +157,30 @@ class KeypadPanel(wx.Panel):
         self.__TimeoutEvent()
 
         response = self.__APIClient.SendPostMsg('receiveKeyCode',
-            MIMEType.JSON, self.__additionalHeaders, jsonBody)
+                                                MIMEType.JSON,
+                                                additionalHeaders,
+                                                jsonBody)
 
-        if response == None:
+        if not response:
             print(f'failed to transmit, reason : {self.__APIClient.LastErrMsg}')
             return
 
         # 400 Bad Request : Missing or invalid json body or validation failed.
         if response.status_code == HTTPStatusCode.BadRequest:
+            # TODO : Add a log message here
             return
 
         # 401 Unauthenticated : Missing or invalid authentication key.
-        elif response.status_code == HTTPStatusCode.Unauthenticated:
+        if response.status_code == HTTPStatusCode.Unauthenticated:
+            # TODO : Add a log message here
             return
 
         # 200 OK : code accepted, code incorrect or code refused.
-        elif response.status_code == HTTPStatusCode.OK:
+        if response.status_code == HTTPStatusCode.OK:
+
+            print(f'REsponse text: {response.text}')
+            print(f'--> KeycodeAccepted: {ReceiveKeyCodeReturnCode.KeycodeAccepted.value}')
+            print(f'REsponse text: {response.text}')
 
             responseText = json.loads(response.text)
 
@@ -187,6 +205,8 @@ class KeypadPanel(wx.Panel):
     #  @param self The object pointer.
     #  @param event Unused.
     def __TimeoutEvent(self, event=None):
+        # pylint: disable=W0613
+
         self.__ResetKeypad()
         self.__sequenceTimer.Stop()
 
@@ -214,6 +234,7 @@ class KeypadPanel(wx.Panel):
     #  @param self The object pointer.
     #  @param actions Unused.
     def __HandleKeycodeAcceptedActions(self, actions):
+        # pylint: disable=W0613
         print('KeycodeAccepted')
 
 
@@ -221,7 +242,7 @@ class KeypadPanel(wx.Panel):
     #  reverting all of the changes made during disabling of it.
     #  @param self The object pointer.
     #  @param unused Required parameter for wxTimer but not used.
-    def __keypadDisabledTimedOut(self, unused=None):
+    def __KeypadDisabledTimedOut(self, unused=None):
         self.__keypadDisableTimer.Stop()
 
         for button, defaultValues in self.__defaultButtonDetails.items():

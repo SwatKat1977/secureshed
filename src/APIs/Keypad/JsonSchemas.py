@@ -54,3 +54,19 @@ class receiveKeyCodeResponseAction_KeycodeRefused:
 class receiveKeyCodeResponseAction_KeycodeIncorrect:
     DisableKeypad = 'disableKeypad'
     TriggerAlarm = 'triggerAlarm'
+
+
+RECEIVEKEYPADLOCKSCHEMA = {
+    "type" : "object",
+    "properties":
+    {
+        "additionalProperties" : False,
+        "lockTime" :
+        {
+            "type" : "integer",
+            "minimum": 0
+        },
+    },
+    "required": ["lockTime"],
+    "additionalProperties" : False
+}

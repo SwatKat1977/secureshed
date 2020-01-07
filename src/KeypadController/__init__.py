@@ -1,5 +1,5 @@
 '''
-Copyright 2019 Secure Shed Project Dev Team
+Copyright 2019-2020 Secure Shed Project Dev Team
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,16 +13,18 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 '''
-import wx
-from KeypadPanel import KeypadPanel
+import flask
+from KeypadController.KeypadApp import KeypadApp
 
 
-class ControlPanelFrame(wx.Frame):
- 
-    def __init__(self):
-        super().__init__(None, title = "", size = (350, 375))
-        panel = KeypadPanel(self)
-        self.Show()
+## Flask startup function.
+#  @param test_config Unused.
+def create_app(test_config=None):
+    # pylint: disable=W0613,E1101,C0103
 
-        #self.ShowFullScreen(True)
-        #self.Maximize(True)
+    app = flask.Flask(__name__)
+
+    keypadApp = KeypadApp()
+    keypadApp.StartApp(app)
+
+    return app

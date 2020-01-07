@@ -1,5 +1,5 @@
 '''
-Copyright 2019 Secure Shed Project Dev Team
+Copyright 2019-2020 Secure Shed Project Dev Team
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ class APIEndpointClient(object):
 
 
     def __SendMessage(self, route, clientMethodType, mimeType,
-        additionalHeaders, body): 
+        additionalHeaders, body):
 
         url = f'{self.__urlBase}{route}'
 
@@ -85,10 +85,10 @@ class APIEndpointClient(object):
 
         except requests.exceptions.Timeout:
             self._lastErrMsg = 'The request timed out.'
-  
+
         except requests.exceptions.RequestException as e:
             self._lastErrMsg = e
-    
+
         # If you have fallen through to this part of then something has gone
         # wrong so return None to identify this as self.__lastErrMsg should
         # have been set.

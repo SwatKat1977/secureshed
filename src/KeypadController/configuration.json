@@ -1,0 +1,13 @@
+{
+    "centralController":
+    {
+        "authorisationKey": "authKey",
+        "endpoint": "http://127.0.0.1:2020/"
+    },
+    "gui":
+    {
+        "fullscreen": false,
+        "windowWidth": 350,
+        "windowHeight": 350
+    }
+}
