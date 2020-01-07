@@ -17,12 +17,15 @@ import logging
 import signal
 import sys
 from KeypadController.ConfigurationManager import ConfigurationManager
-from KeypadController.ControlPanelFrame import ControlPanelFrame
 from KeypadController.GuiThread import GuiThread
+from KeypadController.KeypadApiController import KeypadApiController
+from KeypadController.KeypadStateObject import KeypadStateObject
 
+
+#def __init__(self, logger, config, endpoint, stateObject):
 
 class KeypadApp:
-    __slots__ = ['__configMgr', '__guiThread', '__logger']
+    __slots__ = ['__configMgr', '__guiThread', '__logger', '__stateObject']
 
     def __init__(self):
         self.__configMgr = None
@@ -36,6 +39,10 @@ class KeypadApp:
         self.__logger.setLevel(logging.DEBUG)
         self.__logger.addHandler(consoleStream)
 
+        self.__stateObject = KeypadStateObject()
+
+        #self. KeypadApiController = KeypadApiController()
+
 
     def StartApp(self):
 
@@ -48,7 +55,7 @@ class KeypadApp:
 
         signal.signal(signal.SIGINT, self.__SignalHandler)
 
-        self.__guiThread = GuiThread(self, config)
+        self.__guiThread = GuiThread(self, config, self.__stateObject)
 
 
     def __SignalHandler(self, signum, frame):

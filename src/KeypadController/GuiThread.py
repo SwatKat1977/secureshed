@@ -25,10 +25,11 @@ from KeypadController.ControlPanelFrame import ControlPanelFrame
 class GuiThread():
 
     #  @param self The object pointer.
-    def __init__(self, app, config):
+    def __init__(self, app, config, stateObject):
 
         self.__app = app
         self.__config = config
+        self.__stateObject = stateObject
 
         self.event = multiprocessing.Event()
         self._processingQueue = multiprocessing.Queue()
@@ -50,7 +51,8 @@ class GuiThread():
         app = wx.App()
 
         fsize = (400, 400)
-        self.__modal = ControlPanelFrame(self.__config, fsize)
+        self.__modal = ControlPanelFrame(self.__config, fsize,
+                                         self.__stateObject)
         self.__modal.Show()
 
         app.MainLoop()
