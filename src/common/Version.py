@@ -1,5 +1,5 @@
 '''
-Copyright 2019 Secure Shed Project Dev Team
+Copyright 2019-2020 Secure Shed Project Dev Team
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,6 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 '''
 
-VERSION = '0.1.0 (pre-alpha)'
+VERSION = '0.2.0 (pre-alpha)'
 
-COPYRIGHT = '2019'
+COPYRIGHT = '2019-2020'
