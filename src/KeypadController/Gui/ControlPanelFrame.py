@@ -95,7 +95,4 @@ class ControlPanelFrame(wx.Frame):
         elif panel == KeypadStateObject.PanelType.Keypad:
             self.__keypadPanel.Show()
 
-        else:
-            Errrr
-
         self.__sizer.Layout()
