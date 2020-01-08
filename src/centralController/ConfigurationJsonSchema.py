@@ -106,6 +106,22 @@ CONFIGURATIONJSONSCHEMA = \
             },
             "required" : ["networkPort"]
         },
+        "keypadController":
+        {
+            "additionalProperties" : False,
+            "properties":
+            {
+                "endpoint":
+                {
+                    "type" : "string"
+                },
+                "authKey":
+                {
+                    "type" : "string"
+                }
+            },
+            "required" : ["authKey", "endpoint"]
+        },
         "generalSettings":
         {
             "additionalProperties" : False,
@@ -120,5 +136,6 @@ CONFIGURATIONJSONSCHEMA = \
             "required" : ["devicesConfigFile"]
         }
     },
-    "required" : ["failedAttemptResponses", "keypadAPI", "generalSettings"]
+    "required" : ["failedAttemptResponses", "generalSettings", "keypadAPI",
+                  "keypadController"]
 }

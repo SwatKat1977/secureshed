@@ -28,6 +28,7 @@ class ConfigurationManager:
     # -----------------------------
     JSON_AlarmSettings = 'alarmSettings'
     JSON_keypadAPI = 'keypadAPI'
+    JSON_keypadController = 'keypadController'
     JSON_GeneralSettings = 'generalSettings'
     JSON_failedAttemptResponses = 'failedAttemptResponses'
 
@@ -53,6 +54,12 @@ class ConfigurationManager:
     # -- Alarm settings sub-elements --
     # ---------------------------------
     JSON_AlarmSettingsAlarmSetGraceTimeSecs = 'AlarmSetGraceTimeSecs'
+
+    # ------------------------------------
+    # -- Keypad Controller sub-elements --
+    # ------------------------------------
+    JSON_KeypadControllerEndpoint = 'endpoint'
+    JSON_KeypadControllerAuthKey = 'authKey'
 
 
     ## Property getter : Last error message
@@ -102,6 +109,13 @@ class ConfigurationManager:
         devicesCfgFile = generalSetting[self.JSON_GeneralSettings_DevicesConfigFile]
         generalSettingsCfg = Configuration.GeneralSettings(devicesCfgFile)
 
+        # Populate the keypad controller configuration items.
+        keypadController = configJson[self.JSON_keypadController]
+        keypadCtrlEndpoint = keypadController[self.JSON_KeypadControllerEndpoint]
+        keypadCtrlAuthKey = keypadController[self.JSON_KeypadControllerAuthKey]
+        keypadCtrlCfg = Configuration.KeypadControllerCfg(keypadCtrlEndpoint,
+                                                          keypadCtrlAuthKey)
+
         failedAttemptResponses = {}
 
         for resp in configJson[self.JSON_failedAttemptResponses]:
@@ -115,7 +129,7 @@ class ConfigurationManager:
             failedAttemptResponses[attemptNo] = response
 
         return Configuration(keypadAPIConfig, generalSettingsCfg,
-                             failedAttemptResponses)
+                             failedAttemptResponses, keypadCtrlCfg)
 
 
     def __ProcessFailedCodeResponse(self, response):
