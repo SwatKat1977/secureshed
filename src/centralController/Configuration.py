@@ -18,9 +18,12 @@ import collections
 
 class Configuration:
     __slots__ = ['__alarmSettingsConfig', '__failedAttemptResponses',
-                 '__generalSettings', '__keypadApiConfig']
+                 '__generalSettings', '__keypadApiConfig',
+                 '__keypadController']
 
     GeneralSettings = collections.namedtuple('GeneralSettings', 'devicesConfigFile')
+
+    KeypadControllerCfg = collections.namedtuple('KeypadControllerCfg', 'endpoint authKey')
 
     KeypadAPICfg = collections.namedtuple('KeypadAPIConfig', 'networkPort')
 
@@ -41,13 +44,18 @@ class Configuration:
     def failedAttemptResponses(self):
         return self.__failedAttemptResponses
 
+    @property
+    def keypadController(self):
+        return self.__keypadController
+
 
     ## Default constructor for Configuration class.
     #  @param self The object pointer.
     #  @param keypadAPIConfig Configuration items for keypad api.
     #  @param generalSettings General settings configuration items.
     #  @param failedAttemptResponses Responses when an attempt fails.
-    def __init__(self, keypadAPIConfig, generalSettings, failedAttemptResponses):
+    def __init__(self, keypadAPIConfig, generalSettings,
+                 failedAttemptResponses, keypadController):
         if not isinstance(keypadAPIConfig, self.KeypadAPICfg):
             raise TypeError('keypadAPIConfig param not type KeypadAPICfg')
 
@@ -56,3 +64,5 @@ class Configuration:
         self.__failedAttemptResponses = failedAttemptResponses
 
         self.__generalSettings = generalSettings
+
+        self.__keypadController = keypadController

@@ -21,13 +21,17 @@ import jsonschema
 import APIs.Keypad.JsonSchemas as schemas
 import centralController.Events as Evts
 import centralController.TransientState as TransState
+from common.APIClient.APIEndpointClient import APIEndpointClient
+from common.APIClient.HTTPStatusCode import HTTPStatusCode
+from common.APIClient.MIMEType import MIMEType
 from common.Event import Event
 
 
 ## Implementation of an alarm state management class.
 class StateManager:
     __slots__ = ['__config', '__currAlarmState', '__db', '__eventMgr',
-                 '__failedEntryAttempts', '__logger', '__transientStates']
+                 '__failedEntryAttempts', '__keypadApiClient', '__logger',
+                 '__transientStates']
 
     TransientStateEntry = collections.namedtuple('TransientStateEntry',
                                                  'id TransientState body')
@@ -58,6 +62,9 @@ class StateManager:
         self.__logger = logger
         self.__transientStates = []
 
+        endpoint = self.__config.keypadController.endpoint
+        self.__keypadApiClient = APIEndpointClient(endpoint)
+
 
     ## Received events from the keypad.
     #  @param self The object pointer.
@@ -73,6 +80,46 @@ class StateManager:
 
         if eventInst.id == Evts.EvtType.SensorDeviceStateChange:
             self.__HandleSensorDeviceStateChangeEvent(eventInst)
+
+
+    ## Attemp to send an 'Alive Ping' message to the keypad, this is done when
+    ## the keypad needs waking up after a sytem boot.
+    #  @param self The object pointer.
+    #  @param eventInst Event class that was created to raise this event.
+    def SendAlivePingEvent(self, eventInst):
+        self.__logger.info('called alive ping')
+
+        additionalHeaders = {
+            'authorisationKey' : self.__config.keypadController.authKey
+        }
+
+        response = self.__keypadApiClient.SendPostMsg('receiveCentralControllerPing',
+                                                      MIMEType.JSON,
+                                                      additionalHeaders, {})
+
+        if response is None:
+            msg = f'Unable to communicate with keypad, reason : ' +\
+                  f'{self.__keypadApiClient.LastErrMsg}'
+            self.__logger.debug(msg)
+            self.__eventMgr.QueueEvent(eventInst)
+            return
+
+        # 401 Unauthenticated : Missing authentication key.
+        if response.status_code == HTTPStatusCode.Unauthenticated:
+            self.__logger.critical('Keypad cannot send AlivePing as the ' +\
+                                   'authorisation key is missing')
+            return
+
+        # 403 forbidden : Invalid authentication key.
+        if response.status_code == HTTPStatusCode.Forbidden:
+            self.__logger.critical('Keypad cannot send AlivePing as the ' +\
+                                   'authorisation key is incorrect')
+            return
+
+        # 200 OK : code accepted, code incorrect or code refused.
+        if response.status_code == HTTPStatusCode.OK:
+            msg = f"Successfully send 'AlivePing' to keypad controller"
+            self.__logger.debug(msg)
 
 
     def UpdateTransitoryEvents(self):

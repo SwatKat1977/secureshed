@@ -50,14 +50,38 @@ class KeypadApiController:
 
     #  @param self The object pointer.
     def __ReceiveCentralControllerPing(self):
+
+        # Verify that an authorisation key exists in the request header, if not
+        # then return a 401 (Unauthenticated) status with a human-readable
+        # reason.
+        if schemas.receiveKeyCodeHeader.AuthKey not in request.headers:
+            errMsg = 'Authorisation key is missing'
+            response = self.__endpoint.response_class(
+                response=errMsg, status=HTTPStatusCode.Unauthenticated,
+                mimetype=MIMEType.Text)
+            return response
+
+        authorisationKey = request.headers[schemas.receiveKeyCodeHeader.AuthKey]
+        expectedKey = self.__config.centralController.authKey
+
+        # Verify that authorisation key passed in is matches what is in the
+        # configuration file. If the key isn't valid then return a 403
+        # (forbidden) status with a human-readable reason.
+        if authorisationKey != expectedKey:
+            errMsg = 'Authorisation key is invalid'
+            response = self.__endpoint.response_class(
+                response=errMsg, status=HTTPStatusCode.Forbidden,
+                mimetype=MIMEType.Text)
+            return response
+
         # We should only change the state if the current state is
         # 'CommunicationsLost', changing otherwise is unsafe and may result in
-        # unexpected behaviour.
+        # unexpected behaviour.  Since we don't need to report this we will
+        # return an OK.
         currentPanel, _ = self.__stateObject.currentPanel
         if currentPanel != KeypadStateObject.PanelType.CommunicationsLost:
-            errMsg = 'Keypad not in communications lost state'
-            return self.__endpoint.response_class(response=errMsg,
-                                                  status=HTTPStatusCode.BadRequest,
+            return self.__endpoint.response_class(response='OK',
+                                                  status=HTTPStatusCode.OK,
                                                   mimetype=MIMEType.Text)
 
         self.__stateObject.currentPanel = (KeypadStateObject.PanelType.Keypad, {})
