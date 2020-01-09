@@ -27,6 +27,7 @@ from centralController.KeypadAPIThread import KeypadApiController
 import centralController.Events as Evts
 from centralController.StateManager import StateManager
 from centralController.WorkerThread import WorkerThread
+from common.Event import Event
 from common.EventManager import EventManager
 from common.Version import COPYRIGHT, VERSION
 
@@ -130,6 +131,9 @@ class CentralControllerApp:
                                                          configuration,
                                                          self.__endpoint)
 
+        sendAlivePingEvt = Event(Evts.EvtType.KeypadApiSendAlivePing)
+        self.__eventManager.QueueEvent(sendAlivePingEvt)
+
 
     def __RegisterEventCallbacks(self):
 
@@ -157,7 +161,6 @@ class CentralControllerApp:
         self.__eventManager.RegisterEvent(Evts.EvtType.DeactivateSiren,
                                           self.__deviceMgr.ReceiveEvent)
 
-
         # =========================================
         # == Register event : Alarm state change ==
         # =========================================
@@ -169,6 +172,15 @@ class CentralControllerApp:
         # Register event: Alarm activated.
         self.__eventManager.RegisterEvent(Evts.EvtType.AlarmDeactivated,
                                           self.__deviceMgr.ReceiveEvent)
+
+
+        # ===========================================
+        # == Register event : Keypad state changes ==
+        # ===========================================
+
+        # Register event: Alarm activated.
+        self.__eventManager.RegisterEvent(Evts.EvtType.KeypadApiSendAlivePing,
+                                          self.__stateMgr.SendAlivePingEvent)
 
 
     def __SignalHandler(self, signum, frame):

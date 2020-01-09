@@ -35,6 +35,10 @@ class EvtType(enum.Enum):
     AlarmActivated = 4001
     AlarmDeactivated = 4002
 
+    #------------------------
+    #- Keypad state events
+    KeypadApiSendAlivePing = 5001
+
 
 class SensorDeviceBodyItem:
     DeviceType = 'deviceType'
