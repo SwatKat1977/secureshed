@@ -104,10 +104,16 @@ class StateManager:
             self.__eventMgr.QueueEvent(eventInst)
             return
 
-        # 401 Unauthenticated : Missing or invalid authentication key.
-        # FUTURE USE
+        # 401 Unauthenticated : Missing authentication key.
         if response.status_code == HTTPStatusCode.Unauthenticated:
-            self.__logger.debug('HTTPStatusCode.Unauthenticated')
+            self.__logger.critical('Keypad cannot send AlivePing as the ' +\
+                                   'authorisation key is missing')
+            return
+
+        # 403 forbidden : Invalid authentication key.
+        if response.status_code == HTTPStatusCode.Forbidden:
+            self.__logger.critical('Keypad cannot send AlivePing as the ' +\
+                                   'authorisation key is incorrect')
             return
 
         # 200 OK : code accepted, code incorrect or code refused.

@@ -6,7 +6,7 @@
   "keypadController":
   {
     "endpoint": "http://localhost:1100/",
-    "authKey": "12342323"
+    "authKey": "keypad2019"
   },
   "keypadAPI" :
   {
