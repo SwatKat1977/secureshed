@@ -54,14 +54,14 @@ class KeypadApiController:
         # Verify that an authorisation key exists in the request header, if not
         # then return a 401 (Unauthenticated) status with a human-readable
         # reason.
-        if schemas.receiveKeyCodeHeader.AuthKey not in request.headers:
+        if schemas.AUTH_KEY not in request.headers:
             errMsg = 'Authorisation key is missing'
             response = self.__endpoint.response_class(
                 response=errMsg, status=HTTPStatusCode.Unauthenticated,
                 mimetype=MIMEType.Text)
             return response
 
-        authorisationKey = request.headers[schemas.receiveKeyCodeHeader.AuthKey]
+        authorisationKey = request.headers[schemas.AUTH_KEY]
         expectedKey = self.__config.centralController.authKey
 
         # Verify that authorisation key passed in is matches what is in the

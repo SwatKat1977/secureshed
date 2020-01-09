@@ -18,7 +18,7 @@ import enum
 import time
 import uuid
 import jsonschema
-import APIs.Keypad.JsonSchemas as schemas
+import APIs.CentralController.JsonSchemas as schemas
 import centralController.Events as Evts
 import centralController.TransientState as TransState
 from common.APIClient.APIEndpointClient import APIEndpointClient
