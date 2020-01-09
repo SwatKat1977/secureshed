@@ -50,6 +50,29 @@ class KeypadApiController:
 
     #  @param self The object pointer.
     def __ReceiveCentralControllerPing(self):
+
+        # Verify that an authorisation key exists in the requet header, if not
+        # then return a 401 error with a human-readable reasoning.
+        if schemas.receiveKeyCodeHeader.AuthKey not in request.headers:
+            errMsg = 'Authorisation key is missing'
+            response = self.__endpoint.response_class(
+                response=errMsg, status=HTTPStatusCode.Unauthenticated,
+                mimetype=MIMEType.Text)
+            return response
+
+        authorisationKey = request.headers[schemas.receiveKeyCodeHeader.AuthKey]
+        expectedKey = self.__config.centralController.authKey
+
+        # As the authorisation key functionality isn't currently implemented I
+        # have hard-coded as 'authKey'.  If the key isn't valid then the error
+        # code of 401 (Unauthenticated) is returned.
+        if authorisationKey != expectedKey:
+            errMsg = 'Authorisation key is invalid'
+            response = self.__endpoint.response_class(
+                response=errMsg, status=HTTPStatusCode.Forbidden,
+                mimetype=MIMEType.Text)
+            return response
+
         # We should only change the state if the current state is
         # 'CommunicationsLost', changing otherwise is unsafe and may result in
         # unexpected behaviour.  Since we don't need to report this we will
