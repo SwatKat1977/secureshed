@@ -23,7 +23,7 @@ from centralController.ControllerDBInterface import ControllerDBInterface
 from centralController.DevicesConfigLoader import DevicesConfigLoader
 from centralController.DeviceManager import DeviceManager
 from centralController.DeviceTypeManager import DeviceTypeManager
-from centralController.KeypadAPIThread import KeypadApiController
+from centralController.ApiController import ApiController
 import centralController.Events as Evts
 from centralController.StateManager import StateManager
 from centralController.WorkerThread import WorkerThread
@@ -34,7 +34,7 @@ from common.Version import COPYRIGHT, VERSION
 
 class CentralControllerApp:
     __slots__ = ['__configFile', '__currDevices', '__db', '__deviceMgr',
-                 '__endpoint', '__eventManager', '__keypadApiController',
+                 '__endpoint', '__eventManager',
                  '__logger', '__stateMgr', '__workerThread']
 
 
@@ -45,7 +45,6 @@ class CentralControllerApp:
         self.__deviceMgr = None
         self.__endpoint = endpoint
         self.__eventManager = None
-        self.__keypadApiController = None
         self.__logger = None
         self.__stateMgr = None
         self.__workerThread = None
@@ -125,11 +124,11 @@ class CentralControllerApp:
                                            self.__stateMgr)
         self.__workerThread.start()
 
-        self.__keypadApiController = KeypadApiController(self.__logger,
-                                                         self.__eventManager,
-                                                         controllerDb,
-                                                         configuration,
-                                                         self.__endpoint)
+        apiController = ApiController(self.__logger,
+                                      self.__eventManager,
+                                      controllerDb,
+                                      configuration,
+                                      self.__endpoint)
 
         sendAlivePingEvt = Event(Evts.EvtType.KeypadApiSendAlivePing)
         self.__eventManager.QueueEvent(sendAlivePingEvt)

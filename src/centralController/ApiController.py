@@ -23,7 +23,7 @@ from common.Event import Event
 
 
 ## Implementation of thread that handles API calls to the keypad API.
-class KeypadApiController:
+class ApiController:
 
     __slots__ = ['__config', '__db', '__endpoint', '__eventMgr', '__logger']
 
