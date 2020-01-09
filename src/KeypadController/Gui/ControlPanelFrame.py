@@ -84,7 +84,6 @@ class ControlPanelFrame(wx.Frame):
         self.__keypadLockedPanel.Hide()
 
         panel, _ = self.__currentPanelSel
-        print(panel)
 
         if panel == KeypadStateObject.PanelType.KeypadIsLocked:
             self.__keypadLockedPanel.Show()
