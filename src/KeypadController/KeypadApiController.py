@@ -52,12 +52,12 @@ class KeypadApiController:
     def __ReceiveCentralControllerPing(self):
         # We should only change the state if the current state is
         # 'CommunicationsLost', changing otherwise is unsafe and may result in
-        # unexpected behaviour.
+        # unexpected behaviour.  Since we don't need to report this we will
+        # return an OK.
         currentPanel, _ = self.__stateObject.currentPanel
         if currentPanel != KeypadStateObject.PanelType.CommunicationsLost:
-            errMsg = 'Keypad not in communications lost state'
-            return self.__endpoint.response_class(response=errMsg,
-                                                  status=HTTPStatusCode.BadRequest,
+            return self.__endpoint.response_class(response='OK',
+                                                  status=HTTPStatusCode.OK,
                                                   mimetype=MIMEType.Text)
 
         self.__stateObject.currentPanel = (KeypadStateObject.PanelType.Keypad, {})
