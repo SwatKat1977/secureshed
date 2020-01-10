@@ -173,13 +173,17 @@ class CentralControllerApp:
                                           self.__deviceMgr.ReceiveEvent)
 
 
-        # ===========================================
-        # == Register event : Keypad state changes ==
-        # ===========================================
+        # =================================
+        # == Register event : Keypad Api ==
+        # =================================
 
-        # Register event: Alarm activated.
+        # Register event: Request sending of 'Alive Ping' message.
         self.__eventManager.RegisterEvent(Evts.EvtType.KeypadApiSendAlivePing,
-                                          self.__stateMgr.SendAlivePingEvent)
+                                          self.__stateMgr.SendAlivePingMsg)
+
+        # Register event: Request sending of 'Keypad Locked' message.
+        self.__eventManager.RegisterEvent(Evts.EvtType.KeypadApiSendKeypadLock,
+                                          self.__stateMgr.SendKeypadLockedMsg)
 
 
     def __SignalHandler(self, signum, frame):
