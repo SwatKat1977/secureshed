@@ -122,7 +122,41 @@ class StateManager:
 
 
     def SendKeypadLockedMsg(self, eventInst):
-        self.__logger.critical('Keypad lock requested')
+        additionalHeaders = {
+            'authorisationKey' : self.__config.keypadController.authKey
+        }
+
+        self.__logger.critical(f'Keypad {eventInst.body}')
+
+        response = self.__keypadApiClient.SendPostMsg('receiveKeypadLock',
+                                                      MIMEType.JSON,
+                                                      additionalHeaders,
+                                                      eventInst.body)
+
+        if response is None:
+            msg = f'Unable to communicate with keypad, reason : ' +\
+                  f'{self.__keypadApiClient.LastErrMsg}'
+            self.__logger.debug(msg)
+            self.__eventMgr.QueueEvent(eventInst)
+            return
+
+        # 401 Unauthenticated : Missing authentication key.
+        if response.status_code == HTTPStatusCode.Unauthenticated:
+            self.__logger.critical('Keypad cannot send AlivePing as the ' +\
+                                   'authorisation key is missing')
+            return
+
+        # 403 forbidden : Invalid authentication key.
+        if response.status_code == HTTPStatusCode.Forbidden:
+            self.__logger.critical('Keypad cannot send AlivePing as the ' +\
+                                   'authorisation key is incorrect')
+            return
+
+        # 200 OK : code accepted, code incorrect or code refused.
+        if response.status_code == HTTPStatusCode.OK:
+            msg = f"Successfully send 'AlivePing' to keypad controller"
+            self.__logger.debug(msg)
+
 
 
     def UpdateTransitoryEvents(self):
