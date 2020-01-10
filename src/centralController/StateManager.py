@@ -15,6 +15,7 @@ limitations under the License.
 '''
 import collections
 import enum
+import json
 import time
 import uuid
 import APIs.CentralController.JsonSchemas as schemas
@@ -125,13 +126,11 @@ class StateManager:
         additionalHeaders = {
             'authorisationKey' : self.__config.keypadController.authKey
         }
-
-        self.__logger.critical(f'Keypad {eventInst.body}')
-
+        jsonBody = json.dumps(eventInst.body)
         response = self.__keypadApiClient.SendPostMsg('receiveKeypadLock',
                                                       MIMEType.JSON,
                                                       additionalHeaders,
-                                                      eventInst.body)
+                                                      jsonBody)
 
         if response is None:
             msg = f'Unable to communicate with keypad, reason : ' +\
@@ -158,7 +157,7 @@ class StateManager:
             self.__logger.debug(msg)
 
 
-
+    #  @param self The object pointer.
     def UpdateTransitoryEvents(self):
 
         # List of event id's that need to be removed
@@ -173,7 +172,9 @@ class StateManager:
                 self.__transientStates if evt.id not in idList]
 
 
+    ## Function to handle a a keycode has been entered.
     #  @param self The object pointer.
+    #  @param eventInst The event that contains a keycode.
     def __HandleKeyCodeEnteredEvent(self, eventInst):
         body = eventInst.body
 
@@ -221,7 +222,7 @@ class StateManager:
                     if response == 'disableKeyPad':
                         lockEvtBody = {
                             keypadApi.KeypadLockRequest.BodyElement.LockTime:
-                            int(responses[response]['lockTime'])
+                            round(time.time()) + int(responses[response]['lockTime'])
                         }
                         lockEvt = Event(Evts.EvtType.KeypadApiSendKeypadLock,
                                         lockEvtBody)
@@ -236,6 +237,7 @@ class StateManager:
                         self.__failedEntryAttempts = 0
 
 
+    ## Function to handle the alarm being triggered.
     #  @param self The object pointer.
     def __TriggerAlarm(self):
         self.__currAlarmState = self.AlarmState.Activated
@@ -245,6 +247,7 @@ class StateManager:
         self.__eventMgr.QueueEvent(activateEvt)
 
 
+    ## Function to handle the alarm being deactivated.
     #  @param self The object pointer.
     def __DeactivateAlarm(self):
         self.__currAlarmState = self.AlarmState.Deactivated
@@ -259,7 +262,9 @@ class StateManager:
         #    evt.TransientState != TransState.TransientState.InAlarmSetGraceTime]
 
 
+    ## Event handler for a sensor device state change.
     #  @param self The object pointer.
+    #  @param eventInst Device change event.
     def __HandleSensorDeviceStateChangeEvent(self, eventInst):
         body = eventInst.body
         deviceName = body[Evts.SensorDeviceBodyItem.DeviceName]
