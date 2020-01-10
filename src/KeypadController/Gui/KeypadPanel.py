@@ -161,42 +161,25 @@ class KeypadPanel(wx.Panel):
                                                 additionalHeaders,
                                                 jsonBody)
 
-        if not response:
+        if response is None:
             print(f'failed to transmit, reason : {self.__APIClient.LastErrMsg}')
             return
 
         # 400 Bad Request : Missing or invalid json body or validation failed.
         if response.status_code == HTTPStatusCode.BadRequest:
             # TODO : Add a log message here
+            print('failed to transmit, reason : BadRequest')
             return
 
         # 401 Unauthenticated : Missing or invalid authentication key.
         if response.status_code == HTTPStatusCode.Unauthenticated:
             # TODO : Add a log message here
+            print('failed to transmit, reason : Unauthenticated')
             return
 
         # 200 OK : code accepted, code incorrect or code refused.
         if response.status_code == HTTPStatusCode.OK:
-
-            print(f'REsponse text: {response.text}')
-            print(f'--> KeycodeAccepted: {ReceiveKeyCodeReturnCode.KeycodeAccepted.value}')
-            print(f'REsponse text: {response.text}')
-
-            responseText = json.loads(response.text)
-
-            code = responseText[JsonSchemas.receiveKeyCodeResponse.ReturnCode]
-
-            if code == ReceiveKeyCodeReturnCode.KeycodeAccepted.value:
-                self.__HandleKeycodeAcceptedActions(
-                    responseText[JsonSchemas.receiveKeyCodeResponse.Actions])
-
-            elif code == ReceiveKeyCodeReturnCode.KeycodeIncorrect.value:
-                self.__HandleKeycodeIncorrectActions(
-                    responseText[JsonSchemas.receiveKeyCodeResponse.Actions])
-
-            elif code == ReceiveKeyCodeReturnCode.KeycodeRefused.value:
-                self.__HandleKeycodeRefusedActions(
-                    responseText[JsonSchemas.receiveKeyCodeResponse.Actions])
+            return
 
 
     ## Timer timeout event function.  This will cause any stored key sequence

@@ -15,6 +15,7 @@ limitations under the License.
 '''
 import json
 from flask import request
+import jsonschema
 import APIs.CentralController.JsonSchemas as schemas
 import centralController.Events as Evts
 from common.APIClient.HTTPStatusCode import HTTPStatusCode
@@ -80,12 +81,24 @@ class ApiController:
         # As the authorisation key functionality isn't currently implemented I
         # have hard-coded as 'authKey'.  If the key isn't valid then the error
         # code of 401 (Unauthenticated) is returned.
-        if authorisationKey != 'authKey':
+        if authorisationKey != 'keypad2019':
             errMsg = 'Authorisation key is invalid'
             response = self.__endpoint.response_class(
                 response=errMsg, status=HTTPStatusCode.Forbidden,
                 mimetype=MIMEType.Text)
             return response
+
+        # Validate that the json body conforms to the expected schema.
+        # If the message isn't valid then a 400 error should be generated.
+        try:
+            jsonschema.validate(instance=body,
+                                schema=schemas.ReceiveKeyCode.Schema)
+
+        except jsonschema.exceptions.ValidationError:
+            errMsg = 'Message body validation failed.'
+            return self.__endpoint.response_class(response=errMsg,
+                                                  status=HTTPStatusCode.BadRequest,
+                                                  mimetype='text')
 
         evt = Event(Evts.EvtType.KeypadKeyCodeEntered, body)
         self.__eventMgr.QueueEvent(evt)
