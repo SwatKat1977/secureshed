@@ -92,7 +92,7 @@ CONFIGURATIONJSONSCHEMA = \
             "items": {"$ref": "#/definitions/failedAttemptResponse"},
             "default": []
         },
-        "keypadAPI":
+        "centralControllerApi":
         {
             "additionalProperties" : False,
             "properties":
@@ -136,6 +136,6 @@ CONFIGURATIONJSONSCHEMA = \
             "required" : ["devicesConfigFile"]
         }
     },
-    "required" : ["failedAttemptResponses", "generalSettings", "keypadAPI",
-                  "keypadController"]
+    "required" : ["centralControllerApi", "failedAttemptResponses",
+                  "generalSettings", "keypadController"]
 }
