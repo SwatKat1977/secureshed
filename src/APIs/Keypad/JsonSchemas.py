@@ -19,9 +19,6 @@ limitations under the License.
 
 AUTH_KEY = 'authorisationKey'
 
-class RECEIVECENTRALCONTROLLERPINGHEADER:
-    AuthKey = 'authorisationKey'
-
 
 class KeypadLockRequest:
 
