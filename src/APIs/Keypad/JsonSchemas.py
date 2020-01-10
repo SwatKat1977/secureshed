@@ -21,3 +21,24 @@ AUTH_KEY = 'authorisationKey'
 
 class RECEIVECENTRALCONTROLLERPINGHEADER:
     AuthKey = 'authorisationKey'
+
+
+class KeypadLockRequest:
+
+    Schema = {
+        "type" : "object",
+        "properties":
+        {
+            "additionalProperties" : False,
+            "lockTime" :
+            {
+                "type" : "integer",
+                "minimum": 0
+            },
+        },
+        "required": ["lockTime"],
+        "additionalProperties" : False
+    }
+
+    class BodyElement:
+        LockTime = 'lockTime'

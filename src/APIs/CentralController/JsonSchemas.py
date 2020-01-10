@@ -1,5 +1,5 @@
 '''
-Copyright 2019 Secure Shed Project Dev Team
+Copyright 2019-2020 Secure Shed Project Dev Team
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,60 +13,24 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 '''
+# pylint: disable=C0103
+# pylint: disable=R0903
 
-class Routes:
-    ReceiveKeyCode = 'ReceiveKeyCode'
+
+AUTH_KEY = 'authorisationKey'
 
 
-ReceiveKeyCodeJsonSchema = {
-    "type" : "object",
-    "additionalProperties" : False,
-
-    "properties" : {
+class ReceiveKeyCode:
+    Schema = {
+        "type" : "object",
         "additionalProperties" : False,
-        "keySequence" : {"type" : "string"},
-    },
-    "required": ["keySequence"]
-}
 
-
-class receiveKeyCodeHeader:
-    AuthKey = 'authorisationKey'
-
-
-class receiveKeyCodeBody:
-    KeySeq = 'keySequence'
-
-
-class receiveKeyCodeResponse:
-    ReturnCode = 'returnCode'
-    Actions = 'actions'
-
-
-class receiveKeyCodeResponseAction_KeycodeAccepted:
-    AlarmUnlocked = 'alarmUnlocked'
-
-
-class receiveKeyCodeResponseAction_KeycodeRefused:
-    DisableKeypad = 'disableKeypad'
-
-
-class receiveKeyCodeResponseAction_KeycodeIncorrect:
-    DisableKeypad = 'disableKeypad'
-    TriggerAlarm = 'triggerAlarm'
-
-
-RECEIVEKEYPADLOCKSCHEMA = {
-    "type" : "object",
-    "properties":
-    {
-        "additionalProperties" : False,
-        "lockTime" :
-        {
-            "type" : "integer",
-            "minimum": 0
+        "properties" : {
+            "additionalProperties" : False,
+            "keySequence" : {"type" : "string"},
         },
-    },
-    "required": ["lockTime"],
-    "additionalProperties" : False
-}
+        "required": ["keySequence"]
+    }
+
+    class BodyElement:
+        KeySeq = 'keySequence'

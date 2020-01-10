@@ -106,7 +106,7 @@ class KeypadApiController:
 
         try:
             jsonschema.validate(instance=body,
-                                schema=schemas.RECEIVEKEYPADLOCKSCHEMA)
+                                schema=schemas.KeypadLockRequest.Schema)
 
         except jsonschema.exceptions.ValidationError as ex:
             lastErrorMsg = f"ReceiveKeypadLockReq message failed validation" +\
@@ -116,8 +116,8 @@ class KeypadApiController:
                                                   status=HTTPStatusCode.BadRequest,
                                                   mimetype=MIMEType.Text)
 
-        lockTime = body['lockTime']
-        newPanel = {KeypadStateObject.PanelType.KeypadIsLocked, lockTime}
+        lockTime = body[schemas.KeypadLockRequest.BodyElement.LockTime]
+        newPanel = (KeypadStateObject.PanelType.KeypadIsLocked, lockTime)
         self.__stateObject.currentPanel = newPanel
 
         return self.__endpoint.response_class(response='OK',
