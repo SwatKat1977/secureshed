@@ -72,7 +72,7 @@ class ControlPanelFrame(wx.Frame):
         except queue.Empty:
             return
 
-        if self.__currentPanelSel != retrievedCurPanel:
+        if self.__currentPanelSel[0] != retrievedCurPanel:
             self.__currentPanelSel = retrievedCurPanel
             self.__DisplayPanel()
 
