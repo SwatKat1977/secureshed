@@ -70,23 +70,23 @@ class ApiController:
         # Verify that an authorisation key exists in the requet header, if not
         # then return a 401 error with a human-readable reasoning.
         if schemas.AUTH_KEY not in request.headers:
+            self.__logger.critical('Missing controller auth key from keypad')
             errMsg = 'Authorisation key is missing'
-            response = self.__endpoint.response_class(
+            return self.__endpoint.response_class(
                 response=errMsg, status=HTTPStatusCode.Unauthenticated,
                 mimetype=MIMEType.Text)
-            return response
 
         authorisationKey = request.headers[schemas.AUTH_KEY]
 
         # As the authorisation key functionality isn't currently implemented I
         # have hard-coded as 'authKey'.  If the key isn't valid then the error
         # code of 401 (Unauthenticated) is returned.
-        if authorisationKey != 'keypad2019':
+        if authorisationKey != self.__config.centralControllerApi.authKey:
+            self.__logger.critical('Invalid controller auth key from keypad')
             errMsg = 'Authorisation key is invalid'
-            response = self.__endpoint.response_class(
+            return self.__endpoint.response_class(
                 response=errMsg, status=HTTPStatusCode.Forbidden,
                 mimetype=MIMEType.Text)
-            return response
 
         # Validate that the json body conforms to the expected schema.
         # If the message isn't valid then a 400 error should be generated.
@@ -96,16 +96,16 @@ class ApiController:
 
         except jsonschema.exceptions.ValidationError:
             errMsg = 'Message body validation failed.'
-            return self.__endpoint.response_class(response=errMsg,
-                                                  status=HTTPStatusCode.BadRequest,
-                                                  mimetype='text')
+            return self.__endpoint.response_class(
+                response=errMsg, status=HTTPStatusCode.BadRequest,
+                mimetype='text')
 
         evt = Event(Evts.EvtType.KeypadKeyCodeEntered, body)
         self.__eventMgr.QueueEvent(evt)
 
-        return self.__endpoint.response_class(response='Ok',
-                                              status=HTTPStatusCode.OK,
-                                              mimetype=MIMEType.Text)
+        return self.__endpoint.response_class(
+            response='Ok', status=HTTPStatusCode.OK,
+            mimetype=MIMEType.Text)
 
 
     ## Generate a receive key code response message.
