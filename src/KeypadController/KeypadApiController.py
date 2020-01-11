@@ -54,15 +54,15 @@ class KeypadApiController:
         # Verify that an authorisation key exists in the request header, if not
         # then return a 401 (Unauthenticated) status with a human-readable
         # reason.
-        if schemas.receiveKeyCodeHeader.AuthKey not in request.headers:
+        if schemas.AUTH_KEY not in request.headers:
             errMsg = 'Authorisation key is missing'
             response = self.__endpoint.response_class(
                 response=errMsg, status=HTTPStatusCode.Unauthenticated,
                 mimetype=MIMEType.Text)
             return response
 
-        authorisationKey = request.headers[schemas.receiveKeyCodeHeader.AuthKey]
-        expectedKey = self.__config.centralController.authKey
+        authorisationKey = request.headers[schemas.AUTH_KEY]
+        expectedKey = self.__config.keypadController.authKey
 
         # Verify that authorisation key passed in is matches what is in the
         # configuration file. If the key isn't valid then return a 403
@@ -95,6 +95,29 @@ class KeypadApiController:
     #  @param self The object pointer.
     def __ReceiveKeypadLock(self):
 
+        # Verify that an authorisation key exists in the request header, if not
+        # then return a 401 (Unauthenticated) status with a human-readable
+        # reason.
+        if schemas.AUTH_KEY not in request.headers:
+            errMsg = 'Authorisation key is missing'
+            response = self.__endpoint.response_class(
+                response=errMsg, status=HTTPStatusCode.Unauthenticated,
+                mimetype=MIMEType.Text)
+            return response
+
+        authorisationKey = request.headers[schemas.AUTH_KEY]
+        expectedKey = self.__config.keypadController.authKey
+
+        # Verify that authorisation key passed in is matches what is in the
+        # configuration file. If the key isn't valid then return a 403
+        # (forbidden) status with a human-readable reason.
+        if authorisationKey != expectedKey:
+            errMsg = 'Authorisation key is invalid'
+            response = self.__endpoint.response_class(
+                response=errMsg, status=HTTPStatusCode.Forbidden,
+                mimetype=MIMEType.Text)
+            return response
+
         # Check for that if a message body exists and if so, is it in a json
         # MIME type, if not report a 400 error status with a human-readable.
         body = request.get_json()
@@ -106,7 +129,7 @@ class KeypadApiController:
 
         try:
             jsonschema.validate(instance=body,
-                                schema=schemas.RECEIVEKEYPADLOCKSCHEMA)
+                                schema=schemas.KeypadLockRequest.Schema)
 
         except jsonschema.exceptions.ValidationError as ex:
             lastErrorMsg = f"ReceiveKeypadLockReq message failed validation" +\
@@ -116,8 +139,8 @@ class KeypadApiController:
                                                   status=HTTPStatusCode.BadRequest,
                                                   mimetype=MIMEType.Text)
 
-        lockTime = body['lockTime']
-        newPanel = {KeypadStateObject.PanelType.KeypadIsLocked, lockTime}
+        lockTime = body[schemas.KeypadLockRequest.BodyElement.LockTime]
+        newPanel = (KeypadStateObject.PanelType.KeypadIsLocked, lockTime)
         self.__stateObject.currentPanel = newPanel
 
         return self.__endpoint.response_class(response='OK',

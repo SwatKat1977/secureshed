@@ -18,14 +18,15 @@ import collections
 
 class Configuration:
     __slots__ = ['__alarmSettingsConfig', '__failedAttemptResponses',
-                 '__generalSettings', '__keypadApiConfig',
+                 '__generalSettings', '__centralControllerApi',
                  '__keypadController']
 
     GeneralSettings = collections.namedtuple('GeneralSettings', 'devicesConfigFile')
 
     KeypadControllerCfg = collections.namedtuple('KeypadControllerCfg', 'endpoint authKey')
 
-    KeypadAPICfg = collections.namedtuple('KeypadAPIConfig', 'networkPort')
+    CentralControllerApiCfg = collections.namedtuple('CentralControllerApiCfg',
+                                                     'networkPort authKey')
 
     AlarmSettingsCfg = collections.namedtuple('AlarmSettingsConfig',
                                               'AlarmSetGraceTimeSecs')
@@ -33,8 +34,8 @@ class Configuration:
     ## Property getter : Keypad API config
     #  @param self The object pointer.
     @property
-    def keypadApiConfig(self):
-        return self.__keypadApiConfig
+    def centralControllerApi(self):
+        return self.__centralControllerApi
 
     @property
     def generalSettings(self):
@@ -51,15 +52,12 @@ class Configuration:
 
     ## Default constructor for Configuration class.
     #  @param self The object pointer.
-    #  @param keypadAPIConfig Configuration items for keypad api.
+    #  @param cenControllerApiCfg Config items for central controller api.
     #  @param generalSettings General settings configuration items.
     #  @param failedAttemptResponses Responses when an attempt fails.
-    def __init__(self, keypadAPIConfig, generalSettings,
+    def __init__(self, cenControllerApiCfg, generalSettings,
                  failedAttemptResponses, keypadController):
-        if not isinstance(keypadAPIConfig, self.KeypadAPICfg):
-            raise TypeError('keypadAPIConfig param not type KeypadAPICfg')
-
-        self.__keypadApiConfig = keypadAPIConfig
+        self.__centralControllerApi = cenControllerApiCfg
 
         self.__failedAttemptResponses = failedAttemptResponses
 

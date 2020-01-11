@@ -13,8 +13,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 '''
-import multiprocessing
 import queue
+import time
 import wx
 from KeypadController.Gui.KeypadPanel import KeypadPanel
 from KeypadController.Gui.LockedPanel import LockedPanel
@@ -22,12 +22,17 @@ from KeypadController.Gui.CommsLostPanel import CommsLostPanel
 from KeypadController.KeypadStateObject import KeypadStateObject
 
 
+## Class that implements the control panel frame.
 class ControlPanelFrame(wx.Frame):
     # pylint: disable=R0901
     # pylint: disable=R0903
 
 
+    ## Default constructor for the control panel frame.
     #  @param self The object pointer.
+    #  @param configuration Configuration items.
+    #  @param frameSize The initial size of the panel (width and height).
+    #  @param processingQueue Queue to communicate between processes.
     def __init__(self, configuration, frameSize, processingQueue):
         # pylint: disable=W0612
         super().__init__(None, title="", size=frameSize)
@@ -59,24 +64,38 @@ class ControlPanelFrame(wx.Frame):
 
         self.__panelCheckimer = wx.Timer(self)
         self.Bind(wx.EVT_TIMER, self.__CheckPanel, self.__panelCheckimer)
-        self.__panelCheckimer.Start(1000)
+        self.__panelCheckimer.Start(10)
 
 
+    ## Function that is called to check if the panel has changed or needs to
+    ## be changed (e.g. keypad lock expired).
     #  @param self The object pointer.
+    #  @param event Unused.
     def __CheckPanel(self, event):
         # pylint: disable=W0613
 
         try:
             retrievedCurPanel = self.__processingQueue.get(timeout=0.05)
 
+            if self.__currentPanelSel[0] != retrievedCurPanel:
+                self.__currentPanelSel = retrievedCurPanel
+                self.__DisplayPanel()
+                return
+
         except queue.Empty:
-            return
+            # If the keypad is currently locked then we need to check to see if
+            # the keypad lock has timed out, if it has then reset the panel.
+            if self.__currentPanelSel[0] == KeypadStateObject.PanelType.KeypadIsLocked:
+                currTime = time.time()
 
-        if self.__currentPanelSel != retrievedCurPanel:
-            self.__currentPanelSel = retrievedCurPanel
-            self.__DisplayPanel()
+                if currTime >= self.__currentPanelSel[1]:
+                    self.__currentPanelSel = (KeypadStateObject.PanelType.Keypad,
+                                              {})
+                    self.__DisplayPanel()
 
 
+    ## Display a new panel by firstly hiding all of panels and then after that
+    ## show just the expected one.
     #  @param self The object pointer.
     def __DisplayPanel(self):
         self.__commsLostPanel.Hide()
@@ -84,7 +103,6 @@ class ControlPanelFrame(wx.Frame):
         self.__keypadLockedPanel.Hide()
 
         panel, _ = self.__currentPanelSel
-        print(panel)
 
         if panel == KeypadStateObject.PanelType.KeypadIsLocked:
             self.__keypadLockedPanel.Show()

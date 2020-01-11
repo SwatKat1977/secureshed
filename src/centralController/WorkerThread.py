@@ -58,7 +58,7 @@ class WorkerThread(threading.Thread):
             self.__stateMgr.UpdateTransitoryEvents()
             self.__deviceManager.CheckHardwareDevices()
             self.__eventManager.ProcessNextEvent()
-            time.sleep(0.5)
+            time.sleep(0.1)
 
         self.__shutdownCompleted = True
 

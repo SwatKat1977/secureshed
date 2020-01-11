@@ -8,9 +8,10 @@
     "endpoint": "http://localhost:1100/",
     "authKey": "keypad2019"
   },
-  "keypadAPI" :
+  "centralControllerApi" :
   {
-    "networkPort" : 5000
+    "networkPort" : 5000,
+    "authKey": "ccontroller2019"
   },
   "failedAttemptResponses":
   [

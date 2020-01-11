@@ -92,7 +92,7 @@ CONFIGURATIONJSONSCHEMA = \
             "items": {"$ref": "#/definitions/failedAttemptResponse"},
             "default": []
         },
-        "keypadAPI":
+        "centralControllerApi":
         {
             "additionalProperties" : False,
             "properties":
@@ -102,9 +102,13 @@ CONFIGURATIONJSONSCHEMA = \
                 {
                     "type" : "integer",
                     "minimum": 1
+                },
+                "authKey" :
+                {
+                    "type" : "string"
                 }
             },
-            "required" : ["networkPort"]
+            "required" : ["authKey", "networkPort"]
         },
         "keypadController":
         {
@@ -136,6 +140,6 @@ CONFIGURATIONJSONSCHEMA = \
             "required" : ["devicesConfigFile"]
         }
     },
-    "required" : ["failedAttemptResponses", "generalSettings", "keypadAPI",
-                  "keypadController"]
+    "required" : ["centralControllerApi", "failedAttemptResponses",
+                  "generalSettings", "keypadController"]
 }

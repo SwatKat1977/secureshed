@@ -20,22 +20,17 @@ limitations under the License.
 AUTH_KEY = 'authorisationKey'
 
 
-class KeypadLockRequest:
-
+class ReceiveKeyCode:
     Schema = {
         "type" : "object",
-        "properties":
-        {
+        "additionalProperties" : False,
+
+        "properties" : {
             "additionalProperties" : False,
-            "lockTime" :
-            {
-                "type" : "integer",
-                "minimum": 0
-            },
+            "keySequence" : {"type" : "string"},
         },
-        "required": ["lockTime"],
-        "additionalProperties" : False
+        "required": ["keySequence"]
     }
 
     class BodyElement:
-        LockTime = 'lockTime'
+        KeySeq = 'keySequence'

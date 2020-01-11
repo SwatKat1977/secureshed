@@ -47,7 +47,7 @@ class KeypadApp:
 
         if not config:
             print(f'[ERROR] {self.__configMgr.lastErrorMsg}')
-            return
+            sys.exit()
 
         keypadApiController = KeypadApiController(self.__logger, config,
                                                   keypadApiEndpoint,

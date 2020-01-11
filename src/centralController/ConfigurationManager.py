@@ -27,20 +27,21 @@ class ConfigurationManager:
     # -- Top-level json elements --
     # -----------------------------
     JSON_AlarmSettings = 'alarmSettings'
-    JSON_keypadAPI = 'keypadAPI'
-    JSON_keypadController = 'keypadController'
+    JSON_CentralCtrlApi = 'centralControllerApi'
+    JSON_KeypadController = 'keypadController'
     JSON_GeneralSettings = 'generalSettings'
-    JSON_failedAttemptResponses = 'failedAttemptResponses'
+    JSON_FailedAttemptResponses = 'failedAttemptResponses'
 
-    # -----------------------------
-    # -- Keypad Api sub-elements --
-    # -----------------------------
-    JSON_keypadAPI_Port = 'networkPort'
+    # -----------------------------------------
+    # -- Central Controller Api sub-elements --
+    # -----------------------------------------
+    JSON_CentralCtrlApiPort = 'networkPort'
+    JSON_CentralCtrlApiAuthKey = 'authKey'
 
     # -----------------------------
     # -- General settings sub-elements --
     # -----------------------------
-    JSON_GeneralSettings_DevicesConfigFile = 'devicesConfigFile'
+    JSON_GeneralSettingsDevicesConfigFile = 'devicesConfigFile'
 
     # ------------------------------------------
     # -- Failed attempt tesponse sub-elements --
@@ -68,10 +69,12 @@ class ConfigurationManager:
         return self.__lastErrorMsg
 
 
+    #  @param self The object pointer.
     def __init__(self):
         self.__lastErrorMsg = ''
 
 
+    #  @param self The object pointer.
     def ParseConfigFile(self, filename):
 
         self.__lastErrorMsg = ''
@@ -102,15 +105,15 @@ class ConfigurationManager:
                 "to validate against expected schema.  Please check!"
             return None
 
-        keypadApiNetworkPort = configJson[self.JSON_keypadAPI][self.JSON_keypadAPI_Port]
-        keypadAPIConfig = Configuration.KeypadAPICfg(keypadApiNetworkPort)
+        centralCtrlApiSect = configJson[self.JSON_CentralCtrlApi]
+        centralApi = self.__ProcessCentralControllerSection(centralCtrlApiSect)
 
         generalSetting = configJson[self.JSON_GeneralSettings]
-        devicesCfgFile = generalSetting[self.JSON_GeneralSettings_DevicesConfigFile]
+        devicesCfgFile = generalSetting[self.JSON_GeneralSettingsDevicesConfigFile]
         generalSettingsCfg = Configuration.GeneralSettings(devicesCfgFile)
 
         # Populate the keypad controller configuration items.
-        keypadController = configJson[self.JSON_keypadController]
+        keypadController = configJson[self.JSON_KeypadController]
         keypadCtrlEndpoint = keypadController[self.JSON_KeypadControllerEndpoint]
         keypadCtrlAuthKey = keypadController[self.JSON_KeypadControllerAuthKey]
         keypadCtrlCfg = Configuration.KeypadControllerCfg(keypadCtrlEndpoint,
@@ -118,7 +121,7 @@ class ConfigurationManager:
 
         failedAttemptResponses = {}
 
-        for resp in configJson[self.JSON_failedAttemptResponses]:
+        for resp in configJson[self.JSON_FailedAttemptResponses]:
 
             processedResp = self.__ProcessFailedCodeResponse(resp)
 
@@ -128,10 +131,19 @@ class ConfigurationManager:
             attemptNo, response = processedResp
             failedAttemptResponses[attemptNo] = response
 
-        return Configuration(keypadAPIConfig, generalSettingsCfg,
+        return Configuration(centralApi, generalSettingsCfg,
                              failedAttemptResponses, keypadCtrlCfg)
 
 
+    ## Process the central controller api settings section.
+    #  @param self The object pointer.
+    def __ProcessCentralControllerSection(self, sect):
+        networkPort = sect[self.JSON_CentralCtrlApiPort]
+        authKey = sect[self.JSON_CentralCtrlApiAuthKey]
+        return Configuration.CentralControllerApiCfg(networkPort, authKey)
+
+
+    #  @param self The object pointer.
     def __ProcessFailedCodeResponse(self, response):
 
         processedResponse = {}

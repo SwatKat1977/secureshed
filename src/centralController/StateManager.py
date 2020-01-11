@@ -15,10 +15,11 @@ limitations under the License.
 '''
 import collections
 import enum
+import json
 import time
 import uuid
-import jsonschema
-import APIs.Keypad.JsonSchemas as schemas
+import APIs.CentralController.JsonSchemas as schemas
+import APIs.Keypad.JsonSchemas as keypadApi
 import centralController.Events as Evts
 import centralController.TransientState as TransState
 from common.APIClient.APIEndpointClient import APIEndpointClient
@@ -86,8 +87,7 @@ class StateManager:
     ## the keypad needs waking up after a sytem boot.
     #  @param self The object pointer.
     #  @param eventInst Event class that was created to raise this event.
-    def SendAlivePingEvent(self, eventInst):
-        self.__logger.info('called alive ping')
+    def SendAlivePingMsg(self, eventInst):
 
         additionalHeaders = {
             'authorisationKey' : self.__config.keypadController.authKey
@@ -122,6 +122,43 @@ class StateManager:
             self.__logger.debug(msg)
 
 
+    def SendKeypadLockedMsg(self, eventInst):
+        additionalHeaders = {
+            'authorisationKey' : self.__config.keypadController.authKey
+        }
+        jsonBody = json.dumps(eventInst.body)
+        response = self.__keypadApiClient.SendPostMsg('receiveKeypadLock',
+                                                      MIMEType.JSON,
+                                                      additionalHeaders,
+                                                      jsonBody)
+
+        if response is None:
+            msg = f'Keypad locked msg : Unable to communicate with keypad, ' +\
+                  f'reason : {self.__keypadApiClient.LastErrMsg}'
+            self.__logger.debug(msg)
+            self.__eventMgr.QueueEvent(eventInst)
+            return
+
+        # 401 Unauthenticated : Missing authentication key.
+        if response.status_code == HTTPStatusCode.Unauthenticated:
+            self.__logger.critical('Keypad locked msg : Cannot send the ' +\
+                                   'AlivePing as the authorisation key ' +\
+                                   'is missing')
+            return
+
+        # 403 forbidden : Invalid authentication key.
+        if response.status_code == HTTPStatusCode.Forbidden:
+            self.__logger.critical('Keypad locked msg : Authorisation ' +\
+                                   'key is incorrect')
+            return
+
+        # 200 OK : code accepted, code incorrect or code refused.
+        if response.status_code == HTTPStatusCode.OK:
+            msg = "Successfully sent 'Keypad locked msg' to keypad controller"
+            self.__logger.debug(msg)
+
+
+    #  @param self The object pointer.
     def UpdateTransitoryEvents(self):
 
         # List of event id's that need to be removed
@@ -136,24 +173,13 @@ class StateManager:
                 self.__transientStates if evt.id not in idList]
 
 
+    ## Function to handle a a keycode has been entered.
     #  @param self The object pointer.
+    #  @param eventInst The event that contains a keycode.
     def __HandleKeyCodeEnteredEvent(self, eventInst):
         body = eventInst.body
 
-        # Validate that the json body conforms to the expected schema.
-        # If the message isn't valid then a 400 error should be generated.
-        try:
-            jsonschema.validate(instance=body,
-                                schema=schemas.ReceiveKeyCodeJsonSchema)
-
-        except jsonschema.exceptions.ValidationError:
-            errMsg = 'Message body validation failed.'
-            #response = self.__endpoint.response_class(
-            #    response=errMsg, status=400, mimetype='text')
-            print(errMsg)
-            return 'response'
-
-        keySeq = body[schemas.receiveKeyCodeBody.KeySeq]
+        keySeq = body[schemas.ReceiveKeyCode.BodyElement.KeySeq]
 
         # Read the key code detail from the database.
         details = self.__db.GetKeycodeDetails(keySeq)
@@ -179,19 +205,11 @@ class StateManager:
                 self.__failedEntryAttempts = 0
                 self.__DeactivateAlarm()
 
-            actions = \
-            {
-                schemas.receiveKeyCodeResponseAction_KeycodeAccepted.AlarmUnlocked \
-                : None,
-            }
-            #responseType = ReceiveKeyCodeReturnCode.KeycodeAccepted.value
-
         else:
             self.__logger.info('An invalid key code was entered on keypad')
             self.__failedEntryAttempts += 1
 
             attempts = self.__failedEntryAttempts
-            actions = {}
 
             # If the attempt failed then send the response of type
             # receiveKeyCodeResponseAction_KeycodeIncorrect along with any
@@ -203,15 +221,15 @@ class StateManager:
                 for response in responses:
 
                     if response == 'disableKeyPad':
-                        actions[schemas. \
-                        receiveKeyCodeResponseAction_KeycodeIncorrect. \
-                        DisableKeypad] = int(responses[response]['lockTime'])
+                        lockEvtBody = {
+                            keypadApi.KeypadLockRequest.BodyElement.LockTime:
+                            round(time.time()) + int(responses[response]['lockTime'])
+                        }
+                        lockEvt = Event(Evts.EvtType.KeypadApiSendKeypadLock,
+                                        lockEvtBody)
+                        self.__eventMgr.QueueEvent(lockEvt)
 
                     elif response == 'triggerAlarm':
-                        actions[schemas. \
-                        receiveKeyCodeResponseAction_KeycodeIncorrect. \
-                        TriggerAlarm] = None
-
                         if self.__currAlarmState != self.AlarmState.Triggered:
                             self.__logger.info('|=> Alarm has been triggered!')
                             self.__TriggerAlarm()
@@ -219,17 +237,8 @@ class StateManager:
                     elif response == 'resetAttemptAccount':
                         self.__failedEntryAttempts = 0
 
-            #responseType = ReceiveKeyCodeReturnCode.KeycodeIncorrect.value
 
-        #responseMsg = self.__GenerateReceiveKeyCodeResponse(
-        #    responseType, actions)
-
-        #return self.__endpoint.response_class(response=responseMsg,
-        #                                      status=HTTPStatusCode.OK,
-        #                                      mimetype='application/json')
-        return 'ok'
-
-
+    ## Function to handle the alarm being triggered.
     #  @param self The object pointer.
     def __TriggerAlarm(self):
         self.__currAlarmState = self.AlarmState.Activated
@@ -239,6 +248,7 @@ class StateManager:
         self.__eventMgr.QueueEvent(activateEvt)
 
 
+    ## Function to handle the alarm being deactivated.
     #  @param self The object pointer.
     def __DeactivateAlarm(self):
         self.__currAlarmState = self.AlarmState.Deactivated
@@ -253,7 +263,9 @@ class StateManager:
         #    evt.TransientState != TransState.TransientState.InAlarmSetGraceTime]
 
 
+    ## Event handler for a sensor device state change.
     #  @param self The object pointer.
+    #  @param eventInst Device change event.
     def __HandleSensorDeviceStateChangeEvent(self, eventInst):
         body = eventInst.body
         deviceName = body[Evts.SensorDeviceBodyItem.DeviceName]

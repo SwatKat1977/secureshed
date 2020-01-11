@@ -1,8 +1,12 @@
 {
     "centralController":
     {
-        "authorisationKey": "keypad2019",
+        "authorisationKey": "ccontroller2019",
         "endpoint": "http://127.0.0.1:2020/"
+    },
+    "keypadController":
+    {
+        "authorisationKey": "keypad2019"
     },
     "gui":
     {

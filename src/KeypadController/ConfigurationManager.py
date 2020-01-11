@@ -23,9 +23,10 @@ CentralController = collections.namedtuple('CentralController',
                                            'endpoint authKey')
 GuiSettings = collections.namedtuple('GuiSettings',
                                      'fullscreen windowHeight windowWidth')
+KeypadController = collections.namedtuple('KeypadController', 'authKey')
 
 Configuration = collections.namedtuple('Configuration',
-                                       'centralController gui')
+                                       'centralController gui keypadController')
 
 
 class ConfigurationManager:
@@ -35,6 +36,7 @@ class ConfigurationManager:
     # -----------------------------
     JSON_CentralControllerSettings = 'centralController'
     JSON_GuiSettings = 'gui'
+    JSON_KeypadControllerSettings = 'keypadController'
 
     # ----------------------------------------------
     # -- Central controller settings sub-elements --
@@ -48,6 +50,12 @@ class ConfigurationManager:
     JSON_Gui_Fullscreen = 'fullscreen'
     JSON_Gui_WindowHeight = 'windowHeight'
     JSON_Gui_WindowWidth = 'windowWidth'
+
+    # ----------------------------------------------
+    # -- Keypad controller settings sub-elements --
+    # ----------------------------------------------
+    JSON_KeypadController_AuthKey = 'authorisationKey'
+
 
     ## Property getter : Last error message
     @property
@@ -94,8 +102,13 @@ class ConfigurationManager:
         centralController = self.__ProcessCentralControllerSection(configJson)
         guiSection = self.__ProcessGuiSection(configJson)
 
+        # Populate the keypad controller configuration items.
+        keypadCtrlSection = configJson[self.JSON_KeypadControllerSettings]
+        keypadCtrlAuthKey = keypadCtrlSection[self.JSON_KeypadController_AuthKey]
+        keypadController = KeypadController(keypadCtrlAuthKey)
+
         return Configuration(centralController=centralController,
-                             gui=guiSection)
+                             gui=guiSection, keypadController=keypadController)
 
 
     #  @param self The object pointer.
