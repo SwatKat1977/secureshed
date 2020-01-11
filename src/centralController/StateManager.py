@@ -124,7 +124,7 @@ class StateManager:
 
     def SendKeypadLockedMsg(self, eventInst):
         additionalHeaders = {
-            'authorisationKey' : self.__config.centralControllerApi.authKey
+            'authorisationKey' : self.__config.keypadController.authKey
         }
         jsonBody = json.dumps(eventInst.body)
         response = self.__keypadApiClient.SendPostMsg('receiveKeypadLock',
@@ -133,27 +133,28 @@ class StateManager:
                                                       jsonBody)
 
         if response is None:
-            msg = f'Unable to communicate with keypad, reason : ' +\
-                  f'{self.__keypadApiClient.LastErrMsg}'
+            msg = f'Keypad locked msg : Unable to communicate with keypad, ' +\
+                  f'reason : {self.__keypadApiClient.LastErrMsg}'
             self.__logger.debug(msg)
             self.__eventMgr.QueueEvent(eventInst)
             return
 
         # 401 Unauthenticated : Missing authentication key.
         if response.status_code == HTTPStatusCode.Unauthenticated:
-            self.__logger.critical('Keypad cannot send AlivePing as the ' +\
-                                   'authorisation key is missing')
+            self.__logger.critical('Keypad locked msg : Cannot send the ' +\
+                                   'AlivePing as the authorisation key ' +\
+                                   'is missing')
             return
 
         # 403 forbidden : Invalid authentication key.
         if response.status_code == HTTPStatusCode.Forbidden:
-            self.__logger.critical('Keypad cannot send AlivePing as the ' +\
-                                   'authorisation key is incorrect')
+            self.__logger.critical('Keypad locked msg : Authorisation ' +\
+                                   'key is incorrect')
             return
 
         # 200 OK : code accepted, code incorrect or code refused.
         if response.status_code == HTTPStatusCode.OK:
-            msg = f"Successfully send 'AlivePing' to keypad controller"
+            msg = "Successfully sent 'Keypad locked msg' to keypad controller"
             self.__logger.debug(msg)
 
 
