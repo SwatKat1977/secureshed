@@ -35,12 +35,13 @@ class ConfigurationManager:
     # -----------------------------------------
     # -- Central Controller Api sub-elements --
     # -----------------------------------------
-    JSON_CentralCtrlApi_Port = 'networkPort'
+    JSON_CentralCtrlApiPort = 'networkPort'
+    JSON_CentralCtrlApiAuthKey = 'authKey'
 
     # -----------------------------
     # -- General settings sub-elements --
     # -----------------------------
-    JSON_GeneralSettings_DevicesConfigFile = 'devicesConfigFile'
+    JSON_GeneralSettingsDevicesConfigFile = 'devicesConfigFile'
 
     # ------------------------------------------
     # -- Failed attempt tesponse sub-elements --
@@ -68,10 +69,12 @@ class ConfigurationManager:
         return self.__lastErrorMsg
 
 
+    #  @param self The object pointer.
     def __init__(self):
         self.__lastErrorMsg = ''
 
 
+    #  @param self The object pointer.
     def ParseConfigFile(self, filename):
 
         self.__lastErrorMsg = ''
@@ -106,7 +109,7 @@ class ConfigurationManager:
         centralApi = self.__ProcessCentralControllerSection(centralCtrlApiSect)
 
         generalSetting = configJson[self.JSON_GeneralSettings]
-        devicesCfgFile = generalSetting[self.JSON_GeneralSettings_DevicesConfigFile]
+        devicesCfgFile = generalSetting[self.JSON_GeneralSettingsDevicesConfigFile]
         generalSettingsCfg = Configuration.GeneralSettings(devicesCfgFile)
 
         # Populate the keypad controller configuration items.
@@ -132,11 +135,15 @@ class ConfigurationManager:
                              failedAttemptResponses, keypadCtrlCfg)
 
 
+    ## Process the central controller api settings section.
+    #  @param self The object pointer.
     def __ProcessCentralControllerSection(self, sect):
-        networkPort = sect[self.JSON_CentralCtrlApi_Port]
-        return Configuration.CentralControllerApiCfg(networkPort)
+        networkPort = sect[self.JSON_CentralCtrlApiPort]
+        authKey = sect[self.JSON_CentralCtrlApiAuthKey]
+        return Configuration.CentralControllerApiCfg(networkPort, authKey)
 
 
+    #  @param self The object pointer.
     def __ProcessFailedCodeResponse(self, response):
 
         processedResponse = {}

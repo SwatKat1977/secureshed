@@ -102,9 +102,13 @@ CONFIGURATIONJSONSCHEMA = \
                 {
                     "type" : "integer",
                     "minimum": 1
+                },
+                "authKey" :
+                {
+                    "type" : "string"
                 }
             },
-            "required" : ["networkPort"]
+            "required" : ["authKey", "networkPort"]
         },
         "keypadController":
         {

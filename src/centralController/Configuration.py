@@ -26,7 +26,7 @@ class Configuration:
     KeypadControllerCfg = collections.namedtuple('KeypadControllerCfg', 'endpoint authKey')
 
     CentralControllerApiCfg = collections.namedtuple('CentralControllerApiCfg',
-                                                     'networkPort')
+                                                     'networkPort authKey')
 
     AlarmSettingsCfg = collections.namedtuple('AlarmSettingsConfig',
                                               'AlarmSetGraceTimeSecs')
