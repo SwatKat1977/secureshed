@@ -40,6 +40,18 @@ CONFIGURATIONJSONSCHEMA = \
             },
             "required" : ["authorisationKey", "endpoint"]
         },
+        "keypadController":
+        {
+            "additionalProperties" : False,
+            "properties":
+            {
+                "authorisationKey":
+                {
+                    "type" : "string"
+                }
+            },
+            "required" : ["authorisationKey"]
+        },
         "gui":
         {
             "additionalProperties" : False,
