@@ -62,7 +62,7 @@ class KeypadApiController:
             return response
 
         authorisationKey = request.headers[schemas.AUTH_KEY]
-        expectedKey = self.__config.centralController.authKey
+        expectedKey = self.__config.keypadController.authKey
 
         # Verify that authorisation key passed in is matches what is in the
         # configuration file. If the key isn't valid then return a 403

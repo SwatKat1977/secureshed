@@ -124,7 +124,7 @@ class StateManager:
 
     def SendKeypadLockedMsg(self, eventInst):
         additionalHeaders = {
-            'authorisationKey' : self.__config.keypadController.authKey
+            'authorisationKey' : self.__config.centralControllerApi.authKey
         }
         jsonBody = json.dumps(eventInst.body)
         response = self.__keypadApiClient.SendPostMsg('receiveKeypadLock',
