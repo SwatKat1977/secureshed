@@ -18,11 +18,15 @@ import collections
 
 class Configuration:
     __slots__ = ['__alarmSettingsConfig', '__failedAttemptResponses',
-                 '__generalSettings', '__keypadApiConfig']
+                 '__generalSettings', '__centralControllerApi',
+                 '__keypadController']
 
     GeneralSettings = collections.namedtuple('GeneralSettings', 'devicesConfigFile')
 
-    KeypadAPICfg = collections.namedtuple('KeypadAPIConfig', 'networkPort')
+    KeypadControllerCfg = collections.namedtuple('KeypadControllerCfg', 'endpoint authKey')
+
+    CentralControllerApiCfg = collections.namedtuple('CentralControllerApiCfg',
+                                                     'networkPort authKey')
 
     AlarmSettingsCfg = collections.namedtuple('AlarmSettingsConfig',
                                               'AlarmSetGraceTimeSecs')
@@ -30,8 +34,8 @@ class Configuration:
     ## Property getter : Keypad API config
     #  @param self The object pointer.
     @property
-    def keypadApiConfig(self):
-        return self.__keypadApiConfig
+    def centralControllerApi(self):
+        return self.__centralControllerApi
 
     @property
     def generalSettings(self):
@@ -41,18 +45,22 @@ class Configuration:
     def failedAttemptResponses(self):
         return self.__failedAttemptResponses
 
+    @property
+    def keypadController(self):
+        return self.__keypadController
+
 
     ## Default constructor for Configuration class.
     #  @param self The object pointer.
-    #  @param keypadAPIConfig Configuration items for keypad api.
+    #  @param cenControllerApiCfg Config items for central controller api.
     #  @param generalSettings General settings configuration items.
     #  @param failedAttemptResponses Responses when an attempt fails.
-    def __init__(self, keypadAPIConfig, generalSettings, failedAttemptResponses):
-        if not isinstance(keypadAPIConfig, self.KeypadAPICfg):
-            raise TypeError('keypadAPIConfig param not type KeypadAPICfg')
-
-        self.__keypadApiConfig = keypadAPIConfig
+    def __init__(self, cenControllerApiCfg, generalSettings,
+                 failedAttemptResponses, keypadController):
+        self.__centralControllerApi = cenControllerApiCfg
 
         self.__failedAttemptResponses = failedAttemptResponses
 
         self.__generalSettings = generalSettings
+
+        self.__keypadController = keypadController

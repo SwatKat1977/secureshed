@@ -1,5 +1,5 @@
 '''
-Copyright 2019 Secure Shed Project Dev Team
+Copyright 2019-2020 Secure Shed Project Dev Team
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ class APIEndpointClient(object):
 
 
     def __SendMessage(self, route, clientMethodType, mimeType,
-        additionalHeaders, body): 
+        additionalHeaders, body):
 
         url = f'{self.__urlBase}{route}'
 
@@ -67,7 +67,7 @@ class APIEndpointClient(object):
 
         # If there are any additional header elements, if so add them to the
         # initial header dictionary.
-        if additionalHeaders != None:
+        if additionalHeaders is not None:
             headerDict.update(additionalHeaders)
 
         try:
@@ -75,7 +75,7 @@ class APIEndpointClient(object):
                 pass
 
             elif clientMethodType == self.__MethodType.Post:
-                return requests.post(url, data = body, headers = headerDict)
+                return requests.post(url, data=body, headers=headerDict)
 
         except requests.exceptions.ConnectionError:
             self._lastErrMsg = 'A Connection error occurred.'
@@ -85,10 +85,10 @@ class APIEndpointClient(object):
 
         except requests.exceptions.Timeout:
             self._lastErrMsg = 'The request timed out.'
-  
-        except requests.exceptions.RequestException as e:
-            self._lastErrMsg = e
-    
+
+        except requests.exceptions.RequestException as exceptionInst:
+            self._lastErrMsg = exceptionInst
+
         # If you have fallen through to this part of then something has gone
         # wrong so return None to identify this as self.__lastErrMsg should
         # have been set.

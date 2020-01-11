@@ -3,9 +3,15 @@
   {
     "devicesConfigFile": "../configurationFiles/centralController/devices.json"
   },
-  "keypadAPI" :
+  "keypadController":
   {
-    "networkPort" : 5000
+    "endpoint": "http://localhost:1100/",
+    "authKey": "keypad2019"
+  },
+  "centralControllerApi" :
+  {
+    "networkPort" : 5000,
+    "authKey": "ccontroller2019"
   },
   "failedAttemptResponses":
   [

@@ -13,29 +13,24 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 '''
+# pylint: disable=C0103
+# pylint: disable=R0903
 
-class HTTPStatusCode(object):
 
-    # 200 − OK
-    OK =  200
+AUTH_KEY = 'authorisationKey'
 
-    # 400 − for Bad Request
-    BadRequest = 400
 
-    # 401 − for Unauthenticated
-    Unauthenticated = 401
+class ReceiveKeyCode:
+    Schema = {
+        "type" : "object",
+        "additionalProperties" : False,
 
-    # 403 − for Forbidden
-    Forbidden = 403
+        "properties" : {
+            "additionalProperties" : False,
+            "keySequence" : {"type" : "string"},
+        },
+        "required": ["keySequence"]
+    }
 
-    # 404 − for Not Found
-    NotFound = 404
-
-    # 406 − for Not Acceptable
-    NotAcceptable = 406
-
-    # 415 − for Unsupported Media Type
-    UnsupportedMediaType = 415
-
-    # 429 − Too Many Requests
-    TooManyRequests = 429
+    class BodyElement:
+        KeySeq = 'keySequence'
