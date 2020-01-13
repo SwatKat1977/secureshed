@@ -13,11 +13,16 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 '''
+# pylint: disable=C0413
 import logging
 import signal
 import sys
+from twisted.internet import wxreactor
+wxreactor.install()
+from twisted.internet import reactor
+import wx
 from ConfigurationManager import ConfigurationManager
-from GuiThread import GuiThread
+from Gui.ControlPanelFrame import ControlPanelFrame
 from KeypadApiController import KeypadApiController
 from KeypadStateObject import KeypadStateObject
 
@@ -49,14 +54,23 @@ class KeypadApp:
             print(f'[ERROR] {self.__configMgr.lastErrorMsg}')
             sys.exit()
 
+        '''
         keypadApiEndpoint = None
         keypadApiController = KeypadApiController(self.__logger, config,
                                                   keypadApiEndpoint,
                                                   self.__stateObject)
+        '''
 
         signal.signal(signal.SIGINT, self.__SignalHandler)
 
-        self.__guiThread = GuiThread(self, config, self.__stateObject)
+        wxApp = wx.App()
+        reactor.registerWxApp(wxApp)
+
+        fsize = (400, 400)
+        panelFrame = ControlPanelFrame(config, fsize)
+        panelFrame.Show()
+
+        reactor.run()
 
 
     def __SignalHandler(self, signum, frame):

@@ -15,6 +15,7 @@ limitations under the License.
 '''
 import queue
 import time
+from twisted.internet import reactor
 import wx
 from Gui.KeypadPanel import KeypadPanel
 from Gui.LockedPanel import LockedPanel
@@ -32,14 +33,12 @@ class ControlPanelFrame(wx.Frame):
     #  @param self The object pointer.
     #  @param configuration Configuration items.
     #  @param frameSize The initial size of the panel (width and height).
-    #  @param processingQueue Queue to communicate between processes.
-    def __init__(self, configuration, frameSize, processingQueue):
+    def __init__(self, configuration, frameSize):
         # pylint: disable=W0612
         super().__init__(None, title="", size=frameSize)
 
-        self.__processingQueue = processingQueue
-
-        self.__currentPanelSel = self.__processingQueue.get(timeout=0.05)
+        self.__currentPanelSel = (KeypadStateObject.PanelType.CommunicationsLost, {}) #self.__processingQueue.get(timeout=0.05)
+        ## TODO: FIX THIS
 
         self.__keypadPanel = KeypadPanel(self, configuration)
         self.__keypadPanel.Hide()
@@ -66,6 +65,9 @@ class ControlPanelFrame(wx.Frame):
         self.Bind(wx.EVT_TIMER, self.__CheckPanel, self.__panelCheckimer)
         self.__panelCheckimer.Start(10)
 
+        # make sure reactor.stop() is used to stop event loop
+        self.Bind(wx.EVT_CLOSE, self.__OnExit)
+
 
     ## Function that is called to check if the panel has changed or needs to
     ## be changed (e.g. keypad lock expired).
@@ -75,9 +77,10 @@ class ControlPanelFrame(wx.Frame):
         # pylint: disable=W0613
 
         try:
-            retrievedCurPanel = self.__processingQueue.get(timeout=0.05)
+            retrievedCurPanel = self.__currentPanelSel #self.__processingQueue.get(timeout=0.05)
+            ## TODO : FIX THIS
 
-            if self.__currentPanelSel[0] != retrievedCurPanel:
+            if self.__currentPanelSel[0] != retrievedCurPanel[0]:
                 self.__currentPanelSel = retrievedCurPanel
                 self.__DisplayPanel()
                 return
@@ -114,3 +117,12 @@ class ControlPanelFrame(wx.Frame):
             self.__keypadPanel.Show()
 
         self.__sizer.Layout()
+
+
+    ## Exit event function when the application is closed.
+    #  @param self The object pointer.
+    #  @param event Unused, but required.
+    def __OnExit(self, event):
+        # pylint: disable=R0201
+        # pylint: disable=W0613
+        reactor.stop()
