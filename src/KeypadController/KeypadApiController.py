@@ -18,7 +18,7 @@ import jsonschema
 import APIs.Keypad.JsonSchemas as schemas
 from common.APIClient.HTTPStatusCode import HTTPStatusCode
 from common.APIClient.MIMEType import MIMEType
-from KeypadController.KeypadStateObject import KeypadStateObject
+from KeypadStateObject import KeypadStateObject
 
 
 ## Implementation of thread that handles API calls to the keypad API.

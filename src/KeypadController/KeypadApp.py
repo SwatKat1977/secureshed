@@ -16,10 +16,10 @@ limitations under the License.
 import logging
 import signal
 import sys
-from KeypadController.ConfigurationManager import ConfigurationManager
-from KeypadController.GuiThread import GuiThread
-from KeypadController.KeypadApiController import KeypadApiController
-from KeypadController.KeypadStateObject import KeypadStateObject
+from ConfigurationManager import ConfigurationManager
+from GuiThread import GuiThread
+from KeypadApiController import KeypadApiController
+from KeypadStateObject import KeypadStateObject
 
 
 class KeypadApp:
@@ -40,15 +40,16 @@ class KeypadApp:
         self.__stateObject = KeypadStateObject()
 
 
-    def StartApp(self, keypadApiEndpoint):
+    def StartApp(self):
 
         self.__configMgr = ConfigurationManager()
-        config = self.__configMgr.ParseConfigFile('KeypadController/configuration.json')
+        config = self.__configMgr.ParseConfigFile('configuration.json')
 
         if not config:
             print(f'[ERROR] {self.__configMgr.lastErrorMsg}')
             sys.exit()
 
+        keypadApiEndpoint = None
         keypadApiController = KeypadApiController(self.__logger, config,
                                                   keypadApiEndpoint,
                                                   self.__stateObject)

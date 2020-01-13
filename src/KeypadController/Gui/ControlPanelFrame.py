@@ -16,10 +16,10 @@ limitations under the License.
 import queue
 import time
 import wx
-from KeypadController.Gui.KeypadPanel import KeypadPanel
-from KeypadController.Gui.LockedPanel import LockedPanel
-from KeypadController.Gui.CommsLostPanel import CommsLostPanel
-from KeypadController.KeypadStateObject import KeypadStateObject
+from Gui.KeypadPanel import KeypadPanel
+from Gui.LockedPanel import LockedPanel
+from Gui.CommsLostPanel import CommsLostPanel
+from KeypadStateObject import KeypadStateObject
 
 
 ## Class that implements the control panel frame.

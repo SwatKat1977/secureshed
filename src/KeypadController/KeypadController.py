@@ -13,18 +13,19 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 '''
-import flask
-from KeypadController.KeypadApp import KeypadApp
+import sys
+sys.path.insert(0,'..')
+from KeypadApp import KeypadApp
 
 
 ## Flask startup function.
 #  @param test_config Unused.
-def create_app(test_config=None):
-    # pylint: disable=W0613,E1101,C0103
-
-    app = flask.Flask(__name__)
+def Main():
+    # ___pylint: disable=W0613,E1101,C0103
 
     keypadApp = KeypadApp()
-    keypadApp.StartApp(app)
+    keypadApp.StartApp()
 
-    return app
+
+if __name__ == "__main__":
+    Main()
