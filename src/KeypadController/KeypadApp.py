@@ -20,6 +20,7 @@ import sys
 from twisted.internet import wxreactor
 wxreactor.install()
 from twisted.internet import reactor
+from twisted.web import server
 import wx
 from ConfigurationManager import ConfigurationManager
 from Gui.ControlPanelFrame import ControlPanelFrame
@@ -54,13 +55,6 @@ class KeypadApp:
             print(f'[ERROR] {self.__configMgr.lastErrorMsg}')
             sys.exit()
 
-        '''
-        keypadApiEndpoint = None
-        keypadApiController = KeypadApiController(self.__logger, config,
-                                                  keypadApiEndpoint,
-                                                  self.__stateObject)
-        '''
-
         signal.signal(signal.SIGINT, self.__SignalHandler)
 
         wxApp = wx.App()
@@ -69,6 +63,13 @@ class KeypadApp:
         fsize = (400, 400)
         panelFrame = ControlPanelFrame(config, fsize)
         panelFrame.Show()
+
+        keypadApiCtrl = KeypadApiController(self.__logger, config,
+                                            self.__stateObject)
+        apiServer = server.Site(keypadApiCtrl)
+        #reactor.listenTCP(apiSettings[configMgr.ApiSettingsElement.NetworkPort],
+        reactor.listenTCP(1100,
+                          apiServer)
 
         reactor.run()
 

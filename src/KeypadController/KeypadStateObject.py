@@ -39,7 +39,7 @@ class KeypadStateObject:
     @currentPanel.setter
     def currentPanel(self, newPanelType):
         self.__currentPanel = newPanelType
-        self.__processingQueue.put(newPanelType)
+        #self.__processingQueue.put(newPanelType)
 
 
     @property
