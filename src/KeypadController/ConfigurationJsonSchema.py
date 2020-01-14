@@ -48,9 +48,14 @@ CONFIGURATIONJSONSCHEMA = \
                 "authorisationKey":
                 {
                     "type" : "string"
+                },
+                "networkPort":
+                {
+                    "type" : "integer",
+                    "minimum": 1024
                 }
             },
-            "required" : ["authorisationKey"]
+            "required" : ["authorisationKey", "networkPort"]
         },
         "gui":
         {
@@ -75,5 +80,5 @@ CONFIGURATIONJSONSCHEMA = \
             "required" : ["fullscreen", "windowHeight", "windowWidth"]
         }
     },
-    "required" : ["centralController", "gui"]
+    "required" : ["centralController", "gui", "keypadController"]
 }

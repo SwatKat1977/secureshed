@@ -24,6 +24,7 @@ from KeypadStateObject import KeypadStateObject
 
 ## Implementation of thread that handles API calls to the keypad API.
 class KeypadApiController(resource.Resource):
+    ## __slots__ allow us to explicitly declare data members.
     __slots__ = ['__config', '__logger', '__stateObject']
 
     isLeaf = True
@@ -38,25 +39,20 @@ class KeypadApiController(resource.Resource):
     def __init__(self, logger, config, stateObject):
         super().__init__()
 
+        ## Instance of the current configuration.
         self.__config = config
+
+        ## Instance of a logger.
         self.__logger = logger
+
+        ## Instance of the keypad state object.
         self.__stateObject = stateObject
-
-        '''
-        # Add route : /receiveKeyCode
-        self.__endpoint.add_url_rule('/receiveCentralControllerPing', methods=['POST'],
-                                     view_func=self.__ReceiveCentralControllerPing)
-
-        # Add route : /receiveKeyCode
-        self.__endpoint.add_url_rule('/receiveKeypadLock', methods=['POST'],
-                                     view_func=self.__ReceiveKeypadLock)
-        '''
 
 
     ## Render a GET HTTP method type.
     #  Note: Disabled pylint warning about name as inherited method.
     #  @param self The object pointer.
-    #  @param request GET request to process.
+    #  @param requestInst GET request to process.
     def render_POST(self, requestInst):
         # pylint: disable=C0103
 
@@ -65,14 +61,16 @@ class KeypadApiController(resource.Resource):
         if requestUri == 'receiveCentralControllerPing':
             return self.__ReceiveCentralControllerPing(requestInst)
 
-        elif requestUri == 'receiveKeypadLock':
+        if requestUri == 'receiveKeypadLock':
             return self.__ReceiveKeypadLock(requestInst)
 
-        requestInst.setResponseCode(HTTPStatusCode.OK)
+        requestInst.setResponseCode(HTTPStatusCode.NotFound)
         return b''
 
 
+    ## Function to handle processing of a 'receiveCentralControllerPing' route.
     #  @param self The object pointer.
+    #  @param requestInst Request to be processed.
     def __ReceiveCentralControllerPing(self, requestInst):
         # Verify that an authorisation key exists in the request header, if not
         # then return a 401 (Unauthenticated) status with a human-readable
@@ -108,7 +106,9 @@ class KeypadApiController(resource.Resource):
         return b'OK'
 
 
+    ## Function to handle processing of a 'receiveKeypadLock' route.
     #  @param self The object pointer.
+    #  @param requestInst Request to be processed.
     def __ReceiveKeypadLock(self, requestInst):
 
         response = self.__ValidateAuthKey(requestInst)
@@ -154,7 +154,11 @@ class KeypadApiController(resource.Resource):
         return b'OK'
 
 
+    ## Validate the authentication key for a request.
     #  @param self The object pointer.
+    #  @param requestInst Request to verify auth key on.
+    #  @returns On success None is returned, otherwise a binary string is
+    #  returned on failed.
     def __ValidateAuthKey(self, requestInst):
         # Verify that an authorisation key exists in the request header, if not
         # then return a 401 (Unauthenticated) status with a human-readable
