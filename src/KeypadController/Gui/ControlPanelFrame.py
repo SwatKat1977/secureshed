@@ -33,12 +33,13 @@ class ControlPanelFrame(wx.Frame):
     #  @param self The object pointer.
     #  @param configuration Configuration items.
     #  @param frameSize The initial size of the panel (width and height).
-    def __init__(self, configuration, frameSize):
+    def __init__(self, configuration, frameSize, stateObject):
         # pylint: disable=W0612
         super().__init__(None, title="", size=frameSize)
 
-        self.__currentPanelSel = (KeypadStateObject.PanelType.CommunicationsLost, {}) #self.__processingQueue.get(timeout=0.05)
-        ## TODO: FIX THIS
+        self.__stateObject = stateObject
+
+        self.__currentPanelSel = self.__stateObject.currentPanel
 
         self.__keypadPanel = KeypadPanel(self, configuration)
         self.__keypadPanel.Hide()
@@ -77,8 +78,7 @@ class ControlPanelFrame(wx.Frame):
         # pylint: disable=W0613
 
         try:
-            retrievedCurPanel = self.__currentPanelSel #self.__processingQueue.get(timeout=0.05)
-            ## TODO : FIX THIS
+            retrievedCurPanel = self.__stateObject.currentPanel
 
             if self.__currentPanelSel[0] != retrievedCurPanel[0]:
                 self.__currentPanelSel = retrievedCurPanel
