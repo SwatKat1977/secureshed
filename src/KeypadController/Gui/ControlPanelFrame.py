@@ -32,8 +32,12 @@ class ControlPanelFrame(wx.Frame):
     ## Default constructor for the control panel frame.
     #  @param self The object pointer.
     #  @param configuration Configuration items.
-    #  @param frameSize The initial size of the panel (width and height).
-    def __init__(self, configuration, frameSize, stateObject):
+    #  @param stateObject Instance of the state object.
+    def __init__(self, configuration, stateObject):
+
+        frameSize = (configuration.gui.windowWidth,
+                     configuration.gui.windowHeight)
+
         # pylint: disable=W0612
         super().__init__(None, title="", size=frameSize)
 

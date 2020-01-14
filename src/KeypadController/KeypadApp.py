@@ -60,8 +60,7 @@ class KeypadApp:
         wxApp = wx.App()
         reactor.registerWxApp(wxApp)
 
-        fsize = (400, 400)
-        panelFrame = ControlPanelFrame(config, fsize, self.__stateObject)
+        panelFrame = ControlPanelFrame(config, self.__stateObject)
         panelFrame.Show()
 
         keypadApiCtrl = KeypadApiController(self.__logger, config,
