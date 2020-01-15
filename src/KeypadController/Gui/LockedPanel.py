@@ -48,8 +48,8 @@ class LockedPanel(wx.Panel):
         panelText.SetFont(font)
         horizontalSizer.Add(panelText, 0, wx.CENTER)
 
-        mainSizer.Add((0,0), 1, wx.EXPAND)
-        mainSizer.Add(horizontalSizer, 0, wx.CENTER)
-        mainSizer.Add((0,0), 1, wx.EXPAND)
+        mainSizer.Add((0,0), 1, wx.EXPAND | wx.RESERVE_SPACE_EVEN_IF_HIDDEN)
+        mainSizer.Add(horizontalSizer, 0, wx.CENTER | wx.RESERVE_SPACE_EVEN_IF_HIDDEN)
+        mainSizer.Add((0,0), 1, wx.EXPAND | wx.RESERVE_SPACE_EVEN_IF_HIDDEN)
 
         self.SetSizer(mainSizer)
