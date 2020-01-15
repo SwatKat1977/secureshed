@@ -45,6 +45,9 @@ class CommsLostPanel(wx.Frame):
                       wx.ALIGN_CENTRE_VERTICAL)
         panel.SetSizer(mainSizer)
 
-        if config.gui.fullscreen:
+
+    def Display(self):
+        self.Show()
+        if self.__config.gui.fullscreen:
             self.ShowFullScreen(True)
             self.Maximize(True)

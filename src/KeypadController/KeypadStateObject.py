@@ -92,7 +92,7 @@ class KeypadStateObject:
             self.__keypadLockedPanel.Show()
 
         elif panel == KeypadStateObject.PanelType.CommunicationsLost:
-            self.__commsLostPanel.Show()
+            self.__commsLostPanel.Display()
 
         elif panel == KeypadStateObject.PanelType.Keypad:
             #self.__keypadPanel.Show()
