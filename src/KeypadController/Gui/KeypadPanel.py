@@ -23,7 +23,7 @@ from APIs.Keypad.ReceiveKeyCodeReturnCode import ReceiveKeyCodeReturnCode
 
 
 ## Panel that implements a numbered keypad.
-class KeypadPanel(wx.Panel):
+class KeypadPanel(wx.Frame):
 
     ## Sequence timeout in seconds.
     SequenceTimeout = 5
@@ -31,21 +31,20 @@ class KeypadPanel(wx.Panel):
 
     ## KeypadPanel class constructor.
     #  @param self The object pointer.
-    #  @param parent Parent of the wxPython panel.
-    #  @param configuration Configuration items.
-    def __init__(self, parent, configuration):
-        super().__init__(parent)
+    #  @param config Configuration items.
+    def __init__(self, config):
+        frameSize = (config.gui.windowWidth,
+                     config.gui.windowHeight)
+        super().__init__(None, title="", size=frameSize)
 
-        self.__config = configuration
+        self.__config = config
 
         # The central controller requires a secret authorisation key, this is
         # sent as part of the request header and is defined as part of the
         # configuration file.
         self.__authorisationKey = self.__config.centralController.authKey
 
-        self.__keypadDisableTimer = wx.Timer(self)
-        self.Bind(wx.EVT_TIMER, self.__KeypadDisabledTimedOut,
-                  self.__keypadDisableTimer)
+        self.__panel = wx.Panel(self)
 
         endpoint = self.__config.centralController.endpoint
         self.__APIClient = APIEndpointClient(endpoint)
@@ -58,6 +57,13 @@ class KeypadPanel(wx.Panel):
         self.Bind(wx.EVT_TIMER, self.__TimeoutEvent, self.__sequenceTimer)
 
         self.__CreateUserInterface()
+
+
+    def Display(self):
+        self.Show()
+        if self.__config.gui.fullscreen:
+            self.ShowFullScreen(True)
+            self.Maximize(True)
 
 
     ## Create the keypad user interface.
@@ -83,7 +89,7 @@ class KeypadPanel(wx.Panel):
         for labelList in buttons:
             btnSizer = wx.BoxSizer()
             for label in labelList:
-                button = wx.Button(self, label=label)
+                button = wx.Button(self.__panel, label=label)
                 btnSizer.Add(button, 1, wx.ALIGN_CENTER|wx.EXPAND, 0)
                 self.__buttonsList[button] = button
 
@@ -104,7 +110,7 @@ class KeypadPanel(wx.Panel):
 
             mainSizer.Add(btnSizer, 1, wx.ALIGN_CENTER|wx.EXPAND)
 
-        self.SetSizer(mainSizer)
+        self.__panel.SetSizer(mainSizer)
 
 
     ## A key is pressed event handler.  If this is the 1st key in the sequence
@@ -192,56 +198,3 @@ class KeypadPanel(wx.Panel):
 
         self.__ResetKeypad()
         self.__sequenceTimer.Stop()
-
-
-    ## Currently we don't do anything with this action except write a debug
-    #  message.
-    #  @param self The object pointer.
-    #  @param actions Actions when refused.
-    def __HandleKeycodeRefusedActions(self, actions):
-        print('[DEBUG] The keycode was refused!')
-
-
-    #  @param self The object pointer.
-    #  @param actions Actions when keycode is incorrect.
-    def __HandleKeycodeIncorrectActions(self, actions):
-        print('[DEBUG[ Incorrect keycode event..')
-
-        for a in actions:
-            if a == JsonSchemas.receiveKeyCodeResponseAction_KeycodeRefused.\
-                DisableKeypad:
-                self.DisableKeypad(actions[a])
-
-
-    ## STUB
-    #  @param self The object pointer.
-    #  @param actions Unused.
-    def __HandleKeycodeAcceptedActions(self, actions):
-        # pylint: disable=W0613
-        print('KeycodeAccepted')
-
-
-    ## Disable Keypad wxTimer has timed out event, re-enable the keypad by
-    #  reverting all of the changes made during disabling of it.
-    #  @param self The object pointer.
-    #  @param unused Required parameter for wxTimer but not used.
-    def __KeypadDisabledTimedOut(self, unused=None):
-        self.__keypadDisableTimer.Stop()
-
-        for button, defaultValues in self.__defaultButtonDetails.items():
-            button.Enable()
-            button.SetBackgroundColour(defaultValues['backgroundColour'])
-            button.SetLabel(defaultValues['label'])
-
-
-    ## Disable the keypad by setting all the buttons to disabled, changing the
-    #  background to red and removing labels.
-    #  @param self The object pointer.
-     #  @param timeoutSecs Time (seconds) of how long keypad is disabled.
-    def DisableKeypad(self, timeoutSecs):
-        for _, button in self.__buttonsList.items():
-            button.Disable()
-            button.SetBackgroundColour((212, 13, 13))
-            button.SetLabel('')
-
-        self.__keypadDisableTimer.Start(timeoutSecs * 1000)

@@ -59,7 +59,7 @@ class KeypadStateObject:
 
         self.__commsLostPanel = CommsLostPanel(self.__config)
         self.__keypadLockedPanel = LockedPanel(self.__config)
-        #self.__keypadPanel = KeypadPanel(self.__config)
+        self.__keypadPanel = KeypadPanel(self.__config)
 
 
     ## Function that is called to check if the panel has changed or needs to
@@ -87,17 +87,16 @@ class KeypadStateObject:
     #  @param self The object pointer.
     def __UpdateDisplayedPanel(self):
         self.__commsLostPanel.Hide()
-        #self.__keypadPanel.Hide()
-        #self.__keypadLockedPanel.Hide()
+        self.__keypadPanel.Hide()
+        self.__keypadLockedPanel.Hide()
 
         panel, _ = self.__currentPanel
 
         if panel == KeypadStateObject.PanelType.KeypadIsLocked:
-            self.__keypadLockedPanel.Show()
+            self.__keypadLockedPanel.Display()
 
         elif panel == KeypadStateObject.PanelType.CommunicationsLost:
             self.__commsLostPanel.Display()
 
         elif panel == KeypadStateObject.PanelType.Keypad:
-            #self.__keypadPanel.Show()
-            pass
+            self.__keypadPanel.Display()
