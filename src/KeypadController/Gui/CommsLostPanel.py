@@ -44,3 +44,7 @@ class CommsLostPanel(wx.Frame):
                       wx.ALL | wx.CENTRE | wx.ALIGN_CENTER_HORIZONTAL |\
                       wx.ALIGN_CENTRE_VERTICAL)
         panel.SetSizer(mainSizer)
+
+        if config.gui.fullscreen:
+            self.ShowFullScreen(True)
+            self.Maximize(True)
