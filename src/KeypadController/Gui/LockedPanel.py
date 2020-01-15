@@ -43,3 +43,10 @@ class LockedPanel(wx.Frame):
                       wx.ALL | wx.CENTRE | wx.ALIGN_CENTER_HORIZONTAL |\
                       wx.ALIGN_CENTRE_VERTICAL)
         panel.SetSizer(mainSizer)
+
+
+    def Display(self):
+        self.Show()
+        if self.__config.gui.fullscreen:
+            self.ShowFullScreen(True)
+            self.Maximize(True)

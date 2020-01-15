@@ -98,7 +98,7 @@ class KeypadApiController(resource.Resource):
         currentPanel, _ = self.__stateObject.currentPanel
         if currentPanel == KeypadStateObject.PanelType.CommunicationsLost:
             newPanel = (KeypadStateObject.PanelType.Keypad, {})
-            self.__stateObject.currentPanel = newPanel
+            self.__stateObject.newPanel = newPanel
 
         self.__logger.info("Received an 'alive ping' from central controller")
         requestInst.setResponseCode(HTTPStatusCode.OK)
