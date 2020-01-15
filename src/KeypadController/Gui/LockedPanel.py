@@ -24,6 +24,7 @@ class LockedPanel(wx.Panel):
 
         self.SetBackgroundColour((212, 13, 13))
 
+        '''
         mainSizer = wx.GridSizer(1, 1, 5, 5)
 
         font = wx.Font(18, wx.FONTFAMILY_ROMAN, wx.FONTSTYLE_NORMAL,
@@ -35,4 +36,20 @@ class LockedPanel(wx.Panel):
 
         mainSizer.Add(panelText, 0, wx.ALL |wx.CENTRE | wx.ALIGN_CENTER_HORIZONTAL |\
             wx.ALIGN_CENTRE_VERTICAL | wx.RESERVE_SPACE_EVEN_IF_HIDDEN | wx.EXPAND)
+        self.SetSizer(mainSizer)
+        '''
+
+        horizontalSizer = wx.BoxSizer(wx.HORIZONTAL)
+        mainSizer = wx.BoxSizer(wx.VERTICAL)
+
+        font = wx.Font(18, wx.FONTFAMILY_ROMAN, wx.FONTSTYLE_NORMAL,
+                       wx.FONTWEIGHT_BOLD)
+        panelText = wx.StaticText(self, -1, "Keypad is LOCKED")
+        panelText.SetFont(font)
+        horizontalSizer.Add(panelText, 0, wx.CENTER)
+
+        mainSizer.Add((0,0), 1, wx.EXPAND)
+        mainSizer.Add(horizontalSizer, 0, wx.CENTER)
+        mainSizer.Add((0,0), 1, wx.EXPAND)
+
         self.SetSizer(mainSizer)
