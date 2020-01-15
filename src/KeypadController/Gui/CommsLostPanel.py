@@ -33,6 +33,6 @@ class CommsLostPanel(wx.Panel):
 
         panelText.CenterOnParent()
 
-        mainSizer.Add(panelText, 0, wx.ALL |wx.CENTRE | wx.ALIGN_CENTER_HORIZONTAL |\
-            wx.ALIGN_CENTRE_VERTICAL | wx.RESERVE_SPACE_EVEN_IF_HIDDEN)
+        mainSizer.Add(panelText, 0, wx.ALL | wx.CENTRE | wx.ALIGN_CENTER_HORIZONTAL |\
+            wx.ALIGN_CENTRE_VERTICAL | wx.RESERVE_SPACE_EVEN_IF_HIDDEN | wx.EXPAND)
         self.SetSizer(mainSizer)
