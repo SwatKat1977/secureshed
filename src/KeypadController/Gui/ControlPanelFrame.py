@@ -81,24 +81,22 @@ class ControlPanelFrame(wx.Frame):
     def __CheckPanel(self, event):
         # pylint: disable=W0613
 
-        try:
-            retrievedCurPanel = self.__stateObject.currentPanel
+        retrievedCurPanel = self.__stateObject.currentPanel
+        if self.__currentPanelSel[0] != retrievedCurPanel[0]:
+            self.__currentPanelSel = retrievedCurPanel
+            self.__DisplayPanel()
+            return
 
-            if self.__currentPanelSel[0] != retrievedCurPanel[0]:
-                self.__currentPanelSel = retrievedCurPanel
+        # If the keypad is currently locked then we need to check to see if
+        # the keypad lock has timed out, if it has then reset the panel.
+        if self.__currentPanelSel[0] == KeypadStateObject.PanelType.KeypadIsLocked:
+            currTime = time.time()
+
+            if currTime >= self.__currentPanelSel[1]:
+                keypadPanel = (KeypadStateObject.PanelType.Keypad, {})
+                self.__currentPanelSel = keypadPanel
+                self.__stateObject.currentPanel = keypadPanel
                 self.__DisplayPanel()
-                return
-
-        except queue.Empty:
-            # If the keypad is currently locked then we need to check to see if
-            # the keypad lock has timed out, if it has then reset the panel.
-            if self.__currentPanelSel[0] == KeypadStateObject.PanelType.KeypadIsLocked:
-                currTime = time.time()
-
-                if currTime >= self.__currentPanelSel[1]:
-                    self.__currentPanelSel = (KeypadStateObject.PanelType.Keypad,
-                                              {})
-                    self.__DisplayPanel()
 
 
     ## Display a new panel by firstly hiding all of panels and then after that
