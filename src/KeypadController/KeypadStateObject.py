@@ -46,6 +46,10 @@ class KeypadStateObject:
     def newPanel(self, newPanelType):
         self.__newPanel = newPanelType
 
+    @property
+    def currentPanel(self):
+        return self.__currentPanel
+
 
     def __init__(self, config):
         self.__config = config
