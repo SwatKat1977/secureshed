@@ -146,7 +146,7 @@ class KeypadApiController(resource.Resource):
 
         lockTime = body[schemas.KeypadLockRequest.BodyElement.LockTime]
         newPanel = (KeypadStateObject.PanelType.KeypadIsLocked, lockTime)
-        self.__stateObject.currentPanel = newPanel
+        self.__stateObject.newPanel = newPanel
 
         self.__logger.info("Received an 'lock keypad' from central controller")
         requestInst.setResponseCode(HTTPStatusCode.OK)

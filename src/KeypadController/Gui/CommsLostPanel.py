@@ -16,23 +16,31 @@ limitations under the License.
 import wx
 
 
-## Panel that implements a numbered keypad.
-class CommsLostPanel(wx.Panel):
+## Panel that implements an informational pane stating comms has been lost to
+#  to the central controller.
+class CommsLostPanel(wx.Frame):
 
-    def __init__(self, parent):
-        super().__init__(parent)
+    def __init__(self, config):
+        frameSize = (config.gui.windowWidth,
+                     config.gui.windowHeight)
+        super().__init__(None, title="", size=frameSize)
 
-        self.SetBackgroundColour((215, 220, 24))
+        self.__config = config
+
+        panel = wx.Panel(self)
+
+        panel.SetBackgroundColour((215, 220, 24))
 
         mainSizer = wx.GridSizer(1, 1, 5, 5)
 
         font = wx.Font(18, wx.FONTFAMILY_ROMAN, wx.FONTSTYLE_NORMAL,
                        wx.FONTWEIGHT_BOLD)
-        panelText = wx.StaticText(self, -1, "Comms lost to central controller")
+        panelText = wx.StaticText(panel, -1, "Comms lost to central controller")
         panelText.SetFont(font)
 
         panelText.CenterOnParent()
 
-        mainSizer.Add(panelText, 0, wx.ALL | wx.CENTRE | wx.ALIGN_CENTER_HORIZONTAL |\
-            wx.ALIGN_CENTRE_VERTICAL | wx.RESERVE_SPACE_EVEN_IF_HIDDEN | wx.EXPAND)
-        self.SetSizer(mainSizer)
+        mainSizer.Add(panelText, 0,
+                      wx.ALL | wx.CENTRE | wx.ALIGN_CENTER_HORIZONTAL |\
+                      wx.ALIGN_CENTRE_VERTICAL)
+        panel.SetSizer(mainSizer)

@@ -16,6 +16,7 @@ limitations under the License.
 # pylint: disable=C0413
 import logging
 from twisted.internet import wxreactor
+from twisted.internet.task import LoopingCall
 wxreactor.install()
 from twisted.internet import reactor
 from twisted.web import server
@@ -51,7 +52,7 @@ class KeypadApp:
         self.__logger.addHandler(consoleStream)
 
         ## Instance of the keypad state object.
-        self.__stateObject = KeypadStateObject()
+        self.__stateObject = None
 
 
     ## Start the application, this will not exit until both the GUI and the
@@ -70,13 +71,18 @@ class KeypadApp:
         wxApp = wx.App()
         reactor.registerWxApp(wxApp)
 
-        panelFrame = ControlPanelFrame(config, self.__stateObject)
-        panelFrame.Show()
+        self.__stateObject = KeypadStateObject(config)
+
+        #panelFrame = ControlPanelFrame(config, self.__stateObject)
+        #panelFrame.Show()
 
         keypadApiCtrl = KeypadApiController(self.__logger, config,
                                             self.__stateObject)
         apiServer = server.Site(keypadApiCtrl)
         reactor.listenTCP(config.keypadController.networkPort, apiServer)
+
+        telemetry_looping_call = LoopingCall(self.__stateObject.CheckPanel)
+        telemetry_looping_call.start(0.01, now=False)
 
         reactor.run()
 

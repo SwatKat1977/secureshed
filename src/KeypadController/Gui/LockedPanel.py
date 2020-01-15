@@ -17,39 +17,29 @@ import wx
 
 
 ## Panel that implements a numbered keypad.
-class LockedPanel(wx.Panel):
+class LockedPanel(wx.Frame):
 
-    def __init__(self, parent):
-        super().__init__(parent)
+    def __init__(self, config):
+        frameSize = (config.gui.windowWidth,
+                     config.gui.windowHeight)
+        super().__init__(None, title="", size=frameSize)
 
-        self.SetBackgroundColour((212, 13, 13))
+        self.__config = config
 
-        '''
+        panel = wx.Panel(self)
+
+        panel.SetBackgroundColour((212, 13, 13))
+
         mainSizer = wx.GridSizer(1, 1, 5, 5)
 
         font = wx.Font(18, wx.FONTFAMILY_ROMAN, wx.FONTSTYLE_NORMAL,
                        wx.FONTWEIGHT_BOLD)
-        panelText = wx.StaticText(self, -1, "Keypad is LOCKED")
+        panelText = wx.StaticText(panel, -1, "Keypad is LOCKED")
         panelText.SetFont(font)
 
         panelText.CenterOnParent()
 
-        mainSizer.Add(panelText, 0, wx.ALL |wx.CENTRE | wx.ALIGN_CENTER_HORIZONTAL |\
-            wx.ALIGN_CENTRE_VERTICAL | wx.RESERVE_SPACE_EVEN_IF_HIDDEN | wx.EXPAND)
-        self.SetSizer(mainSizer)
-        '''
-
-        horizontalSizer = wx.BoxSizer(wx.HORIZONTAL)
-        mainSizer = wx.BoxSizer(wx.VERTICAL)
-
-        font = wx.Font(18, wx.FONTFAMILY_ROMAN, wx.FONTSTYLE_NORMAL,
-                       wx.FONTWEIGHT_BOLD)
-        panelText = wx.StaticText(self, -1, "Keypad is LOCKED")
-        panelText.SetFont(font)
-        horizontalSizer.Add(panelText, 0, wx.CENTER)
-
-        mainSizer.Add((0,0), 1, wx.EXPAND | wx.RESERVE_SPACE_EVEN_IF_HIDDEN)
-        mainSizer.Add(horizontalSizer, 0, wx.CENTER | wx.RESERVE_SPACE_EVEN_IF_HIDDEN)
-        mainSizer.Add((0,0), 1, wx.EXPAND | wx.RESERVE_SPACE_EVEN_IF_HIDDEN)
-
-        self.SetSizer(mainSizer)
+        mainSizer.Add(panelText, 0,
+                      wx.ALL | wx.CENTRE | wx.ALIGN_CENTER_HORIZONTAL |\
+                      wx.ALIGN_CENTRE_VERTICAL)
+        panel.SetSizer(mainSizer)
