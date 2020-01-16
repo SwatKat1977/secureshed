@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 '''
 import wx
+from twisted.internet import reactor
 
 
 ## Panel that implements an informational pane stating comms has been lost to
@@ -45,9 +46,21 @@ class CommsLostPanel(wx.Frame):
                       wx.ALIGN_CENTRE_VERTICAL)
         panel.SetSizer(mainSizer)
 
+        # make sure reactor.stop() is used to stop event loop
+        self.Bind(wx.EVT_CLOSE, self.__OnExit)
+
 
     def Display(self):
         self.Show()
         if self.__config.gui.fullscreen:
             self.ShowFullScreen(True)
             self.Maximize(True)
+
+
+    ## Exit event function when the application is closed.
+    #  @param self The object pointer.
+    #  @param event Unused, but required.
+    def __OnExit(self, event):
+        # pylint: disable=R0201
+        # pylint: disable=W0613
+        reactor.stop()

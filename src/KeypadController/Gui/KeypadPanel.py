@@ -15,6 +15,7 @@ limitations under the License.
 '''
 import json
 import wx
+from twisted.internet import reactor
 from common.APIClient.APIEndpointClient import APIEndpointClient
 from common.APIClient.HTTPStatusCode import HTTPStatusCode
 from common.APIClient.MIMEType import MIMEType
@@ -57,6 +58,9 @@ class KeypadPanel(wx.Frame):
         self.Bind(wx.EVT_TIMER, self.__TimeoutEvent, self.__sequenceTimer)
 
         self.__CreateUserInterface()
+
+        # make sure reactor.stop() is used to stop event loop
+        self.Bind(wx.EVT_CLOSE, self.__OnExit)
 
 
     def Display(self):
@@ -198,3 +202,12 @@ class KeypadPanel(wx.Frame):
 
         self.__ResetKeypad()
         self.__sequenceTimer.Stop()
+
+
+    ## Exit event function when the application is closed.
+    #  @param self The object pointer.
+    #  @param event Unused, but required.
+    def __OnExit(self, event):
+        # pylint: disable=R0201
+        # pylint: disable=W0613
+        reactor.stop()
