@@ -22,7 +22,6 @@ from twisted.internet import reactor
 from twisted.web import server
 import wx
 from ConfigurationManager import ConfigurationManager
-from Gui.ControlPanelFrame import ControlPanelFrame
 from KeypadApiController import KeypadApiController
 from KeypadStateObject import KeypadStateObject
 
@@ -73,16 +72,13 @@ class KeypadApp:
 
         self.__stateObject = KeypadStateObject(config)
 
-        #panelFrame = ControlPanelFrame(config, self.__stateObject)
-        #panelFrame.Show()
-
         keypadApiCtrl = KeypadApiController(self.__logger, config,
                                             self.__stateObject)
         apiServer = server.Site(keypadApiCtrl)
         reactor.listenTCP(config.keypadController.networkPort, apiServer)
 
-        telemetry_looping_call = LoopingCall(self.__stateObject.CheckPanel)
-        telemetry_looping_call.start(0.01, now=False)
+        checkPanelLoopingCall = LoopingCall(self.__stateObject.CheckPanel)
+        checkPanelLoopingCall.start(0.01, now=False)
 
         reactor.run()
 
