@@ -13,53 +13,76 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 '''
+# pylint: disable=C0413
 import logging
-import signal
-import sys
-from KeypadController.ConfigurationManager import ConfigurationManager
-from KeypadController.GuiThread import GuiThread
-from KeypadController.KeypadApiController import KeypadApiController
-from KeypadController.KeypadStateObject import KeypadStateObject
+from twisted.internet import wxreactor
+from twisted.internet.task import LoopingCall
+wxreactor.install()
+from twisted.internet import reactor
+from twisted.web import server
+import wx
+from ConfigurationManager import ConfigurationManager
+from KeypadApiController import KeypadApiController
+from KeypadStateObject import KeypadStateObject
 
 
+## The main application class for the keypad controller application.
 class KeypadApp:
-    __slots__ = ['__configMgr', '__guiThread', '__logger', '__stateObject']
+    # pylint: disable=R0903
 
+    ## __slots__ allow us to explicitly declare data members
+    __slots__ = ['__configMgr', '__logger', '__stateObject']
+
+
+    ## KeypadApp class constructor.
+    #  @param self The object pointer.
     def __init__(self):
+        ## Instance of a configuration manager class.
         self.__configMgr = None
-        self.__guiThread = None
 
         formatter = logging.Formatter("%(asctime)s [%(levelname)s] %(message)s",
                                       "%Y-%m-%d %H:%M:%S")
+
+        ## Instance of a logger.
         self.__logger = logging.getLogger('system log')
         consoleStream = logging.StreamHandler()
         consoleStream.setFormatter(formatter)
         self.__logger.setLevel(logging.DEBUG)
         self.__logger.addHandler(consoleStream)
 
-        self.__stateObject = KeypadStateObject()
+        ## Instance of the keypad state object.
+        self.__stateObject = None
 
 
-    def StartApp(self, keypadApiEndpoint):
+    ## Start the application, this will not exit until both the GUI and the
+    #  Twisted reactor have been destroyed.  The only exception is if any
+    #  elements of the startup fail (e.g. loading the configuration).
+    #  @param self The object pointer.
+    def StartApp(self):
 
         self.__configMgr = ConfigurationManager()
-        config = self.__configMgr.ParseConfigFile('KeypadController/configuration.json')
+        config = self.__configMgr.ParseConfigFile('configuration.json')
 
         if not config:
-            print(f'[ERROR] {self.__configMgr.lastErrorMsg}')
-            sys.exit()
+            self.__logger.error(self.__configMgr.lastErrorMsg)
+            return
 
-        keypadApiController = KeypadApiController(self.__logger, config,
-                                                  keypadApiEndpoint,
-                                                  self.__stateObject)
+        wxApp = wx.App()
+        reactor.registerWxApp(wxApp)
 
-        signal.signal(signal.SIGINT, self.__SignalHandler)
+        self.__stateObject = KeypadStateObject(config)
 
-        self.__guiThread = GuiThread(self, config, self.__stateObject)
+        keypadApiCtrl = KeypadApiController(self.__logger, config,
+                                            self.__stateObject)
+        apiServer = server.Site(keypadApiCtrl)
+        reactor.listenTCP(config.keypadController.networkPort, apiServer)
 
+        checkPanelLoopingCall = LoopingCall(self.__stateObject.CheckPanel)
+        checkPanelLoopingCall.start(0.01, now=False)
 
-    def __SignalHandler(self, signum, frame):
-        #pylint: disable=unused-argument
+        reactor.run()
 
-        self.__logger.info('Keypad application stopped')
-        sys.exit(1)
+    ## Stop the application.
+    #  @param self The object pointer.
+    def StopApp(self):
+        self.__logger.info('Stopping keypad controller, cleaning up...')

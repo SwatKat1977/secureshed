@@ -6,7 +6,8 @@
     },
     "keypadController":
     {
-        "authorisationKey": "keypad2019"
+        "authorisationKey": "keypad2019",
+        "networkPort": 1100
     },
     "gui":
     {
