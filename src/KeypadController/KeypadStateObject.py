@@ -100,3 +100,6 @@ class KeypadStateObject:
 
         elif panel == KeypadStateObject.PanelType.Keypad:
             self.__keypadPanel.Display()
+
+        # The displayed panel has changed, we can now reset newPanel.
+        self.__newPanel = self.__currentPanel
