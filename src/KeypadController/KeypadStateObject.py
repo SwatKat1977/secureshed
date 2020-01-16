@@ -14,10 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 '''
 import enum
+import time
+from Gui.KeypadPanel import KeypadPanel
+from Gui.LockedPanel import LockedPanel
+from Gui.CommsLostPanel import CommsLostPanel
 
 
 class KeypadStateObject:
-    __slots__ = ['__currentPanel', '__keypadCode', '__processingQueue']
+    __slots__ = ['__config', '__currentPanel', '__keypadCode', '__newPanel',
+                 '__commsLostPanel', '__keypadLockedPanel',
+                 '__keypadPanel']
 
     class PanelType(enum.Enum):
         KeypadIsLocked = 0
@@ -33,25 +39,64 @@ class KeypadStateObject:
         self.__keypadCode = newCode
 
     @property
+    def newPanel(self):
+        return self.__newPanel
+
+    @newPanel.setter
+    def newPanel(self, newPanelType):
+        self.__newPanel = newPanelType
+
+    @property
     def currentPanel(self):
         return self.__currentPanel
 
-    @currentPanel.setter
-    def currentPanel(self, newPanelType):
-        self.__currentPanel = newPanelType
-        self.__processingQueue.put(newPanelType)
 
-
-    @property
-    def processingQueue(self):
-        return self.__processingQueue
-
-    @processingQueue.setter
-    def processingQueue(self, processingQueue):
-        self.__processingQueue = processingQueue
-
-
-    def __init__(self):
+    def __init__(self, config):
+        self.__config = config
+        self.__currentPanel = (None, None)
+        self.__newPanel = (self.PanelType.CommunicationsLost, {})
         self.__keypadCode = ''
-        self.__currentPanel = (self.PanelType.CommunicationsLost, {})
-        self.__processingQueue = None
+
+        self.__commsLostPanel = CommsLostPanel(self.__config)
+        self.__keypadLockedPanel = LockedPanel(self.__config)
+        self.__keypadPanel = KeypadPanel(self.__config)
+
+
+    ## Function that is called to check if the panel has changed or needs to
+    ## be changed (e.g. keypad lock expired).
+    #  @param self The object pointer.
+    def CheckPanel(self):
+        if self.__currentPanel[0] != self.__newPanel[0]:
+            self.__currentPanel = self.__newPanel
+            self.__UpdateDisplayedPanel()
+            return
+
+        # If the keypad is currently locked then we need to check to see if
+        # the keypad lock has timed out, if it has then reset the panel.
+        if self.__currentPanel[0] == KeypadStateObject.PanelType.KeypadIsLocked:
+            currTime = time.time()
+
+            if currTime >= self.__currentPanel[1]:
+                keypadPanel = (KeypadStateObject.PanelType.Keypad, {})
+                self.__currentPanel = keypadPanel
+                self.__UpdateDisplayedPanel()
+
+
+    ## Display a new panel by firstly hiding all of panels and then after that
+    ## show just the expected one.
+    #  @param self The object pointer.
+    def __UpdateDisplayedPanel(self):
+        self.__commsLostPanel.Hide()
+        self.__keypadPanel.Hide()
+        self.__keypadLockedPanel.Hide()
+
+        panel, _ = self.__currentPanel
+
+        if panel == KeypadStateObject.PanelType.KeypadIsLocked:
+            self.__keypadLockedPanel.Display()
+
+        elif panel == KeypadStateObject.PanelType.CommunicationsLost:
+            self.__commsLostPanel.Display()
+
+        elif panel == KeypadStateObject.PanelType.Keypad:
+            self.__keypadPanel.Display()
