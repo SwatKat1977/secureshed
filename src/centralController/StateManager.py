@@ -232,7 +232,7 @@ class StateManager:
                     elif response == 'triggerAlarm':
                         if self.__currAlarmState != self.AlarmState.Triggered:
                             self.__logger.info('|=> Alarm has been triggered!')
-                            self.__TriggerAlarm()
+                            self.__TriggerAlarm(noGraceTime=True)
 
                     elif response == 'resetAttemptAccount':
                         self.__failedEntryAttempts = 0
@@ -240,10 +240,14 @@ class StateManager:
 
     ## Function to handle the alarm being triggered.
     #  @param self The object pointer.
-    def __TriggerAlarm(self):
+    def __TriggerAlarm(self, noGraceTime=False):
         self.__currAlarmState = self.AlarmState.Activated
 
-        alarmSetEvtBody = {'activationTimestamp': time.time()}
+        alarmSetEvtBody = {
+            'activationTimestamp': time.time(),
+            'noGraceTime': noGraceTime
+        }
+
         activateEvt = Event(Evts.EvtType.AlarmActivated, alarmSetEvtBody)
         self.__eventMgr.QueueEvent(activateEvt)
 

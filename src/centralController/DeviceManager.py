@@ -176,6 +176,9 @@ class DeviceManager:
 
     #  @param self The object pointer.
     def __ProcessAlarmActivatedEvent(self, eventInst):
+        if eventInst.body['noGraceTime']:
+            return
+
         sensors = [s for s in self.__devices if s.hardware == 'sensor']
         for sensor in sensors:
             try:
