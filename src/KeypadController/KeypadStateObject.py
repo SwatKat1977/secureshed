@@ -23,7 +23,9 @@ from Gui.CommsLostPanel import CommsLostPanel
 class KeypadStateObject:
     __slots__ = ['__config', '__currentPanel', '__keypadCode', '__newPanel',
                  '__commsLostPanel', '__keypadLockedPanel',
-                 '__keypadPanel']
+                 '__keypadPanel', '__lastReconnectTime']
+
+    CommLostRetryInterval = 5
 
     class PanelType(enum.Enum):
         KeypadIsLocked = 0
@@ -61,6 +63,8 @@ class KeypadStateObject:
         self.__keypadLockedPanel = LockedPanel(self.__config)
         self.__keypadPanel = KeypadPanel(self.__config)
 
+        self.__lastReconnectTime = 0
+
 
     ## Function that is called to check if the panel has changed or needs to
     ## be changed (e.g. keypad lock expired).
@@ -80,6 +84,14 @@ class KeypadStateObject:
                 keypadPanel = (KeypadStateObject.PanelType.Keypad, {})
                 self.__currentPanel = keypadPanel
                 self.__UpdateDisplayedPanel()
+
+            return
+
+        if self.__currentPanel[0] == KeypadStateObject.PanelType.CommunicationsLost:
+            curTime = time.time()
+            if curTime > self.__lastReconnectTime + self.CommLostRetryInterval:
+                self.__lastReconnectTime = curTime
+                print(f'TODO comms lost send: {curTime}')
 
 
     ## Display a new panel by firstly hiding all of panels and then after that
