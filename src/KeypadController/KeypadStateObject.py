@@ -15,15 +15,21 @@ limitations under the License.
 '''
 import enum
 import time
+from twisted.internet import reactor
+from common.APIClient.APIEndpointClient import APIEndpointClient
+from common.APIClient.HTTPStatusCode import HTTPStatusCode
+from common.APIClient.MIMEType import MIMEType
 from Gui.KeypadPanel import KeypadPanel
 from Gui.LockedPanel import LockedPanel
 from Gui.CommsLostPanel import CommsLostPanel
 
 
 class KeypadStateObject:
-    __slots__ = ['__config', '__currentPanel', '__keypadCode', '__newPanel',
-                 '__commsLostPanel', '__keypadLockedPanel',
-                 '__keypadPanel']
+    __slots__ = ['__centralCtrlApiClient', '__config', '__currentPanel',
+                 '__keypadCode', '__logger', '__newPanel', '__commsLostPanel',
+                 '__keypadLockedPanel', '__keypadPanel', '__lastReconnectTime']
+
+    CommLostRetryInterval = 5
 
     class PanelType(enum.Enum):
         KeypadIsLocked = 0
@@ -51,7 +57,7 @@ class KeypadStateObject:
         return self.__currentPanel
 
 
-    def __init__(self, config):
+    def __init__(self, config, logger):
         self.__config = config
         self.__currentPanel = (None, None)
         self.__newPanel = (self.PanelType.CommunicationsLost, {})
@@ -60,6 +66,13 @@ class KeypadStateObject:
         self.__commsLostPanel = CommsLostPanel(self.__config)
         self.__keypadLockedPanel = LockedPanel(self.__config)
         self.__keypadPanel = KeypadPanel(self.__config)
+
+        self.__lastReconnectTime = 0
+
+        self.__logger = logger
+
+        endpoint = self.__config.centralController.endpoint
+        self.__centralCtrlApiClient = APIEndpointClient(endpoint)
 
 
     ## Function that is called to check if the panel has changed or needs to
@@ -80,6 +93,47 @@ class KeypadStateObject:
                 keypadPanel = (KeypadStateObject.PanelType.Keypad, {})
                 self.__currentPanel = keypadPanel
                 self.__UpdateDisplayedPanel()
+
+            return
+
+        # If the current panel is 'communications lost' then try to send a
+        # please respond message to the central controller only at the alotted
+        # intervals.
+        if self.__currentPanel[0] == KeypadStateObject.PanelType.CommunicationsLost:
+            curTime = time.time()
+            if curTime > self.__lastReconnectTime + self.CommLostRetryInterval:
+                self.__lastReconnectTime = curTime
+                reactor.callFromThread(self.__SendPleaseRespondMsg)
+
+
+    #  @param self The object pointer.
+    def __SendPleaseRespondMsg(self):
+
+        additionalHeaders = {
+            'authorisationKey' : self.__config.centralController.authKey
+        }
+
+        response = self.__centralCtrlApiClient.SendPostMsg(
+            'pleaseRespondToKeypad', MIMEType.JSON, additionalHeaders)
+
+        if response is None:
+            self.__logger.warn('failed to transmit, reason : %s',
+                               self.__centralCtrlApiClient.LastErrMsg)
+            return
+
+        # 400 Bad Request : Missing or invalid json body or validation failed.
+        if response.status_code == HTTPStatusCode.BadRequest:
+            self.__logger.warn('failed to transmit, reason : BadRequest')
+            return
+
+        # 401 Unauthenticated : Missing or invalid authentication key.
+        if response.status_code == HTTPStatusCode.Unauthenticated:
+            self.__logger.warn('failed to transmit, reason : Unauthenticated')
+            return
+
+        # 200 OK : code accepted, code incorrect or code refused.
+        if response.status_code == HTTPStatusCode.OK:
+            return
 
 
     ## Display a new panel by firstly hiding all of panels and then after that

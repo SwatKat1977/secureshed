@@ -47,6 +47,132 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Please Respond to Keypad",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "authorisationKey",
+								"value": "ccontroller2019",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"keySequence\" : \"124\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:2020/pleaseRespondToKeypad",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "2020",
+							"path": [
+								"pleaseRespondToKeypad"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Keypad Controller",
+			"item": [
+				{
+					"name": "Receive Central Controller Ping",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "authorisationKey",
+								"type": "text",
+								"value": "keypad2019"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"keySequence\" : \"124\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:1100/receiveCentralControllerPing",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "1100",
+							"path": [
+								"receiveCentralControllerPing"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Receive Keypad Lock",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "authorisationKey",
+								"type": "text",
+								"value": "keypad2019"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"lockTime\" : 100000000024\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:1100/receiveKeypadLock",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "1100",
+							"path": [
+								"receiveKeypadLock"
+							]
+						}
+					},
+					"response": []
 				}
 			],
 			"protocolProfileBehavior": {}

@@ -70,7 +70,7 @@ class KeypadApp:
         wxApp = wx.App()
         reactor.registerWxApp(wxApp)
 
-        self.__stateObject = KeypadStateObject(config)
+        self.__stateObject = KeypadStateObject(config, self.__logger)
 
         keypadApiCtrl = KeypadApiController(self.__logger, config,
                                             self.__stateObject)

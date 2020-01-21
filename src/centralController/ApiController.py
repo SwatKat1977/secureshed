@@ -1,5 +1,5 @@
 '''
-Copyright 2019 Secure Shed Project Dev Team
+Copyright 2019-2020 Secure Shed Project Dev Team
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -47,6 +47,10 @@ class ApiController:
         self.__endpoint.add_url_rule('/receiveKeyCode', methods=['POST'],
                                      view_func=self.__ReceiveKeyCode)
 
+        # Add route : /receiveKeyCode
+        self.__endpoint.add_url_rule('/pleaseRespondToKeypad', methods=['POST'],
+                                     view_func=self.__PleaseRespondToKeypad)
+
 
     ## API route : receiveKeyCode
     #  Recieve a key code from the keypad.  This is for unlocking/disabling the
@@ -67,26 +71,11 @@ class ApiController:
                 mimetype=MIMEType.Text)
             return response
 
-        # Verify that an authorisation key exists in the requet header, if not
-        # then return a 401 error with a human-readable reasoning.
-        if schemas.AUTH_KEY not in request.headers:
-            self.__logger.critical('Missing controller auth key from keypad')
-            errMsg = 'Authorisation key is missing'
-            return self.__endpoint.response_class(
-                response=errMsg, status=HTTPStatusCode.Unauthenticated,
-                mimetype=MIMEType.Text)
-
-        authorisationKey = request.headers[schemas.AUTH_KEY]
-
-        # As the authorisation key functionality isn't currently implemented I
-        # have hard-coded as 'authKey'.  If the key isn't valid then the error
-        # code of 401 (Unauthenticated) is returned.
-        if authorisationKey != self.__config.centralControllerApi.authKey:
-            self.__logger.critical('Invalid controller auth key from keypad')
-            errMsg = 'Authorisation key is invalid'
-            return self.__endpoint.response_class(
-                response=errMsg, status=HTTPStatusCode.Forbidden,
-                mimetype=MIMEType.Text)
+        # Validate the request to ensure that the auth key is firstly present,
+        # then if it's valid.  None is returned if successful.
+        validateReturn = self.__ValidateAuthKey()
+        if validateReturn is not None:
+            return validateReturn
 
         # Validate that the json body conforms to the expected schema.
         # If the message isn't valid then a 400 error should be generated.
@@ -108,15 +97,43 @@ class ApiController:
             mimetype=MIMEType.Text)
 
 
-    ## Generate a receive key code response message.
     #  @param self The object pointer.
-    #  @param returnCode The return code for the response.
-    #  @param actions List of actions to do with the response.
-    #  @return Returns a JSON string with return code and actions.
-    def __GenerateReceiveKeyCodeResponse(self, returnCode, actions):
-        responseJson = \
-        {
-            schemas.receiveKeyCodeResponse.ReturnCode : returnCode,
-            schemas.receiveKeyCodeResponse.Actions : actions
-        }
-        return json.dumps(responseJson)
+    def __PleaseRespondToKeypad(self):
+        # Validate the request to ensure that the auth key is firstly present,
+        # then if it's valid.  None is returned if successful.
+        validateReturn = self.__ValidateAuthKey()
+        if validateReturn is not None:
+            return validateReturn
+
+        sendAlivePingEvt = Event(Evts.EvtType.KeypadApiSendAlivePing)
+        self.__eventMgr.QueueEvent(sendAlivePingEvt)
+
+        return self.__endpoint.response_class(
+            response='Ok', status=HTTPStatusCode.OK,
+            mimetype=MIMEType.Text)
+
+
+    #  @param self The object pointer.
+    def __ValidateAuthKey(self):
+        # Verify that an authorisation key exists in the requet header, if not
+        # then return a 401 error with a human-readable reasoning.
+        if schemas.AUTH_KEY not in request.headers:
+            self.__logger.critical('Missing controller auth key from keypad')
+            errMsg = 'Authorisation key is missing'
+            return self.__endpoint.response_class(
+                response=errMsg, status=HTTPStatusCode.Unauthenticated,
+                mimetype=MIMEType.Text)
+
+        authorisationKey = request.headers[schemas.AUTH_KEY]
+
+        # Verify the authorisation key against what is specified in the
+        # configuration file.  If the key isn't valid then the error
+        # code of 403 (Forbidden) is returned.
+        if authorisationKey != self.__config.centralControllerApi.authKey:
+            self.__logger.critical('Invalid controller auth key from keypad')
+            errMsg = 'Authorisation key is invalid'
+            return self.__endpoint.response_class(
+                response=errMsg, status=HTTPStatusCode.Forbidden,
+                mimetype=MIMEType.Text)
+
+        return None
