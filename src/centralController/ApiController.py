@@ -114,4 +114,40 @@ class ApiController:
 
     #  @param self The object pointer.
     def __PleaseRespondToKeypad(self):
-        pass
+        validateReturn = self.__ValidateAuthKey()
+
+        if validateReturn is not None:
+            return validateReturn
+
+        sendAlivePingEvt = Event(Evts.EvtType.KeypadApiSendAlivePing)
+        self.__eventMgr.QueueEvent(sendAlivePingEvt)
+
+        return self.__endpoint.response_class(
+            response='Ok', status=HTTPStatusCode.OK,
+            mimetype=MIMEType.Text)
+
+
+    #  @param self The object pointer.
+    def __ValidateAuthKey(self):
+        # Verify that an authorisation key exists in the requet header, if not
+        # then return a 401 error with a human-readable reasoning.
+        if schemas.AUTH_KEY not in request.headers:
+            self.__logger.critical('Missing controller auth key from keypad')
+            errMsg = 'Authorisation key is missing'
+            return self.__endpoint.response_class(
+                response=errMsg, status=HTTPStatusCode.Unauthenticated,
+                mimetype=MIMEType.Text)
+
+        authorisationKey = request.headers[schemas.AUTH_KEY]
+
+        # As the authorisation key functionality isn't currently implemented I
+        # have hard-coded as 'authKey'.  If the key isn't valid then the error
+        # code of 401 (Unauthenticated) is returned.
+        if authorisationKey != self.__config.centralControllerApi.authKey:
+            self.__logger.critical('Invalid controller auth key from keypad')
+            errMsg = 'Authorisation key is invalid'
+            return self.__endpoint.response_class(
+                response=errMsg, status=HTTPStatusCode.Forbidden,
+                mimetype=MIMEType.Text)
+
+        return None
