@@ -114,7 +114,7 @@ class KeypadStateObject:
         }
 
         response = self.__centralCtrlApiClient.SendPostMsg(
-            'pleaseRespondMsg', MIMEType.JSON, additionalHeaders)
+            'pleaseRespondToKeypad', MIMEType.JSON, additionalHeaders)
 
         if response is None:
             self.__logger.warn('failed to transmit, reason : %s',
