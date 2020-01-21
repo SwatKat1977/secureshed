@@ -1,5 +1,5 @@
 '''
-Copyright 2019 Secure Shed Project Dev Team
+Copyright 2019-2020 Secure Shed Project Dev Team
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -46,6 +46,10 @@ class ApiController:
         # Add route : /receiveKeyCode
         self.__endpoint.add_url_rule('/receiveKeyCode', methods=['POST'],
                                      view_func=self.__ReceiveKeyCode)
+
+        # Add route : /receiveKeyCode
+        self.__endpoint.add_url_rule('/pleaseRespondToKeypad', methods=['POST'],
+                                     view_func=self.__PleaseRespondToKeypad)
 
 
     ## API route : receiveKeyCode
@@ -108,15 +112,6 @@ class ApiController:
             mimetype=MIMEType.Text)
 
 
-    ## Generate a receive key code response message.
     #  @param self The object pointer.
-    #  @param returnCode The return code for the response.
-    #  @param actions List of actions to do with the response.
-    #  @return Returns a JSON string with return code and actions.
-    def __GenerateReceiveKeyCodeResponse(self, returnCode, actions):
-        responseJson = \
-        {
-            schemas.receiveKeyCodeResponse.ReturnCode : returnCode,
-            schemas.receiveKeyCodeResponse.Actions : actions
-        }
-        return json.dumps(responseJson)
+    def __PleaseRespondToKeypad(self):
+        pass
