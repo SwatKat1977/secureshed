@@ -71,26 +71,11 @@ class ApiController:
                 mimetype=MIMEType.Text)
             return response
 
-        # Verify that an authorisation key exists in the requet header, if not
-        # then return a 401 error with a human-readable reasoning.
-        if schemas.AUTH_KEY not in request.headers:
-            self.__logger.critical('Missing controller auth key from keypad')
-            errMsg = 'Authorisation key is missing'
-            return self.__endpoint.response_class(
-                response=errMsg, status=HTTPStatusCode.Unauthenticated,
-                mimetype=MIMEType.Text)
-
-        authorisationKey = request.headers[schemas.AUTH_KEY]
-
-        # As the authorisation key functionality isn't currently implemented I
-        # have hard-coded as 'authKey'.  If the key isn't valid then the error
-        # code of 401 (Unauthenticated) is returned.
-        if authorisationKey != self.__config.centralControllerApi.authKey:
-            self.__logger.critical('Invalid controller auth key from keypad')
-            errMsg = 'Authorisation key is invalid'
-            return self.__endpoint.response_class(
-                response=errMsg, status=HTTPStatusCode.Forbidden,
-                mimetype=MIMEType.Text)
+        # Validate the request to ensure that the auth key is firstly present,
+        # then if it's valid.  None is returned if successful.
+        validateReturn = self.__ValidateAuthKey()
+        if validateReturn is not None:
+            return validateReturn
 
         # Validate that the json body conforms to the expected schema.
         # If the message isn't valid then a 400 error should be generated.
@@ -114,8 +99,9 @@ class ApiController:
 
     #  @param self The object pointer.
     def __PleaseRespondToKeypad(self):
+        # Validate the request to ensure that the auth key is firstly present,
+        # then if it's valid.  None is returned if successful.
         validateReturn = self.__ValidateAuthKey()
-
         if validateReturn is not None:
             return validateReturn
 
@@ -140,9 +126,9 @@ class ApiController:
 
         authorisationKey = request.headers[schemas.AUTH_KEY]
 
-        # As the authorisation key functionality isn't currently implemented I
-        # have hard-coded as 'authKey'.  If the key isn't valid then the error
-        # code of 401 (Unauthenticated) is returned.
+        # Verify the authorisation key against what is specified in the
+        # configuration file.  If the key isn't valid then the error
+        # code of 403 (Forbidden) is returned.
         if authorisationKey != self.__config.centralControllerApi.authKey:
             self.__logger.critical('Invalid controller auth key from keypad')
             errMsg = 'Authorisation key is invalid'
