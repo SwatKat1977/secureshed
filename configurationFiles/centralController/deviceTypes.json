@@ -1,0 +1,16 @@
+{
+    "deviceTypes": [
+        {
+            "name": "GenericAlarmSiren",
+            "enabled": true
+        },
+        {
+            "name": "MagneticContactSensor",
+            "enabled": false
+        },
+        {
+            "name": "InvalidForTesting",
+            "enabled": true
+        }
+    ]
+}
