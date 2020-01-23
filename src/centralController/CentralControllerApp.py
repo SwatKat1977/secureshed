@@ -96,6 +96,11 @@ class CentralControllerApp:
         # Attempt to load the device types plug-ins, if a plug-in cannot be
         # found or is invalid then a warning is logged and it's not loaded.
         deviceTypeMgr = DeviceTypeManager(self.__logger)
+        deviceTypesCfg = deviceTypeMgr.ReadDeviceTypesConfig('../configurationFiles/centralController/deviceTypes.json')
+        if not deviceTypesCfg:
+            self.__logger.error(deviceTypeMgr.lastErrorMsg)
+            sys.exit(1)
+
         deviceTypeMgr.LoadDeviceTypes()
 
         # Load the devices configuration file which contains the devices

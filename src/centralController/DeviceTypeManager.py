@@ -13,19 +13,84 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 '''
+import collections
+import json
 import importlib
+import jsonschema
 from centralController.DeviceTypes.BaseDeviceType import BaseDeviceType
 
 
 class DeviceTypeManager:
     # pylint: disable=R0903
-    __slots__ = ['__deviceTypes', '__expectedDeviceTypes', '__logger']
+    __slots__ = ['__deviceTypes', '__deviceTypesCfg', '__expectedDeviceTypes',
+                 '__lastErrorMsg', '__logger']
+
+
+    DeviceTypeCfg = collections.namedtuple('DeviceTypeCfg', 'name enabled')
+
+    DeviceTypesCfg = collections.namedtuple('DeviceTypesCfg', 'devices')
+
+    # Json devices array element.
+    JsonDeviceTypesArray = 'deviceTypes'
+
+    # Json top element : Device type.
+    JsonTopElement_DeviceType = 'deviceType'
+
+    JsonDeviceTypeElement_Name = 'name'
+    JsonDeviceTypeElement_Enabled = 'enabled'
+
+    ## Device types configuration file's Json schema.
+    JsonSchema = \
+    {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+
+        "definitions":
+        {
+            JsonTopElement_DeviceType:
+            {
+                "type" : "object",
+                "properties":
+                {
+                    JsonDeviceTypeElement_Name:
+                    {
+                        "type": "string"
+                    },
+                    JsonDeviceTypeElement_Enabled:
+                    {
+                        "type": "boolean"
+                    }
+                },
+                "additionalProperties": False,
+                "required":
+                [
+                    JsonDeviceTypeElement_Name,
+                    JsonDeviceTypeElement_Enabled
+                ]
+            }
+        },
+        "type" : "object",
+        "properties":
+        {
+            JsonDeviceTypesArray:
+            {
+                "type": "array",
+                "items": {"$ref": f"#/definitions/{JsonTopElement_DeviceType}"}
+            }
+        },
+        "required" : [JsonDeviceTypesArray],
+        "additionalProperties" : False
+    }
 
     @property
     def deviceTypes(self):
         return self.__deviceTypes
 
+    @property
+    def lastErrorMsg(self):
+        return self.__lastErrorMsg
 
+
+    #  @param self The object pointer.
     def __init__(self, logger):
         self.__logger = logger
 
@@ -37,7 +102,54 @@ class DeviceTypeManager:
 
         self.__deviceTypes = {}
 
+        self.__lastErrorMsg = ''
 
+        self.__deviceTypesCfg = None
+
+
+    #  @param self The object pointer.
+    def ReadDeviceTypesConfig(self, filename):
+        self.__lastErrorMsg = ''
+
+        try:
+            with open(filename) as fileHandle:
+                fileContents = fileHandle.read()
+
+        except IOError as excpt:
+            self.__lastErrorMsg = "Unable to read device types file '" + \
+                f"{filename}', reason: {excpt.strerror}"
+            return False
+
+        try:
+            configJson = json.loads(fileContents)
+
+        except json.JSONDecodeError as excpt:
+            self.__lastErrorMsg = "Unable to parse device types file" + \
+                f"{filename}, reason: {excpt}"
+            return False
+
+        try:
+            jsonschema.validate(instance=configJson,
+                                schema=self.JsonSchema)
+
+        except jsonschema.exceptions.SchemaError:
+            self.__lastErrorMsg = f"FATAL internal error, schema file invalid!"
+            return False
+
+        except jsonschema.exceptions.ValidationError as ex:
+            self.__lastErrorMsg = "Schema validation failed for devices " + \
+                f"file '{filename} failed. " + ex.message
+            return False
+
+        self.__logger.warn('deviceTypes:')
+        for deviceType in configJson[self.JsonDeviceTypesArray]:
+            self.__logger.warn(deviceType)
+
+        self.__deviceTypesCfg = configJson
+        return True
+
+
+    #  @param self The object pointer.
     def LoadDeviceTypes(self):
         defaultModulePath = 'centralController.DeviceTypes.'
 
