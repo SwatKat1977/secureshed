@@ -25,10 +25,7 @@ class DeviceTypeManager:
     __slots__ = ['__deviceTypes', '__deviceTypesCfg', '__expectedDeviceTypes',
                  '__lastErrorMsg', '__logger']
 
-
     DeviceTypeCfg = collections.namedtuple('DeviceTypeCfg', 'name enabled')
-
-    DeviceTypesCfg = collections.namedtuple('DeviceTypesCfg', 'devices')
 
     # Json devices array element.
     JsonDeviceTypesArray = 'deviceTypes'
@@ -141,11 +138,14 @@ class DeviceTypeManager:
                 f"file '{filename} failed. " + ex.message
             return False
 
-        self.__logger.warn('deviceTypes:')
+        # Populate the device types from the configuration file.
+        self.__deviceTypesCfg = []
         for deviceType in configJson[self.JsonDeviceTypesArray]:
-            self.__logger.warn(deviceType)
+            deviceTypeEntry = self.DeviceTypeCfg(
+                name=deviceType[self.JsonDeviceTypeElement_Name],
+                enabled=deviceType[self.JsonDeviceTypeElement_Enabled])
+            self.__deviceTypesCfg.append(deviceTypeEntry)
 
-        self.__deviceTypesCfg = configJson
         return True
 
 
