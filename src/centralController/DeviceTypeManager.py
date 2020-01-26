@@ -22,8 +22,8 @@ from centralController.DeviceTypes.BaseDeviceType import BaseDeviceType
 
 class DeviceTypeManager:
     # pylint: disable=R0903
-    __slots__ = ['__deviceTypes', '__deviceTypesCfg', '__expectedDeviceTypes',
-                 '__lastErrorMsg', '__logger']
+    __slots__ = ['__deviceTypes', '__expectedTypes', '__lastErrorMsg',
+                 '__logger']
 
     DeviceTypeCfg = collections.namedtuple('DeviceTypeCfg', 'name enabled')
 
@@ -91,17 +91,11 @@ class DeviceTypeManager:
     def __init__(self, logger):
         self.__logger = logger
 
-        self.__expectedDeviceTypes = {
-            'GenericAlarmSiren': None,
-            'MagneticContactSensor': None,
-            'InvalidForTesting': None
-        }
+        self.__expectedTypes = []
 
         self.__deviceTypes = {}
 
         self.__lastErrorMsg = ''
-
-        self.__deviceTypesCfg = None
 
 
     #  @param self The object pointer.
@@ -139,12 +133,11 @@ class DeviceTypeManager:
             return False
 
         # Populate the device types from the configuration file.
-        self.__deviceTypesCfg = []
         for deviceType in configJson[self.JsonDeviceTypesArray]:
             deviceTypeEntry = self.DeviceTypeCfg(
                 name=deviceType[self.JsonDeviceTypeElement_Name],
                 enabled=deviceType[self.JsonDeviceTypeElement_Enabled])
-            self.__deviceTypesCfg.append(deviceTypeEntry)
+            self.__expectedTypes.append(deviceTypeEntry)
 
         return True
 
@@ -153,35 +146,43 @@ class DeviceTypeManager:
     def LoadDeviceTypes(self):
         defaultModulePath = 'centralController.DeviceTypes.'
 
-        for device in self.__expectedDeviceTypes:
-            moduleName = f'{defaultModulePath}{device}'
+        for device in self.__expectedTypes:
+            deviceName = device.name
+
+            if not device.enabled:
+                msg = f"Plug-in for device type '{deviceName}' is disabled" +\
+                       " so loading won't be attempted."
+                self.__logger.warn(msg)
+                continue
+
+            moduleName = f'{defaultModulePath}{deviceName}'
 
             try:
                 importedModule = importlib.import_module(moduleName)
 
             except ModuleNotFoundError:
-                self.__logger.warn(f"No plug-in for device type '{device}'," +\
+                self.__logger.warn(f"No plug-in for device type '{deviceName}'," +\
                     " it has been removed from the devices list.")
                 continue
 
             except NameError:
-                self.__logger.warn(f"Device type '{device}' Plug-in has a " +\
+                self.__logger.warn(f"Device type '{deviceName}' Plug-in has a " +\
                     "syntax error, it has been removed from the devices list.")
                 continue
 
             try:
-                importedCls = getattr(importedModule, device)
+                importedCls = getattr(importedModule, deviceName)
 
                 valid = BaseDeviceType in importedCls.__bases__
 
                 if not valid:
-                    self.__logger.warn(f"Plug-in for device type '{device}'" +\
+                    self.__logger.warn(f"Plug-in for device type '{deviceName}'" +\
                         " is not derived from plug-in class.  It cannot be " +\
                          "used and was removed from the devices list.")
                     continue
 
                 self.__deviceTypes[device] = importedCls
-                self.__logger.info(f"Loaded plug-in for device type '{device}'")
+                self.__logger.info(f"Loaded plug-in for device type '{deviceName}'")
 
             except AttributeError:
                 pass
