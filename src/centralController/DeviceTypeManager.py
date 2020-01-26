@@ -181,7 +181,7 @@ class DeviceTypeManager:
                          "used and was removed from the devices list.")
                     continue
 
-                self.__deviceTypes[device] = importedCls
+                self.__deviceTypes[deviceName] = importedCls
                 self.__logger.info(f"Loaded plug-in for device type '{deviceName}'")
 
             except AttributeError:
