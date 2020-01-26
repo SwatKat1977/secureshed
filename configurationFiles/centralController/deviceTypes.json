@@ -6,7 +6,7 @@
         },
         {
             "name": "MagneticContactSensor",
-            "enabled": false
+            "enabled": true
         },
         {
             "name": "InvalidForTesting",
