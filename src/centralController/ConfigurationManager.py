@@ -42,6 +42,7 @@ class ConfigurationManager:
     # -- General settings sub-elements --
     # -----------------------------
     JSON_GeneralSettingsDevicesConfigFile = 'devicesConfigFile'
+    JSON_GeneralSettingsDeviceTypesConfigFile = 'deviceTypesConfigFile'
 
     # ------------------------------------------
     # -- Failed attempt tesponse sub-elements --
@@ -109,8 +110,7 @@ class ConfigurationManager:
         centralApi = self.__ProcessCentralControllerSection(centralCtrlApiSect)
 
         generalSetting = configJson[self.JSON_GeneralSettings]
-        devicesCfgFile = generalSetting[self.JSON_GeneralSettingsDevicesConfigFile]
-        generalSettingsCfg = Configuration.GeneralSettings(devicesCfgFile)
+        generalSettingsCfg = self.__ProcessGeneralSection(generalSetting)
 
         # Populate the keypad controller configuration items.
         keypadController = configJson[self.JSON_KeypadController]
@@ -141,6 +141,15 @@ class ConfigurationManager:
         networkPort = sect[self.JSON_CentralCtrlApiPort]
         authKey = sect[self.JSON_CentralCtrlApiAuthKey]
         return Configuration.CentralControllerApiCfg(networkPort, authKey)
+
+
+    ## Process the general settings section.
+    #  @param self The object pointer.
+    def __ProcessGeneralSection(self, sect):
+        devicesCfgFile = sect[self.JSON_GeneralSettingsDevicesConfigFile]
+        deviceTypesConfigFile = sect[self.JSON_GeneralSettingsDeviceTypesConfigFile]
+        return Configuration.GeneralSettings(devicesCfgFile,
+                                             deviceTypesConfigFile)
 
 
     #  @param self The object pointer.

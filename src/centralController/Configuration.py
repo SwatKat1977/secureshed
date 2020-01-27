@@ -21,7 +21,8 @@ class Configuration:
                  '__generalSettings', '__centralControllerApi',
                  '__keypadController']
 
-    GeneralSettings = collections.namedtuple('GeneralSettings', 'devicesConfigFile')
+    GeneralSettings = collections.namedtuple('GeneralSettings',
+                                             'devicesConfigFile deviceTypesConfigFile')
 
     KeypadControllerCfg = collections.namedtuple('KeypadControllerCfg', 'endpoint authKey')
 

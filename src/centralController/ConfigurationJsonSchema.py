@@ -135,9 +135,13 @@ CONFIGURATIONJSONSCHEMA = \
                 "devicesConfigFile":
                 {
                     "type" : "string"
+                },
+                "deviceTypesConfigFile":
+                {
+                    "type" : "string"
                 }
             },
-            "required" : ["devicesConfigFile"]
+            "required" : ["devicesConfigFile", "deviceTypesConfigFile"]
         }
     },
     "required" : ["centralControllerApi", "failedAttemptResponses",

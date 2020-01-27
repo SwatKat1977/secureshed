@@ -1,7 +1,8 @@
 {
   "generalSettings":
   {
-    "devicesConfigFile": "../configurationFiles/centralController/devices.json"
+    "devicesConfigFile": "../configurationFiles/centralController/devices.json",
+    "deviceTypesConfigFile": "../configurationFiles/centralController/deviceTypes.json"
   },
   "keypadController":
   {
