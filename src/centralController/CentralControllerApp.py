@@ -93,7 +93,6 @@ class CentralControllerApp:
                            configuration.keypadController.authKey)
         self.__logger.info('|=> Endpoint                 : %s',
                            configuration.keypadController.endpoint)
-
         self.__logger.info('Central Controller Settings:')
         self.__logger.info('|=> Authentication Key       : %s',
                            configuration.centralControllerApi.authKey)
@@ -116,7 +115,8 @@ class CentralControllerApp:
         # Attempt to load the device types plug-ins, if a plug-in cannot be
         # found or is invalid then a warning is logged and it's not loaded.
         deviceTypeMgr = DeviceTypeManager(self.__logger)
-        deviceTypesCfg = deviceTypeMgr.ReadDeviceTypesConfig('../configurationFiles/centralController/deviceTypes.json')
+        deviceTypesCfg = deviceTypeMgr.ReadDeviceTypesConfig(
+            configuration.generalSettings.deviceTypesConfigFile)
         if not deviceTypesCfg:
             self.__logger.error(deviceTypeMgr.lastErrorMsg)
             sys.exit(1)
