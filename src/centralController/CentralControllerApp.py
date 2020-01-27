@@ -77,8 +77,27 @@ class CentralControllerApp:
 
         self.__logger.info('=== Configuration Parameters ===')
         self.__logger.info('Environment Variables:')
-        self.__logger.info('|=> Configuration file : %s', self.__configFile)
-        self.__logger.info('|=> Database           : %s', self.__db)
+        self.__logger.info('|=> Configuration file       : %s',
+                           self.__configFile)
+        self.__logger.info('|=> Database                 : %s',
+                           self.__db)
+        self.__logger.info('===================================')
+        self.__logger.info('=== Configuration File Settings ===')
+        self.__logger.info('General Settings:')
+        self.__logger.info('|=> Devices Config File      : %s',
+                           configuration.generalSettings.devicesConfigFile)
+        self.__logger.info('|=> Device Types Config File : %s',
+                           configuration.generalSettings.deviceTypesConfigFile)
+        self.__logger.info('Keypad Controller Settings:')
+        self.__logger.info('|=> Authentication Key       : %s',
+                           configuration.keypadController.authKey)
+        self.__logger.info('|=> Endpoint                 : %s',
+                           configuration.keypadController.endpoint)
+        self.__logger.info('Central Controller Settings:')
+        self.__logger.info('|=> Authentication Key       : %s',
+                           configuration.centralControllerApi.authKey)
+        self.__logger.info('|=> Network Port             : %s',
+                           configuration.centralControllerApi.networkPort)
         self.__logger.info('================================')
 
         self.__eventManager = EventManager()
@@ -96,6 +115,12 @@ class CentralControllerApp:
         # Attempt to load the device types plug-ins, if a plug-in cannot be
         # found or is invalid then a warning is logged and it's not loaded.
         deviceTypeMgr = DeviceTypeManager(self.__logger)
+        deviceTypesCfg = deviceTypeMgr.ReadDeviceTypesConfig(
+            configuration.generalSettings.deviceTypesConfigFile)
+        if not deviceTypesCfg:
+            self.__logger.error(deviceTypeMgr.lastErrorMsg)
+            sys.exit(1)
+
         deviceTypeMgr.LoadDeviceTypes()
 
         # Load the devices configuration file which contains the devices
