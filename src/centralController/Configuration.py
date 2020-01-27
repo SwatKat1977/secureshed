@@ -17,9 +17,8 @@ import collections
 
 
 class Configuration:
-    __slots__ = ['__alarmSettingsConfig', '__failedAttemptResponses',
-                 '__generalSettings', '__centralControllerApi',
-                 '__keypadController']
+    __slots__ = ['__failedAttemptResponses', '__generalSettings',
+                 '__centralControllerApi', '__keypadController']
 
     GeneralSettings = collections.namedtuple('GeneralSettings',
                                              'devicesConfigFile deviceTypesConfigFile')
@@ -28,9 +27,6 @@ class Configuration:
 
     CentralControllerApiCfg = collections.namedtuple('CentralControllerApiCfg',
                                                      'networkPort authKey')
-
-    AlarmSettingsCfg = collections.namedtuple('AlarmSettingsConfig',
-                                              'AlarmSetGraceTimeSecs')
 
     ## Property getter : Keypad API config
     #  @param self The object pointer.
