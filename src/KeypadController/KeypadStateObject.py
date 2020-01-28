@@ -135,7 +135,7 @@ class KeypadStateObject:
         if response.status_code == HTTPStatusCode.OK:
             return
 
-
+          
     ## Display a new panel by firstly hiding all of panels and then after that
     ## show just the expected one.
     #  @param self The object pointer.
