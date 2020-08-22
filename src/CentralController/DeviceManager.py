@@ -21,7 +21,7 @@ try:
     import RPi.GPIO as GPIO
     RPIO_EMULATED = False
 except ModuleNotFoundError:
-    from centralController.EmulatedRaspberryPiIO import GPIO
+    from CentralController.EmulatedRaspberryPiIO import GPIO
     RPIO_EMULATED = True
 
 
