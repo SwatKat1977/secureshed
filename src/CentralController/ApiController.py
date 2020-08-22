@@ -17,7 +17,7 @@ import json
 from flask import request
 import jsonschema
 import APIs.CentralController.JsonSchemas as schemas
-import centralController.Events as Evts
+import CentralController.Events as Evts
 from common.APIClient.HTTPStatusCode import HTTPStatusCode
 from common.APIClient.MIMEType import MIMEType
 from common.Event import Event

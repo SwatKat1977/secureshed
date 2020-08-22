@@ -15,9 +15,9 @@ limitations under the License.
 '''
 import json
 import jsonschema
-from centralController.Configuration import Configuration
-from centralController.ConfigurationJsonSchema import CONFIGURATIONJSONSCHEMA
-from centralController.FailedCodeAttemptAction import (FailedCodeAttemptActionType,
+from CentralController.Configuration import Configuration
+from CentralController.ConfigurationJsonSchema import CONFIGURATIONJSONSCHEMA
+from CentralController.FailedCodeAttemptAction import (FailedCodeAttemptActionType,
                                                        ActionTypeParams)
 
 

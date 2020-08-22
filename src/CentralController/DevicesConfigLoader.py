@@ -16,7 +16,7 @@ limitations under the License.
 # pylint: disable=R0903
 import json
 import jsonschema
-from centralController.EmulatedRaspberryPiIO import GPIO
+from CentralController.EmulatedRaspberryPiIO import GPIO
 
 
 class DevicesConfigLoader:

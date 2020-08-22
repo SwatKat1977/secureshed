@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 '''
 import collections
-from centralController.DevicesConfigLoader import DevicesConfigLoader
-import centralController.Events as Evts
+from CentralController.DevicesConfigLoader import DevicesConfigLoader
+import CentralController.Events as Evts
 
 try:
     import RPi.GPIO as GPIO
