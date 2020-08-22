@@ -120,9 +120,9 @@ class StateManager:
         # 200 OK : code accepted, code incorrect or code refused.
         if response.status_code == HTTPStatusCode.OK:
             msg = f"Successfully send 'AlivePing' to keypad controller"
-            self.__logger.debug(msg)
-        
-        self._unableToConnErrorDisplayed = True
+            self.__logger.info(msg)
+
+        self._unableToConnErrorDisplayed = False
 
 
     def SendKeypadLockedMsg(self, eventInst):
