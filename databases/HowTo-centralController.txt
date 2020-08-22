@@ -5,10 +5,10 @@ The central database uses sqlite3, which you will need to install.
 
 To create the central controller database called ccontroller.db:
 
-1) Change to the central controller directory: src/centralController
-2) Create using:  sqlite3 ccontroller.db < ../../databases/centralController.sql
+1) Change to the central controller directory: src/CentralController
+2) Create using:  sqlite3 ccontroller.db < ../../databases/CentralController.sql
 3) Open the database using: sqlite3 ccontroller.db
 4) Run the following query to create default keycode (last param is to identify
    the entry as a master code):
    INSERT INTO KeyCodes VALUES(null, '1234', true);
-5) Quite sqllite3: .quit
+5) Quit sqllite3: .quit
