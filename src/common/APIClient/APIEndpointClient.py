@@ -17,7 +17,7 @@ import enum
 import requests
 
 
-class APIEndpointClient(object):
+class APIEndpointClient:
 
     ## Property getter : Last reported error message.
     @property
