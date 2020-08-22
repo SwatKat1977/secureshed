@@ -30,7 +30,7 @@ from common.Event import Event
 class StateManager:
     __slots__ = ['__config', '__currAlarmState', '__db', '__eventMgr',
                  '__failedEntryAttempts', '__keypadApiClient', '__logger',
-                 '__transientStates']
+                 '__transientStates', '_unableToConnErrorDisplayed']
 
     TransientStateEntry = collections.namedtuple('TransientStateEntry',
                                                  'id TransientState body')
@@ -60,6 +60,7 @@ class StateManager:
         self.__failedEntryAttempts = 0
         self.__logger = logger
         self.__transientStates = []
+        self._unableToConnErrorDisplayed = False
 
         endpoint = self.__config.keypadController.endpoint
         self.__keypadApiClient = APIEndpointClient(endpoint)
@@ -96,10 +97,12 @@ class StateManager:
                                                       additionalHeaders, {})
 
         if response is None:
-            msg = f'Unable to communicate with keypad, reason : ' +\
-                  f'{self.__keypadApiClient.LastErrMsg}'
-            self.__logger.debug(msg)
-            self.__eventMgr.QueueEvent(eventInst)
+            if not self._unableToConnErrorDisplayed:
+                msg = f'Unable to communicate with keypad, reason : ' +\
+                    f'{self.__keypadApiClient.LastErrMsg}'
+                self.__logger.info(msg)
+                self.__eventMgr.QueueEvent(eventInst)
+                self._unableToConnErrorDisplayed = True
             return
 
         # 401 Unauthenticated : Missing authentication key.
@@ -118,6 +121,8 @@ class StateManager:
         if response.status_code == HTTPStatusCode.OK:
             msg = f"Successfully send 'AlivePing' to keypad controller"
             self.__logger.debug(msg)
+        
+        self._unableToConnErrorDisplayed = True
 
 
     def SendKeypadLockedMsg(self, eventInst):
