@@ -17,11 +17,9 @@ import collections
 import enum
 import json
 import time
-import uuid
 import APIs.CentralController.JsonSchemas as schemas
 import APIs.Keypad.JsonSchemas as keypadApi
-import centralController.Events as Evts
-import centralController.TransientState as TransState
+import CentralController.Events as Evts
 from common.APIClient.APIEndpointClient import APIEndpointClient
 from common.APIClient.HTTPStatusCode import HTTPStatusCode
 from common.APIClient.MIMEType import MIMEType

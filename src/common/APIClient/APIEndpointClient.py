@@ -17,7 +17,7 @@ import enum
 import requests
 
 
-class APIEndpointClient(object):
+class APIEndpointClient:
 
     ## Property getter : Last reported error message.
     @property
@@ -36,24 +36,24 @@ class APIEndpointClient(object):
         self._lastErrMsg = ''
 
 
-    def SendGetMsg(self, route, mimeType, additionalHeaders = None,
-        body = None):
+    def SendGetMsg(self, route, mimeType, additionalHeaders=None,
+                   body=None):
 
         self._lastErrMsg = ''
         return self.__SendMessage(route, self.__MethodType.Get, mimeType,
-            additionalHeaders, body)
+                                  additionalHeaders, body)
 
 
-    def SendPostMsg(self, route, mimeType, additionalHeaders = None,
-        body = None):
+    def SendPostMsg(self, route, mimeType, additionalHeaders=None,
+                    body=None):
 
         self._lastErrMsg = ''
         return self.__SendMessage(route, self.__MethodType.Post, mimeType,
-            additionalHeaders, body)
+                                  additionalHeaders, body)
 
 
     def __SendMessage(self, route, clientMethodType, mimeType,
-        additionalHeaders, body):
+                      additionalHeaders, body):
 
         url = f'{self.__urlBase}{route}'
 

@@ -1,7 +1,7 @@
-export FLASK_APP=centralController
+export FLASK_APP=CentralController
 export FLASK_ENV=development
 
-export CENCON_CONFIG=centralController/configuration.json
-export CENCON_DB=centralController/ccontroller.db
+export CENCON_CONFIG=CentralController/configuration.json
+export CENCON_DB=CentralController/ccontroller.db
 
-python -m flask run -p 2020 -h 0.0.0.0 --eager-loading --no-reload
+python3 -m flask run -p 2020 -h 0.0.0.0 --eager-loading --no-reload

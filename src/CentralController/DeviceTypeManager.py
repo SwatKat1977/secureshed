@@ -17,7 +17,7 @@ import collections
 import json
 import importlib
 import jsonschema
-from centralController.DeviceTypes.BaseDeviceType import BaseDeviceType
+from CentralController.DeviceTypes.BaseDeviceType import BaseDeviceType
 
 
 class DeviceTypeManager:
