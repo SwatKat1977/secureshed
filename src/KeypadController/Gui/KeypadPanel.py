@@ -94,7 +94,7 @@ class KeypadPanel(wx.Frame):
             btnSizer = wx.BoxSizer()
             for label in labelList:
                 button = wx.Button(self.__panel, label=label)
-                btnSizer.Add(button, 1, wx.ALIGN_CENTER|wx.EXPAND, 0)
+                btnSizer.Add(button, 1, wx.EXPAND, 0)
                 self.__buttonsList[button] = button
 
                 self.__defaultButtonDetails[button] = \
@@ -112,7 +112,7 @@ class KeypadPanel(wx.Frame):
                 else:
                     button.Bind(wx.EVT_BUTTON, self.__PressKey)
 
-            mainSizer.Add(btnSizer, 1, wx.ALIGN_CENTER|wx.EXPAND)
+            mainSizer.Add(btnSizer, 1, wx.EXPAND)
 
         self.__panel.SetSizer(mainSizer)
 
