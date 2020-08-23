@@ -23,14 +23,14 @@ class MainWindowNotebook(wx.Notebook):
         wx.Notebook.__init__(self, parent, id=wx.ID_ANY,
                              style=wx.BK_DEFAULT)
 
-        # Create the first tab and add it to the notebook
-        tabOne = MainWindowTab(self)
-        tabOne.SetBackgroundColour("Gray")
-        self.AddPage(tabOne, "TabOne")
+        # Create the notebook tab for Keypad Controller.
+        keypadControllerTab = MainWindowTab(self)
+        keypadControllerTab.SetBackgroundColour("Gray")
+        self.AddPage(keypadControllerTab, "Keypad Controller")
 
-        # Create and add the second tab
-        tabTwo = MainWindowTab(self)
-        self.AddPage(tabTwo, "TabTwo")
+        # Create the notebook tab for Central Controller.
+        centralControllerTab = MainWindowTab(self)
+        self.AddPage(centralControllerTab, "Central Controller")
 
         self.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self.OnPageChanged)
         self.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGING, self.OnPageChanging)
