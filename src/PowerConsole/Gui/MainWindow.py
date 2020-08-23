@@ -15,8 +15,16 @@ limitations under the License.
 '''
 import wx
 from common.Version import VERSION, COPYRIGHT
-from Gui.MainWindowNotebook import MainWindowNotebook
+from Gui.MainWindowTree import MainWindowTree
 
+
+class RightPanel(wx.Panel):
+    """"""
+    #----------------------------------------------------------------------
+    def __init__(self, parent):
+        """Constructor"""
+        wx.Panel.__init__(self, parent=parent)
+        txt = wx.TextCtrl(self)
 
 class MainWindow(wx.Frame):
 
@@ -30,17 +38,11 @@ class MainWindow(wx.Frame):
         frameSize = (windowWidth, windowHeight)
         super().__init__(None, title=title, size=frameSize)
 
-        self._BuildGui()
+        splitter = wx.SplitterWindow(self)
+        leftP = MainWindowTree(splitter)
+        rightP = RightPanel(splitter)
 
-
-    #  @param self The object pointer.
-    def _BuildGui(self):
-        panel = wx.Panel(self)
-
-        self._notebook = MainWindowNotebook(panel)
-
-        topSizer = wx.BoxSizer(wx.VERTICAL)
-        topSizer.Add(self._notebook, 1, wx.ALL|wx.EXPAND, 5)
-        panel.SetSizer(topSizer)
-
-        self.Layout()
+        # split the window
+        splitter.SplitVertically(leftP, rightP)
+        splitter.SetMinimumPaneSize(20)
+        self.Centre()
