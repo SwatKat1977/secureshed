@@ -16,6 +16,8 @@ limitations under the License.
 import logging
 import os
 import sys
+import wx
+from Gui.MainWindow import MainWindow
 
 
 ## The main application class for the keypad controller application.
@@ -50,33 +52,29 @@ class PowerConsoleApp:
     def StartApp(self):
 
 
-        if not os.getenv('CENCON_CONFIG'):
-            self._logger.error(f'CENCON_CONFIG environment variable missing!')
-        sys.exit(1)
+        if not os.getenv('PWRCON_CONFIG'):
+            self._logger.error(f'PWRCON_CONFIG environment variable missing!')
+            sys.exit(1)
 
+        '''
         self.__configMgr = ConfigurationManager()
         config = self.__configMgr.ParseConfigFile('configuration.json')
+
 
         if not config:
             self.__logger.error(self.__configMgr.lastErrorMsg)
             return
+        '''
 
         wxApp = wx.App()
-        reactor.registerWxApp(wxApp)
 
-        self.__stateObject = KeypadStateObject(config, self.__logger)
+        mainWindow = MainWindow()
+        mainWindow.Show()
 
-        keypadApiCtrl = KeypadApiController(self.__logger, config,
-                                            self.__stateObject)
-        apiServer = server.Site(keypadApiCtrl)
-        reactor.listenTCP(config.keypadController.networkPort, apiServer)
+        wxApp.MainLoop()
 
-        checkPanelLoopingCall = LoopingCall(self.__stateObject.CheckPanel)
-        checkPanelLoopingCall.start(0.01, now=False)
-
-        reactor.run()
 
     ## Stop the application.
     #  @param self The object pointer.
     def StopApp(self):
-        self.__logger.info('Stopping keypad controller, cleaning up...')
+        self._logger.info('Stopping power console, cleaning up...')
