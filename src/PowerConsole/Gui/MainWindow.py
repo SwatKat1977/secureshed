@@ -15,12 +15,12 @@ limitations under the License.
 '''
 import wx
 from common.Version import VERSION, COPYRIGHT
+from Gui.MainWindowNotebook import MainWindowNotebook
 
 
-## Panel that implements a numbered keypad.
 class MainWindow(wx.Frame):
 
-    ## KeypadPanel class constructor.
+    ## MainWindow class constructor.
     #  @param self The object pointer.
     def __init__(self):
         windowWidth = 800
@@ -30,5 +30,17 @@ class MainWindow(wx.Frame):
         frameSize = (windowWidth, windowHeight)
         super().__init__(None, title=title, size=frameSize)
 
-    def BuildGui(self):
-        pass
+        self._BuildGui()
+
+
+    #  @param self The object pointer.
+    def _BuildGui(self):
+        panel = wx.Panel(self)
+
+        self._notebook = MainWindowNotebook(panel)
+
+        topSizer = wx.BoxSizer(wx.VERTICAL)
+        topSizer.Add(self._notebook, 1, wx.ALL|wx.EXPAND, 5)
+        panel.SetSizer(topSizer)
+
+        self.Layout()
