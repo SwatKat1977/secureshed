@@ -1,0 +1,2 @@
+
+# PowerConsole/Gui/MainWindowNotebook.py
