@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 '''
 import wx
+from common.Version import VERSION, COPYRIGHT
 
 
 ## Panel that implements a numbered keypad.
@@ -25,5 +26,9 @@ class MainWindow(wx.Frame):
         windowWidth = 800
         windowHeight = 600
 
+        title = f"Secure Shed Power Console (Core {VERSION})"
         frameSize = (windowWidth, windowHeight)
-        super().__init__(None, title="", size=frameSize)
+        super().__init__(None, title=title, size=frameSize)
+
+    def BuildGui(self):
+        pass
