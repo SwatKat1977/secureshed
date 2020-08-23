@@ -1,5 +1,5 @@
 '''
-Copyright 2019 Secure Shed Project Dev Team
+Copyright 2019-2020 Secure Shed Project Dev Team
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,14 +13,17 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 '''
-import os
-import sys
-from PowerConsoleApp import PowerConsoleApp
-
-def Main():
-    powerConsoleApp = PowerConsoleApp()
-    powerConsoleApp.StartApp()
+import wx
 
 
-if __name__ == "__main__":
-    Main()
+## Panel that implements a numbered keypad.
+class MainWindow(wx.Frame):
+
+    ## KeypadPanel class constructor.
+    #  @param self The object pointer.
+    def __init__(self):
+        windowWidth = 800
+        windowHeight = 600
+
+        frameSize = (windowWidth, windowHeight)
+        super().__init__(None, title="", size=frameSize)
