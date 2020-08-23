@@ -51,7 +51,6 @@ class PowerConsoleApp:
     #  @param self The object pointer.
     def StartApp(self):
 
-
         if not os.getenv('PWRCON_CONFIG'):
             self._logger.error('PWRCON_CONFIG environment variable missing!')
             sys.exit(1)
