@@ -53,18 +53,15 @@ class PowerConsoleApp:
 
 
         if not os.getenv('PWRCON_CONFIG'):
-            self._logger.error(f'PWRCON_CONFIG environment variable missing!')
+            self._logger.error('PWRCON_CONFIG environment variable missing!')
             sys.exit(1)
 
-        '''
-        self.__configMgr = ConfigurationManager()
-        config = self.__configMgr.ParseConfigFile('configuration.json')
+        #self.__configMgr = ConfigurationManager()
+        #config = self.__configMgr.ParseConfigFile('configuration.json')
 
-
-        if not config:
-            self.__logger.error(self.__configMgr.lastErrorMsg)
-            return
-        '''
+        #if not config:
+        #    self.__logger.error(self.__configMgr.lastErrorMsg)
+        #    return
 
         wxApp = wx.App()
 
