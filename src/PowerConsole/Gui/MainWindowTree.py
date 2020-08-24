@@ -38,8 +38,8 @@ class MainWindowTree(wx.Panel):
 
         centralCtrl = self._tree.AppendItem(treeRoot, 'Central Controller',
                                             data=TreeElementType.DoNotProcess)
-        item = self._tree.AppendItem(centralCtrl, 'Configuration',
-                                     data=TreeElementType.CentralCtrlConfig)
+        self._tree.AppendItem(centralCtrl, 'Configuration',
+                              data=TreeElementType.CentralCtrlConfig)
         self._tree.AppendItem(centralCtrl, 'Console Logs',
                                      data=TreeElementType.CentralCtrlLogs)
         keypadCtrl = self._tree.AppendItem(treeRoot, 'Keypad Controller',
