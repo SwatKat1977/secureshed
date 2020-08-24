@@ -13,8 +13,15 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 '''
+import enum
 import wx
 
+class TreeElementType(enum.Enum):
+    DoNotProcess = 0
+    CentralCtrlConfig = 1
+    CentralCtrlLogs = 2
+    KeypadCtrlConfig = 3
+    KeypadCtrlLogs = 4
 
 class MainWindowTree(wx.Panel):
 
@@ -24,17 +31,32 @@ class MainWindowTree(wx.Panel):
         sizer = wx.BoxSizer(wx.VERTICAL)
 
         treeSize = (-1, -1)
-        treeStyle = wx.TR_HIDE_ROOT|wx.TR_HAS_BUTTONS
+        treeStyle = wx.TR_HIDE_ROOT | wx.TR_HAS_BUTTONS
         self._tree = wx.TreeCtrl(parent=self, size=treeSize, style=treeStyle)
 
         treeRoot = self._tree.AddRoot('Component')
-        centralCtrl = self._tree.AppendItem(treeRoot, 'Central Controller')
-        self._tree.AppendItem(centralCtrl, 'Configuration')
-        self._tree.AppendItem(centralCtrl, 'Console Logs')
-        keypadCtrl = self._tree.AppendItem(treeRoot, 'Keypad Controller')
-        self._tree.AppendItem(keypadCtrl, 'Configuration')
-        self._tree.AppendItem(keypadCtrl, 'Console Logs')
+
+        centralCtrl = self._tree.AppendItem(treeRoot, 'Central Controller',
+                                            data=TreeElementType.DoNotProcess)
+        item = self._tree.AppendItem(centralCtrl, 'Configuration',
+                                     data=TreeElementType.CentralCtrlConfig)
+        self._tree.AppendItem(centralCtrl, 'Console Logs',
+                                     data=TreeElementType.CentralCtrlLogs)
+        keypadCtrl = self._tree.AppendItem(treeRoot, 'Keypad Controller',
+                                     data=TreeElementType.DoNotProcess)
+        self._tree.AppendItem(keypadCtrl, 'Configuration',
+                              data=TreeElementType.KeypadCtrlConfig)
+        self._tree.AppendItem(keypadCtrl, 'Console Logs',
+                              data=TreeElementType.KeypadCtrlLogs)
 
         sizer.Add(self._tree, 1, wx.EXPAND)
 
         self.SetSizer(sizer)
+
+        self._tree.Bind(wx.EVT_TREE_SEL_CHANGED, self._OnSelChanged)
+
+
+    def _OnSelChanged(self, event):
+        item = event.GetItem()
+        itemData = self._tree.GetItemData(item)
+        print(f'OnPageChanged() {itemData}')
