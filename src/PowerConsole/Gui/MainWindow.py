@@ -16,15 +16,8 @@ limitations under the License.
 import wx
 from common.Version import VERSION, COPYRIGHT
 from Gui.MainWindowTree import MainWindowTree
+from Gui.ConsoleLogsPanel import ConsoleLogsPanel
 
-
-class RightPanel(wx.Panel):
-    """"""
-    #----------------------------------------------------------------------
-    def __init__(self, parent):
-        """Constructor"""
-        wx.Panel.__init__(self, parent=parent)
-        txt = wx.TextCtrl(self)
 
 class MainWindow(wx.Frame):
 
@@ -40,7 +33,7 @@ class MainWindow(wx.Frame):
 
         splitter = wx.SplitterWindow(self)
         leftP = MainWindowTree(splitter)
-        rightP = RightPanel(splitter)
+        rightP = ConsoleLogsPanel(splitter)
 
         # split the window
         splitter.SplitVertically(leftP, rightP)
