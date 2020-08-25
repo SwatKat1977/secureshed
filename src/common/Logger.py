@@ -23,6 +23,8 @@ class LogType(enum.Enum):
     Debug = 0
     Info = 1
     Warn = 2
+    Error = 3
+    Critical = 4
 
 
 @Singleton
@@ -32,8 +34,10 @@ class Logger:
 
     _LoggerMappings = {
         LogType.Debug : ('debug', logging.DEBUG),
+        LogType.Error : ('error', logging.ERROR),
         LogType.Info : ('info', logging.INFO),
         LogType.Warn : ('warn', logging.WARN),
+        LogType.Critical : ('critical', logging.CRITICAL),
     }
 
     @property
