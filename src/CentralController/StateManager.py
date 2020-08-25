@@ -24,12 +24,13 @@ from common.APIClient.APIEndpointClient import APIEndpointClient
 from common.APIClient.HTTPStatusCode import HTTPStatusCode
 from common.APIClient.MIMEType import MIMEType
 from common.Event import Event
+from common.Logger import Logger, LogType
 
 
 ## Implementation of an alarm state management class.
 class StateManager:
     __slots__ = ['__config', '__currAlarmState', '__db', '__eventMgr',
-                 '__failedEntryAttempts', '__keypadApiClient', '__logger',
+                 '__failedEntryAttempts', '__keypadApiClient',
                  '__transientStates', '_unableToConnErrorDisplayed']
 
     TransientStateEntry = collections.namedtuple('TransientStateEntry',
@@ -49,16 +50,14 @@ class StateManager:
     ## StateManager class default constructor.
     #  @param self The object pointer.
     #  @param controllerDb Database controller interface instance.
-    #  @param logger Logger instance.
     #  @param config Configuration items in json format.
     #  @param eventMgr Event manager instance.
-    def __init__(self, controllerDb, logger, config, eventMgr):
+    def __init__(self, controllerDb, config, eventMgr):
         self.__config = config
         self.__currAlarmState = self.AlarmState.Deactivated
         self.__db = controllerDb
         self.__eventMgr = eventMgr
         self.__failedEntryAttempts = 0
-        self.__logger = logger
         self.__transientStates = []
         self._unableToConnErrorDisplayed = False
 
@@ -100,27 +99,29 @@ class StateManager:
             if not self._unableToConnErrorDisplayed:
                 msg = f'Unable to communicate with keypad, reason : ' +\
                     f'{self.__keypadApiClient.LastErrMsg}'
-                self.__logger.info(msg)
+                Logger.Instance().Log(LogType.Info, msg)
                 self.__eventMgr.QueueEvent(eventInst)
                 self._unableToConnErrorDisplayed = True
             return
 
         # 401 Unauthenticated : Missing authentication key.
         if response.status_code == HTTPStatusCode.Unauthenticated:
-            self.__logger.critical('Keypad cannot send AlivePing as the ' +\
-                                   'authorisation key is missing')
+            Logger.Instance().Log(LogType.Critical,
+                                  'Keypad cannot send AlivePing as the ' +\
+                                  'authorisation key is missing')
             return
 
         # 403 forbidden : Invalid authentication key.
         if response.status_code == HTTPStatusCode.Forbidden:
-            self.__logger.critical('Keypad cannot send AlivePing as the ' +\
-                                   'authorisation key is incorrect')
+            Logger.Instance().Log(LogType.Critical,
+                                  'Keypad cannot send AlivePing as the ' +\
+                                  'authorisation key is incorrect')
             return
 
         # 200 OK : code accepted, code incorrect or code refused.
         if response.status_code == HTTPStatusCode.OK:
             msg = f"Successfully send 'AlivePing' to keypad controller"
-            self.__logger.info(msg)
+            Logger.Instance().Log(LogType.Info, msg)
 
         self._unableToConnErrorDisplayed = False
 
@@ -138,27 +139,29 @@ class StateManager:
         if response is None:
             msg = f'Keypad locked msg : Unable to communicate with keypad, ' +\
                   f'reason : {self.__keypadApiClient.LastErrMsg}'
-            self.__logger.debug(msg)
+            Logger.Instance().Log(LogType.Debug, msg)
             self.__eventMgr.QueueEvent(eventInst)
             return
 
         # 401 Unauthenticated : Missing authentication key.
         if response.status_code == HTTPStatusCode.Unauthenticated:
-            self.__logger.critical('Keypad locked msg : Cannot send the ' +\
-                                   'AlivePing as the authorisation key ' +\
-                                   'is missing')
+            Logger.Instance().Log(LogType.Critical,
+                                  'Keypad locked msg : Cannot send the ' +\
+                                  'AlivePing as the authorisation key ' +\
+                                  'is missing')
             return
 
         # 403 forbidden : Invalid authentication key.
         if response.status_code == HTTPStatusCode.Forbidden:
-            self.__logger.critical('Keypad locked msg : Authorisation ' +\
-                                   'key is incorrect')
+            Logger.Instance().Log(LogType.Critical,
+                                  'Keypad locked msg : Authorisation ' +\
+                                  'key is incorrect')
             return
 
         # 200 OK : code accepted, code incorrect or code refused.
         if response.status_code == HTTPStatusCode.OK:
             msg = "Successfully sent 'Keypad locked msg' to keypad controller"
-            self.__logger.debug(msg)
+            Logger.Instance().Log(LogType.Debug, msg)
 
 
     #  @param self The object pointer.
@@ -189,7 +192,7 @@ class StateManager:
 
         if details is not None:
             if self.__currAlarmState == self.AlarmState.Triggered:
-                self.__logger.info('A triggered alarm has been deactivated')
+                Logger.Instance().Log(LogType.Info, 'A triggered alarm has been deactivated')
                 self.__currAlarmState = self.AlarmState.Deactivated
                 self.__failedEntryAttempts = 0
                 evt = Event(Evts.EvtType.DeactivateSiren, None)
@@ -197,19 +200,19 @@ class StateManager:
                 self.__DeactivateAlarm()
 
             elif self.__currAlarmState == self.AlarmState.Deactivated:
-                self.__logger.info('The alarm has been activated')
+                Logger.Instance().Log(LogType.Info, 'The alarm has been activated')
                 self.__currAlarmState = self.AlarmState.Activated
                 self.__failedEntryAttempts = 0
                 self.__TriggerAlarm()
 
             elif self.__currAlarmState == self.AlarmState.Activated:
-                self.__logger.info('The alarm has been deactivated')
+                Logger.Instance().Log(LogType.Info, 'The alarm has been deactivated')
                 self.__currAlarmState = self.AlarmState.Deactivated
                 self.__failedEntryAttempts = 0
                 self.__DeactivateAlarm()
 
         else:
-            self.__logger.info('An invalid key code was entered on keypad')
+            Logger.Instance().Log(LogType.Info, 'An invalid key code was entered on keypad')
             self.__failedEntryAttempts += 1
 
             attempts = self.__failedEntryAttempts
@@ -234,7 +237,7 @@ class StateManager:
 
                     elif response == 'triggerAlarm':
                         if self.__currAlarmState != self.AlarmState.Triggered:
-                            self.__logger.info('|=> Alarm has been triggered!')
+                            Logger.Instance().Log(LogType.Info, '|=> Alarm has been triggered!')
                             self.__TriggerAlarm(noGraceTime=True)
 
                     elif response == 'resetAttemptAccount':
@@ -285,7 +288,7 @@ class StateManager:
         # logging the change for reference.
         if self.__currAlarmState == self.AlarmState.Deactivated:
             logMsg = f"{deviceName} was {stateStr}, although alarm isn't on"
-            self.__logger.info(logMsg)
+            Logger.Instance().Log(LogType.Info, logMsg)
             return
 
         # If the trigger has has already been triggered then opening or closing
@@ -293,13 +296,13 @@ class StateManager:
         # the even occurred.
         if self.__currAlarmState == self.AlarmState.Triggered:
             logMsg = f"{deviceName} was {stateStr}, alarm already triggered"
-            self.__logger.info(logMsg)
+            Logger.Instance().Log(LogType.Info, logMsg)
             return
 
         if self.__currAlarmState == self.AlarmState.Activated:
             logMsg = f"Activity on {deviceName} ({stateStr}) has triggerd " +\
                 "the alarm!"
-            self.__logger.info(logMsg)
+            Logger.Instance().Log(LogType.Info, logMsg)
             self.__currAlarmState = self.AlarmState.Triggered
 
             evt = Event(Evts.EvtType.ActivateSiren, None)

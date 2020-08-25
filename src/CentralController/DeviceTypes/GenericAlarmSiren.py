@@ -15,6 +15,7 @@ limitations under the License.
 '''
 from CentralController.DeviceTypes.BaseDeviceType import BaseDeviceType
 import CentralController.Events as Evts
+from common.Logger import Logger, LogType
 
 
 class GenericAlarmSiren(BaseDeviceType):
@@ -22,9 +23,8 @@ class GenericAlarmSiren(BaseDeviceType):
     ExpectedPinId = 'sirenPin'
 
 
-    def __init__(self, logger, hardwareIO, eventMgr):
+    def __init__(self, hardwareIO, eventMgr):
         self.__eventMgr = eventMgr
-        self.__logger = logger
         self.__ioPin = None
         self.__hardwareIO = hardwareIO
         self.__isTriggered = False
@@ -38,14 +38,16 @@ class GenericAlarmSiren(BaseDeviceType):
 
         # Expecting one pin.
         if len(pins) != 1:
-            self.__logger.warn("Device '%s' was expecting 1 pin, actually %s",
-                               deviceName, len(pins))
+            Logger.Instance().Log(LogType.Warn,
+                                  "Device '%s' was expecting 1 pin, actually %s",
+                                  deviceName, len(pins))
             return False
 
         pin = [pin for pin in pins if pin['identifier'] == self.ExpectedPinId]
         if not pin:
-            self.__logger.warn("Device '%s' missing expected pin '%s'",
-                               deviceName, self.ExpectedPinId)
+            Logger.Instance().Log(LogType.Warn,
+                                  "Device '%s' missing expected pin '%s'",
+                                  deviceName, self.ExpectedPinId)
             return False
 
         self.__ioPin = int(pin[0]['ioPin'][len(pinPrefix):])
