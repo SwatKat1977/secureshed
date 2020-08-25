@@ -17,13 +17,14 @@ import os
 import signal
 import sys
 import time
+from CentralController.ApiController import ApiController
 from CentralController.ConfigurationManager import ConfigurationManager
 from CentralController.ControllerDBInterface import ControllerDBInterface
 from CentralController.DevicesConfigLoader import DevicesConfigLoader
 from CentralController.DeviceManager import DeviceManager
 from CentralController.DeviceTypeManager import DeviceTypeManager
-from CentralController.ApiController import ApiController
 import CentralController.Events as Evts
+from CentralController.LogStore import LogStore
 from CentralController.StateManager import StateManager
 from CentralController.WorkerThread import WorkerThread
 from common.Event import Event
@@ -33,7 +34,8 @@ from common.Logger import Logger, LogType
 
 class CentralControllerApp:
     __slots__ = ['__configFile', '__currDevices', '__db', '__deviceMgr',
-                 '__endpoint', '__eventManager', '__stateMgr', '__workerThread']
+                 '__endpoint', '__eventManager', '_logStore', '__stateMgr',
+                 '__workerThread']
 
 
     def __init__(self, endpoint):
@@ -43,12 +45,14 @@ class CentralControllerApp:
         self.__deviceMgr = None
         self.__endpoint = endpoint
         self.__eventManager = None
+        self._logStore = LogStore()
         self.__stateMgr = None
         self.__workerThread = None
 
 
     def StartApp(self):
         Logger.Instance().WriteToConsole = True
+        Logger.Instance().ExternalLogger = self
         Logger.Instance().Initialise()
 
         signal.signal(signal.SIGINT, self.__SignalHandler)
@@ -99,8 +103,8 @@ class CentralControllerApp:
 
         controllerDb = ControllerDBInterface()
         if not controllerDb.Connect(self.__db):
-            Logger.Instance().Log(LogType.Error("Database '%s' is missing!",
-                                                self.__db)
+            Logger.Instance().Log(LogType.Error, "Database '%s' is missing!",
+                                  self.__db)
             sys.exit(1)
 
         # Build state manager which manages the state of the alarm itself and
@@ -219,3 +223,7 @@ class CentralControllerApp:
             time.sleep(1)
 
         Logger.Instance().Log(LogType.Info, 'Worker thread has Shut down')
+
+
+    def AddLogEvent(self, currTime, logLevel, compiledMsg):
+        pass
