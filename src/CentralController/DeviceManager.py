@@ -127,7 +127,7 @@ class DeviceManager:
     def CheckHardwareDevices(self):
 
         if RPIO_EMULATED:
-            GPIO.UpdateFromPinOutFile(self.__logger)
+            GPIO.UpdateFromPinOutFile()
 
         for device in self.__devices:
             try:

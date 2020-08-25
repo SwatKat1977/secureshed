@@ -21,26 +21,25 @@ import CentralController.Events as Evts
 from common.APIClient.HTTPStatusCode import HTTPStatusCode
 from common.APIClient.MIMEType import MIMEType
 from common.Event import Event
+from common.Logger import Logger, LogType
 
 
 ## Implementation of thread that handles API calls to the keypad API.
 class ApiController:
 
-    __slots__ = ['__config', '__db', '__endpoint', '__eventMgr', '__logger']
+    __slots__ = ['__config', '__db', '__endpoint', '__eventMgr']
 
     ## KeypadAPIThread class constructor, passing in the network port that the
     #  API will listen to.
     #  @param self The object pointer.
-    #  @param logger Logger instance.
     #  @param eventMgr Event management class instance.
     #  @param controllerDb Central controller internal database.
     #  @param config Configuration items.
     #  @param endpoint REST api endpoint instance.
-    def __init__(self, logger, eventMgr, controllerDb, config, endpoint):
+    def __init__(self, eventMgr, controllerDb, config, endpoint):
         self.__config = config
         self.__db = controllerDb
         self.__endpoint = endpoint
-        self.__logger = logger
         self.__eventMgr = eventMgr
 
         # Add route : /receiveKeyCode
@@ -118,7 +117,8 @@ class ApiController:
         # Verify that an authorisation key exists in the requet header, if not
         # then return a 401 error with a human-readable reasoning.
         if schemas.AUTH_KEY not in request.headers:
-            self.__logger.critical('Missing controller auth key from keypad')
+            Logger.Instance().Log(LogType.Critical,
+                                  'Missing controller auth key from keypad')
             errMsg = 'Authorisation key is missing'
             return self.__endpoint.response_class(
                 response=errMsg, status=HTTPStatusCode.Unauthenticated,
@@ -130,7 +130,8 @@ class ApiController:
         # configuration file.  If the key isn't valid then the error
         # code of 403 (Forbidden) is returned.
         if authorisationKey != self.__config.centralControllerApi.authKey:
-            self.__logger.critical('Invalid controller auth key from keypad')
+            Logger.Instance().Log(LogType.Critical,
+                                  'Invalid controller auth key from keypad')
             errMsg = 'Authorisation key is invalid'
             return self.__endpoint.response_class(
                 response=errMsg, status=HTTPStatusCode.Forbidden,
