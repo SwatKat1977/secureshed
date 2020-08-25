@@ -13,6 +13,25 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 '''
+import collections
 
-#    def AddLogEvent(self, currTime, logLevel, compiledMsg):
-#        pass
+
+LogEntry = collections.namedtuple('LogEntry',
+                                  'timestamp logLevel msg')
+
+
+class LogStore:
+    __slots__ = ['_logEntries']
+
+    @property
+    def LogEntries(self):
+        return self._logEntries
+
+
+    def __init__(self):
+        self._logEntries = []
+
+
+    def AddLogEvent(self, timestamp, logLevel, msg):
+        entry = LogEntry(timestamp=timestamp, logLevel=logLevel, msg=msg)
+        self._logEntries.append(entry)
