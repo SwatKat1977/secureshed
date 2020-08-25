@@ -13,7 +13,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 '''
-import json
 from flask import request
 import jsonschema
 import APIs.CentralController.JsonSchemas as schemas
@@ -26,6 +25,7 @@ from common.Logger import Logger, LogType
 
 ## Implementation of thread that handles API calls to the keypad API.
 class ApiController:
+    # pylint: disable=too-few-public-methods
 
     __slots__ = ['__config', '__db', '__endpoint', '__eventMgr']
 

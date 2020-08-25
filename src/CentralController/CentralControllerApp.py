@@ -57,7 +57,7 @@ class CentralControllerApp:
                               'Secure Shed Central Controller V%s', VERSION)
         Logger.Instance().Log(LogType.Info,
                               'Copyright %s Secure Shed Project Dev Team',
-                           COPYRIGHT)
+                              COPYRIGHT)
         Logger.Instance().Log(LogType.Info,
                               'Licensed under the Apache License, Version 2.0')
 
@@ -99,7 +99,8 @@ class CentralControllerApp:
 
         controllerDb = ControllerDBInterface()
         if not controllerDb.Connect(self.__db):
-            self.__logger.error("Database '%s' is missing!", self.__db)
+            Logger.Instance().Log(LogType.Error("Database '%s' is missing!",
+                                                self.__db)
             sys.exit(1)
 
         # Build state manager which manages the state of the alarm itself and

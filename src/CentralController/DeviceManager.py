@@ -167,7 +167,8 @@ class DeviceManager:
         sirens = [s for s in self.__devices if s.hardware == 'siren']
 
         for siren in sirens:
-            Logger.Instance().Log(LogType.Info,"Activating alarm siren '%s'", siren.name)
+            Logger.Instance().Log(LogType.Info, "Activating alarm siren '%s'",
+                                  siren.name)
             siren.deviceType.ReceiveEvent(eventInst)
 
 
@@ -176,7 +177,8 @@ class DeviceManager:
         sirens = [s for s in self.__devices if s.hardware == 'siren']
 
         for siren in sirens:
-            Logger.Instance().Log(LogType.Info,"Deactivating alarm siren '%s'", siren.name)
+            Logger.Instance().Log(LogType.Info,
+                                  "Deactivating alarm siren '%s'", siren.name)
             siren.deviceType.ReceiveEvent(eventInst)
 
 
@@ -204,6 +206,6 @@ class DeviceManager:
                 sensor.deviceType.ReceiveEvent(eventInst)
 
             except NotImplementedError:
-                Logger.Instance().Log(LogType.Error, 
+                Logger.Instance().Log(LogType.Error,
                                       "Device '%s' missing ReceiveEvent()",
                                       sensor.name)

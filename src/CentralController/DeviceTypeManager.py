@@ -150,7 +150,7 @@ class DeviceTypeManager:
             if not device.enabled:
                 msg = f"Plug-in for device type '{deviceName}' is disabled" +\
                        " so loading won't be attempted."
-                self.__logger.warn(msg)
+                Logger.Instance().Log(LogType.Warn, msg)
                 continue
 
             moduleName = f'{defaultModulePath}{deviceName}'
