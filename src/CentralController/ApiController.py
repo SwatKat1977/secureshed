@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 '''
+import json
 from flask import request
 import jsonschema
 import APIs.CentralController.JsonSchemas as schemas
@@ -27,7 +28,7 @@ from common.Logger import Logger, LogType
 class ApiController:
     # pylint: disable=too-few-public-methods
 
-    __slots__ = ['__config', '__db', '__endpoint', '__eventMgr']
+    __slots__ = ['__config', '__db', '__endpoint', '__eventMgr', '_logStore']
 
     ## KeypadAPIThread class constructor, passing in the network port that the
     #  API will listen to.
@@ -36,11 +37,13 @@ class ApiController:
     #  @param controllerDb Central controller internal database.
     #  @param config Configuration items.
     #  @param endpoint REST api endpoint instance.
-    def __init__(self, eventMgr, controllerDb, config, endpoint):
+    #  @param logStore Instance of log store.
+    def __init__(self, eventMgr, controllerDb, config, endpoint, logStore):
         self.__config = config
         self.__db = controllerDb
         self.__endpoint = endpoint
         self.__eventMgr = eventMgr
+        self._logStore = logStore
 
         # Add route : /receiveKeyCode
         self.__endpoint.add_url_rule('/receiveKeyCode', methods=['POST'],
@@ -49,6 +52,10 @@ class ApiController:
         # Add route : /receiveKeyCode
         self.__endpoint.add_url_rule('/pleaseRespondToKeypad', methods=['POST'],
                                      view_func=self.__PleaseRespondToKeypad)
+
+        # Add route : /retrieveConsoleLogs
+        self.__endpoint.add_url_rule('/retrieveConsoleLogs', methods=['POST'],
+                                     view_func=self._RetrieveConsoleLogs)
 
 
     ## API route : receiveKeyCode
@@ -110,6 +117,43 @@ class ApiController:
         return self.__endpoint.response_class(
             response='Ok', status=HTTPStatusCode.OK,
             mimetype=MIMEType.Text)
+
+
+    def _RetrieveConsoleLogs(self):
+        # Validate the request to ensure that the auth key is firstly present,
+        # then if it's valid.  None is returned if successful.
+        validateReturn = self.__ValidateAuthKey()
+        if validateReturn is not None:
+            return validateReturn
+
+        # Check for that the message body ia of type application/json and that
+        # there is one, if not report a 400 error status with a human-readable.
+        body = request.get_json()
+        if not body:
+            errMsg = 'Missing/invalid json body'
+            response = self.__endpoint.response_class(
+                response=errMsg, status=HTTPStatusCode.BadRequest,
+                mimetype=MIMEType.Text)
+            return response
+
+        # Validate that the json body conforms to the expected schema.
+        # If the message isn't valid then a 400 error should be generated.
+        try:
+            jsonschema.validate(instance=body,
+                                schema=schemas.RetrieveConsoleLogs.Schema)
+
+        except jsonschema.exceptions.ValidationError:
+            errMsg = 'Message body validation failed.'
+            return self.__endpoint.response_class(
+                response=errMsg, status=HTTPStatusCode.BadRequest,
+                mimetype='text')
+
+        start = body[schemas.RetrieveConsoleLogs.BodyElement.StartTimestamp]
+        logEvents = self._logStore.GetLogEvents(start)
+
+        return self.__endpoint.response_class(
+            response=json.dumps(logEvents), status=HTTPStatusCode.OK,
+            mimetype=MIMEType.JSON)
 
 
     #  @param self The object pointer.

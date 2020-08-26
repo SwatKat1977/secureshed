@@ -34,3 +34,23 @@ class ReceiveKeyCode:
 
     class BodyElement:
         KeySeq = 'keySequence'
+
+
+class RetrieveConsoleLogs:
+    Schema = {
+        "type" : "object",
+        "additionalProperties" : False,
+
+        "properties" : {
+            "additionalProperties" : False,
+            "startTimestamp" :
+            {
+                "type" : "number",
+                "minimum": 0
+            }
+        },
+        "required": ["startTimestamp"]
+    }
+
+    class BodyElement:
+        StartTimestamp = 'startTimestamp'

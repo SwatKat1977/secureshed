@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "926e8da6-c1d0-4ee9-8cc8-32fa56f22319",
+		"_postman_id": "f1ad8d13-86fe-455e-b44d-71ec397523c2",
 		"name": "Secure Shed",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -83,6 +83,46 @@
 							"port": "2020",
 							"path": [
 								"pleaseRespondToKeypad"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieve Console Logs",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "authorisationKey",
+								"type": "text",
+								"value": "ccontroller2019"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"startTimestamp\" : 0\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:2020/retrieveConsoleLogs",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "2020",
+							"path": [
+								"retrieveConsoleLogs"
 							]
 						}
 					},
