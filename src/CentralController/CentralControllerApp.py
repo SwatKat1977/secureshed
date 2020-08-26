@@ -150,7 +150,8 @@ class CentralControllerApp:
         apiController = ApiController(self.__eventManager,
                                       controllerDb,
                                       configuration,
-                                      self.__endpoint)
+                                      self.__endpoint,
+                                      self._logStore)
 
         sendAlivePingEvt = Event(Evts.EvtType.KeypadApiSendAlivePing)
         self.__eventManager.QueueEvent(sendAlivePingEvt)
@@ -225,5 +226,5 @@ class CentralControllerApp:
         Logger.Instance().Log(LogType.Info, 'Worker thread has Shut down')
 
 
-    def AddLogEvent(self, currTime, logLevel, compiledMsg):
-        pass
+    def AddLogEvent(self, currTime, logLevel, msg):
+        self._logStore.AddLogEvent(currTime, logLevel, msg)
