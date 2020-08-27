@@ -13,3 +13,11 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 '''
+
+
+class CentralControllerPanel(wx.Panel):
+
+    def __init__(self, parent, clientSize):
+        super(CentralControllerPanel, self).__init__(parent, size=clientSize)
+
+        clientSize = self.GetClientSize()
