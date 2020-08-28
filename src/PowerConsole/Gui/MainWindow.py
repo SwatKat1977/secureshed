@@ -16,7 +16,6 @@ limitations under the License.
 import wx
 from common.APIClient.APIEndpointClient import APIEndpointClient
 from common.Version import VERSION, COPYRIGHT
-from Gui.MainWindowTree import MainWindowTree
 from Gui.ConsoleLogsPanel import ConsoleLogsPanel
 from Gui.CentralControllerPanel import CentralControllerPanel
 from Gui.KeypadControllerPanel import KeypadControllerPanel
