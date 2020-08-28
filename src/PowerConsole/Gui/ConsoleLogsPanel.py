@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 '''
 import wx
+from Gui.ConsoleLogsPanelListCtrl import ConsoleLogsPanelListCtrl
 
 
 class ConsoleLogsPanel(wx.Panel):
@@ -23,9 +24,7 @@ class ConsoleLogsPanel(wx.Panel):
 
         topSizer = wx.BoxSizer(wx.HORIZONTAL)
 
-        self._logsList = wx.ListCtrl(self, -1, style=wx.LC_REPORT)
-        self._logsList.InsertColumn(0, 'Log Level', width=150)
-        self._logsList.InsertColumn(1, 'Message')
+        self._logsList = ConsoleLogsPanelListCtrl(self, style=wx.LC_REPORT)
 
         topSizer.Add(self._logsList, 1, wx.EXPAND)
         self.SetSizer(topSizer)
