@@ -13,26 +13,25 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 '''
+import wx
+from Gui.ConsoleLogsPanel import ConsoleLogsPanel
+
 
 class PlaceholderPanel(wx.Panel):
-    """"""
-    #----------------------------------------------------------------------
+
     def __init__(self, parent):
         wx.Panel.__init__(self, parent)
 
 
 class CentralControllerPanel(wx.Panel):
 
-    def __init__(self, parent, clientSize):
-        super(CentralControllerPanel, self).__init__(parent, size=clientSize)
-
-        clientSize = self.GetClientSize()
+    def __init__(self, parent):
+        wx.Panel.__init__(self, parent)
 
         topSplitter = wx.SplitterWindow(self)
-
-        panelOne = RandomPanel(topSplitter, "blue")
-        panelThree = RandomPanel(topSplitter, "green")
-        topSplitter.SplitHorizontally(panelOne, panelThree)
+        self._configPanel = PlaceholderPanel(topSplitter)
+        self._logsPanel = ConsoleLogsPanel(topSplitter)
+        topSplitter.SplitHorizontally(self._configPanel, self._logsPanel)
         topSplitter.SetSashGravity(0.5)
 
         sizer = wx.BoxSizer(wx.VERTICAL)

@@ -18,6 +18,8 @@ from common.APIClient.APIEndpointClient import APIEndpointClient
 from common.Version import VERSION, COPYRIGHT
 from Gui.MainWindowTree import MainWindowTree
 from Gui.ConsoleLogsPanel import ConsoleLogsPanel
+from Gui.CentralControllerPanel import CentralControllerPanel
+from Gui.KeypadControllerPanel import KeypadControllerPanel
 
 
 ID_toolbarKeypadCtrl = 1001
@@ -49,12 +51,18 @@ class MainWindow(wx.Frame):
         self.BuildStatusBar()
         self.BuildToolbar()
 
-        # Get the client size
-		clientSize = self.GetClientSize()
-
 		# Create Sizer for layout
-		self._sizer = wx.BoxSizer(wx.VERTICAL)
-		self.SetSizer(self._sizer)
+        self._sizer = wx.BoxSizer(wx.VERTICAL)
+        self.SetSizer(self._sizer)
+
+        # Central Controller Panel
+        self._centralControllerPanel = CentralControllerPanel(self)
+        self._sizer.Add(self._centralControllerPanel, 1, wx.GROW)
+
+        # Keypad Controller Panel
+        self._keypadControllerPanel = KeypadControllerPanel(self)
+        self._sizer.Add(self._keypadControllerPanel, 1, wx.GROW)
+        self._keypadControllerPanel.Hide()
 
 
     def BuildStatusBar(self):
