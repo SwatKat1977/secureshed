@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 '''
+import enum
 import wx
 from common.APIClient.APIEndpointClient import APIEndpointClient
 from common.Version import VERSION, COPYRIGHT
@@ -30,6 +31,11 @@ CentralCtrlToolbarImg = 'art/icons8-motherboard-48.png'
 
 class MainWindow(wx.Frame):
 
+    class PageSelection(enum.Enum):
+        CentralControllerPanel = 0
+        KeypadControllerPanel = 1
+
+
     ## MainWindow class constructor.
     #  @param self The object pointer.
     def __init__(self, config):
@@ -40,6 +46,7 @@ class MainWindow(wx.Frame):
         super().__init__(None, title=title, size=frameSize)
 
         self._config = config
+        self._currPage = self.PageSelection.CentralControllerPanel
 
         self._keypadClient = APIEndpointClient(config.keypadController.endpoint)
         self._controllerClient = APIEndpointClient(config.centralController.endpoint)
@@ -50,7 +57,7 @@ class MainWindow(wx.Frame):
         self.BuildStatusBar()
         self.BuildToolbar()
 
-		# Create Sizer for layout
+        # Create Sizer for layout
         self._sizer = wx.BoxSizer(wx.VERTICAL)
         self.SetSizer(self._sizer)
 
@@ -60,7 +67,6 @@ class MainWindow(wx.Frame):
 
         # Keypad Controller Panel
         self._keypadControllerPanel = KeypadControllerPanel(self)
-        self._sizer.Add(self._keypadControllerPanel, 1, wx.GROW)
         self._keypadControllerPanel.Hide()
 
 
@@ -88,4 +94,60 @@ class MainWindow(wx.Frame):
                                            "Central Controller",
                                            CentralCtrlIcon)
 
+        # Bind toolbar events
+        self.Bind(wx.EVT_TOOL, self.OnCentralControllerClick, btnCentral)
+        self.Bind(wx.EVT_TOOL, self.OnKeypadControllerClick, btnKeypad)
+
         self._toolbar.Realize()
+
+
+    def OnCentralControllerClick(self, event):
+        #  If current page is same as what is selected then do nothing.
+        if self._currPage == self.PageSelection.CentralControllerPanel:
+            return
+
+        # Detach current page.
+        self._sizer.Detach(0)
+
+        # If the current page is 'Keypad' then hide it.
+        if self._currPage == self.PageSelection.KeypadControllerPanel:
+            self._keypadControllerPanel.Hide()
+
+        # Add the Test Plan panel to the sizer control.
+        self._sizer.Prepend(self._centralControllerPanel, 1, wx.GROW)
+
+        # Set the Central Controller Panel to be displayed.
+        self._centralControllerPanel.Show()
+
+        # Set the current activate page
+        self._currPage = self.PageSelection.CentralControllerPanel
+
+        # Update the sizer control and refresh.
+        self._sizer.Layout()
+        self._centralControllerPanel.Refresh()
+
+
+    def OnKeypadControllerClick(self, event):
+        #  If current page is same as what is selected then do nothing.
+        if self._currPage == self.PageSelection.KeypadControllerPanel:
+            return
+
+        # Detach current page.
+        self._sizer.Detach(0)
+
+        # If the current page is 'Central Controller' then hide it.
+        if self._currPage == self.PageSelection.CentralControllerPanel:
+            self._centralControllerPanel.Hide()
+
+        # Add the Keypad Controller panel to the sizer control.
+        self._sizer.Prepend(self._keypadControllerPanel, 1, wx.GROW)
+
+        # Set the Keypad Controller Panel to be displayed.
+        self._keypadControllerPanel.Show()
+
+        # Set the current activate page
+        self._currPage = self.PageSelection.KeypadControllerPanel
+
+        # Update the sizer control and refresh.
+        self._sizer.Layout()
+        self._keypadControllerPanel.Refresh()
