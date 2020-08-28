@@ -38,6 +38,7 @@ class MainWindow(wx.Frame):
 
     ## MainWindow class constructor.
     #  @param self The object pointer.
+    #  @param config Instance of a configuration object.
     def __init__(self, config):
         windowWidth = 800
         windowHeight = 600
@@ -70,6 +71,7 @@ class MainWindow(wx.Frame):
         self._keypadControllerPanel.Hide()
 
 
+    #  @param self The object pointer.
     def BuildStatusBar(self):
         self._statusBar = self.CreateStatusBar()
         self._statusBar.SetFieldsCount(2)
@@ -81,6 +83,7 @@ class MainWindow(wx.Frame):
         self._statusBar.SetStatusText(controllerStatus, 1)
 
 
+    #  @param self The object pointer.
     def BuildToolbar(self):
         self._toolbar = self.CreateToolBar(wx.TB_HORIZONTAL)
         self._toolbar.SetToolBitmapSize(wx.Size( 48, 48 ))
@@ -101,7 +104,11 @@ class MainWindow(wx.Frame):
         self._toolbar.Realize()
 
 
+    #  @param self The object pointer.
+    #  @param event Unused.
     def OnCentralControllerClick(self, event):
+        #pylint: disable=unused-argument
+
         #  If current page is same as what is selected then do nothing.
         if self._currPage == self.PageSelection.CentralControllerPanel:
             return
@@ -127,7 +134,11 @@ class MainWindow(wx.Frame):
         self._centralControllerPanel.Refresh()
 
 
+    #  @param self The object pointer.
+    #  @param event Unused.
     def OnKeypadControllerClick(self, event):
+        #pylint: disable=unused-argument
+
         #  If current page is same as what is selected then do nothing.
         if self._currPage == self.PageSelection.KeypadControllerPanel:
             return
