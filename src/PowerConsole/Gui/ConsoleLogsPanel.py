@@ -14,10 +14,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 '''
 import wx
-  
+
 
 class ConsoleLogsPanel(wx.Panel):
 
     def __init__(self, parent):
         wx.Panel.__init__(self, parent)
-   
+
+        topSizer = wx.BoxSizer(wx.HORIZONTAL)
+
+        self._logsList = wx.ListCtrl(self, -1, style=wx.LC_REPORT)
+        self._logsList.InsertColumn(0, 'Log Level', width=150)
+        self._logsList.InsertColumn(1, 'Message')
+
+        topSizer.Add(self._logsList, 1, wx.EXPAND)
+        self.SetSizer(topSizer)
+        self.Fit()

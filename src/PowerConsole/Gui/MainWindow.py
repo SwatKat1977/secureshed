@@ -14,28 +14,71 @@ See the License for the specific language governing permissions and
 limitations under the License.
 '''
 import wx
+from common.APIClient.APIEndpointClient import APIEndpointClient
 from common.Version import VERSION, COPYRIGHT
 from Gui.MainWindowTree import MainWindowTree
 from Gui.ConsoleLogsPanel import ConsoleLogsPanel
+
+
+ID_toolbarKeypadCtrl = 1001
+ID_toolbarCentralCtrl = 1002
+
+KeypadCtrlToolbarImg = 'art/icons8-ctrl-48.png'
+CentralCtrlToolbarImg = 'art/icons8-motherboard-48.png'
 
 
 class MainWindow(wx.Frame):
 
     ## MainWindow class constructor.
     #  @param self The object pointer.
-    def __init__(self):
+    def __init__(self, config):
         windowWidth = 800
         windowHeight = 600
-
         title = f"Secure Shed Power Console (Core {VERSION})"
         frameSize = (windowWidth, windowHeight)
         super().__init__(None, title=title, size=frameSize)
 
-        splitter = wx.SplitterWindow(self)
-        leftP = MainWindowTree(splitter)
-        rightP = ConsoleLogsPanel(splitter)
+        self._config = config
 
-        # split the window
-        splitter.SplitVertically(leftP, rightP)
-        splitter.SetMinimumPaneSize(20)
-        self.Centre()
+        self._keypadClient = APIEndpointClient(config.keypadController.endpoint)
+        self._controllerClient = APIEndpointClient(config.centralController.endpoint)
+
+        self._statusBar = None
+        self._toolbar = None
+
+        self.BuildStatusBar()
+        self.BuildToolbar()
+
+        # Get the client size
+		clientSize = self.GetClientSize()
+
+		# Create Sizer for layout
+		self._sizer = wx.BoxSizer(wx.VERTICAL)
+		self.SetSizer(self._sizer)
+
+
+    def BuildStatusBar(self):
+        self._statusBar = self.CreateStatusBar()
+        self._statusBar.SetFieldsCount(2)
+
+        keypadStatus = "Keypad: DISCONNECTED"
+        self._statusBar.SetStatusText(keypadStatus, 0)
+
+        controllerStatus = "Controller: DISCONNECTED"
+        self._statusBar.SetStatusText(controllerStatus, 1)
+
+
+    def BuildToolbar(self):
+        self._toolbar = self.CreateToolBar(wx.TB_HORIZONTAL)
+        self._toolbar.SetToolBitmapSize(wx.Size( 48, 48 ))
+
+        keypadCtrlIcon = wx.Bitmap(KeypadCtrlToolbarImg, wx.BITMAP_TYPE_PNG)
+        btnKeypad = self._toolbar.AddTool(ID_toolbarKeypadCtrl,
+                                          "Keypad Controller", keypadCtrlIcon)
+
+        CentralCtrlIcon = wx.Bitmap(CentralCtrlToolbarImg, wx.BITMAP_TYPE_PNG)
+        btnCentral = self._toolbar.AddTool(ID_toolbarCentralCtrl,
+                                           "Central Controller",
+                                           CentralCtrlIcon)
+
+        self._toolbar.Realize()

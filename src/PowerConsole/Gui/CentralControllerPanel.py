@@ -14,6 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 '''
 
+class PlaceholderPanel(wx.Panel):
+    """"""
+    #----------------------------------------------------------------------
+    def __init__(self, parent):
+        wx.Panel.__init__(self, parent)
+
 
 class CentralControllerPanel(wx.Panel):
 
@@ -21,3 +27,14 @@ class CentralControllerPanel(wx.Panel):
         super(CentralControllerPanel, self).__init__(parent, size=clientSize)
 
         clientSize = self.GetClientSize()
+
+        topSplitter = wx.SplitterWindow(self)
+
+        panelOne = RandomPanel(topSplitter, "blue")
+        panelThree = RandomPanel(topSplitter, "green")
+        topSplitter.SplitHorizontally(panelOne, panelThree)
+        topSplitter.SetSashGravity(0.5)
+
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add(topSplitter, 1, wx.EXPAND)
+        self.SetSizer(sizer)
