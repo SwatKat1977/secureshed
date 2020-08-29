@@ -18,12 +18,6 @@ from Gui.ConsoleLogsPanel import ConsoleLogsPanel
 from Gui.KeypadControllerConfigPanel import KeypadControllerConfigPanel
 
 
-class PlaceholderPanel(wx.Panel):
-
-    def __init__(self, parent):
-        wx.Panel.__init__(self, parent)
-
-
 class KeypadControllerPanel(wx.Panel):
 
     def __init__(self, parent):
