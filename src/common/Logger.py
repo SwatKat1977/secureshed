@@ -32,7 +32,7 @@ class Logger:
     __slots__ = ['_externalLogger', '_isInitialised', '_loggerInst',
                  '_writeToConsole']
 
-    _LoggerMappings = {
+    LoggerMappings = {
         LogType.Debug : ('debug', logging.DEBUG),
         LogType.Error : ('error', logging.ERROR),
         LogType.Info : ('info', logging.INFO),
@@ -85,7 +85,7 @@ class Logger:
             raise RuntimeError('Logger is not initialised!')
 
         if self._writeToConsole:
-            mappedMethod, _ = self._LoggerMappings[logLevel]
+            mappedMethod, _ = self.LoggerMappings[logLevel]
             methodToCall = getattr(self._loggerInst, mappedMethod)
             methodToCall(msg, *args)
 

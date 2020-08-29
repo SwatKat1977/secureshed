@@ -13,9 +13,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 '''
+#pylint: disable=unused-argument
 import enum
 import wx
-from common.APIClient.APIEndpointClient import APIEndpointClient
 from common.Version import VERSION, COPYRIGHT
 from Gui.ConsoleLogsPanel import ConsoleLogsPanel
 from Gui.CentralControllerPanel import CentralControllerPanel
@@ -31,6 +31,13 @@ CentralCtrlToolbarImg = 'art/icons8-motherboard-48.png'
 
 class MainWindow(wx.Frame):
 
+    # Event ID's for main dialog.
+    EventID_updateTimer = 0x100
+
+    # Update timer interval.
+    UpdateTimerInterval = 2000
+
+    ## Enumeration for current page selected.
     class PageSelection(enum.Enum):
         CentralControllerPanel = 0
         KeypadControllerPanel = 1
@@ -49,9 +56,6 @@ class MainWindow(wx.Frame):
         self._config = config
         self._currPage = self.PageSelection.CentralControllerPanel
 
-        self._keypadClient = APIEndpointClient(config.keypadController.endpoint)
-        self._controllerClient = APIEndpointClient(config.centralController.endpoint)
-
         self._statusBar = None
         self._toolbar = None
 
@@ -63,12 +67,22 @@ class MainWindow(wx.Frame):
         self.SetSizer(self._sizer)
 
         # Central Controller Panel
-        self._centralControllerPanel = CentralControllerPanel(self)
+        self._centralControllerPanel = CentralControllerPanel(self, config)
         self._sizer.Add(self._centralControllerPanel, 1, wx.GROW)
 
         # Keypad Controller Panel
-        self._keypadControllerPanel = KeypadControllerPanel(self)
+        self._keypadControllerPanel = KeypadControllerPanel(self, config)
         self._keypadControllerPanel.Hide()
+
+        # Create update timer
+        self._updateTimer = wx.Timer(self, id = self.EventID_updateTimer)
+        self._updateTimer.Start(self.UpdateTimerInterval, wx.TIMER_CONTINUOUS)
+
+        # ----------------
+        #  Bind events to functions
+        #  ----------------
+        self.Bind(wx.EVT_TIMER, self.OnTimerTick)
+        self.Bind(wx.EVT_CLOSE, self.OnCloseApplication)
 
 
     #  @param self The object pointer.
@@ -107,7 +121,6 @@ class MainWindow(wx.Frame):
     #  @param self The object pointer.
     #  @param event Unused.
     def OnCentralControllerClick(self, event):
-        #pylint: disable=unused-argument
 
         #  If current page is same as what is selected then do nothing.
         if self._currPage == self.PageSelection.CentralControllerPanel:
@@ -137,7 +150,6 @@ class MainWindow(wx.Frame):
     #  @param self The object pointer.
     #  @param event Unused.
     def OnKeypadControllerClick(self, event):
-        #pylint: disable=unused-argument
 
         #  If current page is same as what is selected then do nothing.
         if self._currPage == self.PageSelection.KeypadControllerPanel:
@@ -162,3 +174,20 @@ class MainWindow(wx.Frame):
         # Update the sizer control and refresh.
         self._sizer.Layout()
         self._keypadControllerPanel.Refresh()
+
+
+    # Event when the timer ticks, the panels are updated.
+    #  @param self The object pointer.
+    #  @param event Required, but not used.
+    def OnTimerTick(self, event):
+        #self._keypadControllerPanel.UpdatePage()
+        self._centralControllerPanel.GetLogs()
+
+
+    # Event when the main dialog is closed.  Ensure that the update timer is
+    # stopped.
+    #  @param self The object pointer.
+    #  @param event Required, but not used.
+    def OnCloseApplication(self, event):
+        self._updateTimer.Stop()
+        self.Destroy()
