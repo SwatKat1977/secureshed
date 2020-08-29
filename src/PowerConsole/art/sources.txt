@@ -1,0 +1,4 @@
+The following images came from https://icons8.com/ and used under a royalty
+free licence:
+* icons8-ctrl-48.png : https://img.icons8.com/fluent/48/000000/motherboard.png
+* icons8-motherboard-48.png : https://img.icons8.com/cute-clipart/64/000000/keypad.png

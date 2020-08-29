@@ -14,33 +14,33 @@ See the License for the specific language governing permissions and
 limitations under the License.
 '''
 import collections
-from centralController.DevicesConfigLoader import DevicesConfigLoader
-import centralController.Events as Evts
+from CentralController.DevicesConfigLoader import DevicesConfigLoader
+import CentralController.Events as Evts
+from common.Logger import Logger, LogType
 
 try:
     import RPi.GPIO as GPIO
     RPIO_EMULATED = False
 except ModuleNotFoundError:
-    from centralController.EmulatedRaspberryPiIO import GPIO
+    from CentralController.EmulatedRaspberryPiIO import GPIO
     RPIO_EMULATED = True
 
 
 class DeviceManager:
-    __slots__ = ['__devices', '__deviceTypeMgr', '__eventMgr', '__logger']
+    __slots__ = ['__devices', '__deviceTypeMgr', '__eventMgr']
 
     Device = collections.namedtuple('Device',
                                     'name hardware deviceType pins triggerGracePeriod')
 
 
     #  @param self The object pointer.
-    def __init__(self, logger, deviceTypeMgr, eventMgr):
-        self.__logger = logger
+    def __init__(self, deviceTypeMgr, eventMgr):
         self.__deviceTypeMgr = deviceTypeMgr
         self.__devices = []
         self.__eventMgr = eventMgr
 
         if RPIO_EMULATED:
-            self.__logger.info('Using Raspberry PI IO Emulation...')
+            Logger.Instance().Log(LogType.Info, 'Using Raspberry PI IO Emulation...')
 
         GPIO.setmode(GPIO.BCM)
 
@@ -54,8 +54,8 @@ class DeviceManager:
             enabled = device[DevicesConfigLoader.DeviceElement.Enabled]
 
             if not enabled:
-                self.__logger.warn("Device '%s' is disabled, not loading it!",
-                                   name)
+                Logger.Instance().Log(LogType.Warn,
+                                      "Device '%s' is disabled, not loading it!", name)
                 continue
 
             try:
@@ -70,22 +70,23 @@ class DeviceManager:
             deviceType = device[DevicesConfigLoader.DeviceElement.DeviceType]
 
             if deviceType not in deviceTypes:
-                self.__logger.warn("Ignoring device '%s' as it has invalid " +\
-                                   "device type of '%s'", name, deviceType)
+                Logger.Instance().Log(LogType.Warn,
+                                      "Ignoring device '%s' as it has invalid " +\
+                                      "device type of '%s'", name, deviceType)
                 continue
 
             try:
-                deviceInst = deviceTypes[deviceType](self.__logger, GPIO,
-                                                     self.__eventMgr)
+                deviceInst = deviceTypes[deviceType](GPIO, self.__eventMgr)
                 newDevice = self.Device(name=name, hardware=hardware,
                                         deviceType=deviceInst, pins=pins,
                                         triggerGracePeriod=triggerGracePeriod)
                 self.__devices.append(newDevice)
 
             except TypeError:
-                self.__logger.warn("Ignoring device '%s' as unable to " +\
-                                   "instantiate device type of '%s'", name,
-                                   deviceType)
+                Logger.Instance().Log(LogType.Warn,
+                                      "Ignoring device '%s' as unable to " +\
+                                      "instantiate device type of '%s'", name,
+                                      deviceType)
                 continue
 
 
@@ -102,19 +103,22 @@ class DeviceManager:
 
                 if not device.deviceType.Initialise(device.name, device.pins,
                                                     additionalParams):
-                    self.__logger.error("Device plug-in '%s' initialisation" +\
-                        " failed so cannot be used.", device.name)
+                    Logger.Instance().Log(LogType.Error,
+                                          "Device plug-in '%s' initialisation" +\
+                                          " failed so cannot be used.", device.name)
                     continue
 
                 devices.append(device)
 
             except NotImplementedError:
-                self.__logger.error("Device name '%s' plug-in does not " +\
-                    "implement Initialise() so cannot be used.", device.name)
+                Logger.Instance().Log(LogType.Error,
+                                      "Device name '%s' plug-in does not " +\
+                                      "implement Initialise() so cannot be used.", device.name)
 
             except TypeError:
-                self.__logger.error("Device name '%s' plug-in has syntax " +\
-                    "error(s) so cannot be used.", device.name)
+                Logger.Instance().Log(LogType.Error,
+                                      "Device name '%s' plug-in has syntax " +\
+                                      "error(s) so cannot be used.", device.name)
 
         self.__devices = devices
 
@@ -123,20 +127,22 @@ class DeviceManager:
     def CheckHardwareDevices(self):
 
         if RPIO_EMULATED:
-            GPIO.UpdateFromPinOutFile(self.__logger)
+            GPIO.UpdateFromPinOutFile()
 
         for device in self.__devices:
             try:
                 device.deviceType.CheckDevice()
 
             except NotImplementedError:
-                self.__logger.error("Device name '%s' plug-in does not " +\
-                    "implement CheckDevice() so cannot be used.", device.name)
+                Logger.Instance().Log(LogType.Error,
+                                      "Device name '%s' plug-in does not " +\
+                                      "implement CheckDevice() so cannot be used.",
+                                      device.name)
 
 
     #  @param self The object pointer.
     def CleanupDevices(self):
-        self.__logger.error("Cleaning up hardware devices")
+        Logger.Instance().Log(LogType.Info, "Cleaning up hardware devices")
         GPIO.cleanup()
 
 
@@ -161,7 +167,8 @@ class DeviceManager:
         sirens = [s for s in self.__devices if s.hardware == 'siren']
 
         for siren in sirens:
-            self.__logger.info("Activating alarm siren '%s'", siren.name)
+            Logger.Instance().Log(LogType.Info, "Activating alarm siren '%s'",
+                                  siren.name)
             siren.deviceType.ReceiveEvent(eventInst)
 
 
@@ -170,7 +177,8 @@ class DeviceManager:
         sirens = [s for s in self.__devices if s.hardware == 'siren']
 
         for siren in sirens:
-            self.__logger.info("Deactivating alarm siren '%s'", siren.name)
+            Logger.Instance().Log(LogType.Info,
+                                  "Deactivating alarm siren '%s'", siren.name)
             siren.deviceType.ReceiveEvent(eventInst)
 
 
@@ -185,8 +193,9 @@ class DeviceManager:
                 sensor.deviceType.ReceiveEvent(eventInst)
 
             except NotImplementedError:
-                self.__logger.info("Device '%s' missing ReceiveEvent()",
-                                   sensor.name)
+                Logger.Instance().Log(LogType.Info,
+                                      "Device '%s' missing ReceiveEvent()",
+                                      sensor.name)
 
 
     #  @param self The object pointer.
@@ -197,5 +206,6 @@ class DeviceManager:
                 sensor.deviceType.ReceiveEvent(eventInst)
 
             except NotImplementedError:
-                self.__logger.info("Device '%s' missing ReceiveEvent()",
-                                   sensor.name)
+                Logger.Instance().Log(LogType.Error,
+                                      "Device '%s' missing ReceiveEvent()",
+                                      sensor.name)

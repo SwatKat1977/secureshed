@@ -16,7 +16,7 @@ limitations under the License.
 import os
 import sys
 from flask import Flask
-from centralController.CentralControllerApp import CentralControllerApp
+from CentralController.CentralControllerApp import CentralControllerApp
 
 
 ## Flask startup function.

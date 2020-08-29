@@ -13,7 +13,12 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 '''
+import wx
 
-VERSION = '0.5.0 (pre-alpha)'
 
-COPYRIGHT = '2019-2020'
+class KeypadControllerConfigPanel(wx.Panel):
+
+    def __init__(self, parent):
+        wx.Panel.__init__(self, parent)
+
+        wx.StaticText(parent, -1, 'Keypad Controller Config')

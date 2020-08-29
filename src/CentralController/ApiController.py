@@ -17,31 +17,33 @@ import json
 from flask import request
 import jsonschema
 import APIs.CentralController.JsonSchemas as schemas
-import centralController.Events as Evts
+import CentralController.Events as Evts
 from common.APIClient.HTTPStatusCode import HTTPStatusCode
 from common.APIClient.MIMEType import MIMEType
 from common.Event import Event
+from common.Logger import Logger, LogType
 
 
 ## Implementation of thread that handles API calls to the keypad API.
 class ApiController:
+    # pylint: disable=too-few-public-methods
 
-    __slots__ = ['__config', '__db', '__endpoint', '__eventMgr', '__logger']
+    __slots__ = ['__config', '__db', '__endpoint', '__eventMgr', '_logStore']
 
     ## KeypadAPIThread class constructor, passing in the network port that the
     #  API will listen to.
     #  @param self The object pointer.
-    #  @param logger Logger instance.
     #  @param eventMgr Event management class instance.
     #  @param controllerDb Central controller internal database.
     #  @param config Configuration items.
     #  @param endpoint REST api endpoint instance.
-    def __init__(self, logger, eventMgr, controllerDb, config, endpoint):
+    #  @param logStore Instance of log store.
+    def __init__(self, eventMgr, controllerDb, config, endpoint, logStore):
         self.__config = config
         self.__db = controllerDb
         self.__endpoint = endpoint
-        self.__logger = logger
         self.__eventMgr = eventMgr
+        self._logStore = logStore
 
         # Add route : /receiveKeyCode
         self.__endpoint.add_url_rule('/receiveKeyCode', methods=['POST'],
@@ -50,6 +52,10 @@ class ApiController:
         # Add route : /receiveKeyCode
         self.__endpoint.add_url_rule('/pleaseRespondToKeypad', methods=['POST'],
                                      view_func=self.__PleaseRespondToKeypad)
+
+        # Add route : /retrieveConsoleLogs
+        self.__endpoint.add_url_rule('/retrieveConsoleLogs', methods=['POST'],
+                                     view_func=self._RetrieveConsoleLogs)
 
 
     ## API route : receiveKeyCode
@@ -113,12 +119,50 @@ class ApiController:
             mimetype=MIMEType.Text)
 
 
+    def _RetrieveConsoleLogs(self):
+        # Validate the request to ensure that the auth key is firstly present,
+        # then if it's valid.  None is returned if successful.
+        validateReturn = self.__ValidateAuthKey()
+        if validateReturn is not None:
+            return validateReturn
+
+        # Check for that the message body ia of type application/json and that
+        # there is one, if not report a 400 error status with a human-readable.
+        body = request.get_json()
+        if not body:
+            errMsg = 'Missing/invalid json body'
+            response = self.__endpoint.response_class(
+                response=errMsg, status=HTTPStatusCode.BadRequest,
+                mimetype=MIMEType.Text)
+            return response
+
+        # Validate that the json body conforms to the expected schema.
+        # If the message isn't valid then a 400 error should be generated.
+        try:
+            jsonschema.validate(instance=body,
+                                schema=schemas.RetrieveConsoleLogs.Schema)
+
+        except jsonschema.exceptions.ValidationError:
+            errMsg = 'Message body validation failed.'
+            return self.__endpoint.response_class(
+                response=errMsg, status=HTTPStatusCode.BadRequest,
+                mimetype='text')
+
+        start = body[schemas.RetrieveConsoleLogs.BodyElement.StartTimestamp]
+        logEvents = self._logStore.GetLogEvents(start)
+
+        return self.__endpoint.response_class(
+            response=json.dumps(logEvents), status=HTTPStatusCode.OK,
+            mimetype=MIMEType.JSON)
+
+
     #  @param self The object pointer.
     def __ValidateAuthKey(self):
         # Verify that an authorisation key exists in the requet header, if not
         # then return a 401 error with a human-readable reasoning.
         if schemas.AUTH_KEY not in request.headers:
-            self.__logger.critical('Missing controller auth key from keypad')
+            Logger.Instance().Log(LogType.Critical,
+                                  'Missing controller auth key from keypad')
             errMsg = 'Authorisation key is missing'
             return self.__endpoint.response_class(
                 response=errMsg, status=HTTPStatusCode.Unauthenticated,
@@ -130,7 +174,8 @@ class ApiController:
         # configuration file.  If the key isn't valid then the error
         # code of 403 (Forbidden) is returned.
         if authorisationKey != self.__config.centralControllerApi.authKey:
-            self.__logger.critical('Invalid controller auth key from keypad')
+            Logger.Instance().Log(LogType.Critical,
+                                  'Invalid controller auth key from keypad')
             errMsg = 'Authorisation key is invalid'
             return self.__endpoint.response_class(
                 response=errMsg, status=HTTPStatusCode.Forbidden,

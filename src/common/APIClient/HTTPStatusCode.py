@@ -13,11 +13,12 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 '''
+# pylint: disable=too-few-public-methods
 
-class HTTPStatusCode(object):
+class HTTPStatusCode:
 
     # 200 − OK
-    OK =  200
+    OK = 200
 
     # 400 − for Bad Request
     BadRequest = 400

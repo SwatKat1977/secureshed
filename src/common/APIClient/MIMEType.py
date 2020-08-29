@@ -16,7 +16,7 @@ limitations under the License.
 
 # Based on:
 #https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Complete_list_of_MIME_types
-class MIMEType(object):
+class MIMEType:
 
     # .css | Cascading Style Sheets (CSS)
     CascadingStyleSheets = 'text/css'
