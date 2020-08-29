@@ -17,6 +17,7 @@ import enum
 import hashlib
 import json
 import jsonschema
+from common.Logger import Logger, LogType
 
 
 ## Simulation of the Raspberry GPIO package.
@@ -280,9 +281,8 @@ class GPIO:
 
     ## Update the simulated states of the Raspberry Pi GPIO pins only if the
     #  MD5 hash of the file has changed.
-    #  @param logger Instance of the logger object.
     @staticmethod
-    def UpdateFromPinOutFile(logger):
+    def UpdateFromPinOutFile():
         newHash = GPIO.HashPinoutFile(GPIO.PinOutFile)
         if newHash is None or newHash == GPIO.PinOutFileHash:
             return
@@ -293,7 +293,8 @@ class GPIO:
 
         status, pinouts = GPIO.ReadPinoutFile()
         if status or not pinouts:
-            logger.info(f'Unable to read pin file, reason: {status}')
+            Logger.Instance().Log(LogType.Info,
+                                  f'Unable to read pin file, reason: {status}')
             return
 
         for key in pinouts:
@@ -303,4 +304,5 @@ class GPIO:
                 else GPIO.PinState.Low
 
         GPIO.CurrentPinOutStates = newPinOutStates
-        logger.debug(f'Emulated Pin states : {GPIO.CurrentPinOutStates}')
+        Logger.Instance().Log(LogType.Debug,
+                              f'Emulated Pin states : {GPIO.CurrentPinOutStates}')

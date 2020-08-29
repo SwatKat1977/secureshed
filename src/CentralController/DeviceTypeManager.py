@@ -18,12 +18,12 @@ import json
 import importlib
 import jsonschema
 from CentralController.DeviceTypes.BaseDeviceType import BaseDeviceType
+from common.Logger import Logger, LogType
 
 
 class DeviceTypeManager:
     # pylint: disable=R0903
-    __slots__ = ['__deviceTypes', '__expectedTypes', '__lastErrorMsg',
-                 '__logger']
+    __slots__ = ['__deviceTypes', '__expectedTypes', '__lastErrorMsg']
 
     DeviceTypeCfg = collections.namedtuple('DeviceTypeCfg', 'name enabled')
 
@@ -88,9 +88,7 @@ class DeviceTypeManager:
 
 
     #  @param self The object pointer.
-    def __init__(self, logger):
-        self.__logger = logger
-
+    def __init__(self):
         self.__expectedTypes = []
 
         self.__deviceTypes = {}
@@ -144,7 +142,7 @@ class DeviceTypeManager:
 
     #  @param self The object pointer.
     def LoadDeviceTypes(self):
-        defaultModulePath = 'centralController.DeviceTypes.'
+        defaultModulePath = 'CentralController.DeviceTypes.'
 
         for device in self.__expectedTypes:
             deviceName = device.name
@@ -152,7 +150,7 @@ class DeviceTypeManager:
             if not device.enabled:
                 msg = f"Plug-in for device type '{deviceName}' is disabled" +\
                        " so loading won't be attempted."
-                self.__logger.warn(msg)
+                Logger.Instance().Log(LogType.Warn, msg)
                 continue
 
             moduleName = f'{defaultModulePath}{deviceName}'
@@ -161,13 +159,15 @@ class DeviceTypeManager:
                 importedModule = importlib.import_module(moduleName)
 
             except ModuleNotFoundError:
-                self.__logger.warn(f"No plug-in for device type '{deviceName}'," +\
-                    " it has been removed from the devices list.")
+                Logger.Instance().Log(LogType.Warn,
+                                      f"No plug-in for device type '{deviceName}'," +\
+                                       " it has been removed from the devices list.")
                 continue
 
             except NameError:
-                self.__logger.warn(f"Device type '{deviceName}' Plug-in has a " +\
-                    "syntax error, it has been removed from the devices list.")
+                Logger.Instance().Log(LogType.Warn,
+                                      f"Device type '{deviceName}' Plug-in has a " +\
+                                      "syntax error, it has been removed from the devices list.")
                 continue
 
             try:
@@ -176,13 +176,15 @@ class DeviceTypeManager:
                 valid = BaseDeviceType in importedCls.__bases__
 
                 if not valid:
-                    self.__logger.warn(f"Plug-in for device type '{deviceName}'" +\
-                        " is not derived from plug-in class.  It cannot be " +\
-                         "used and was removed from the devices list.")
+                    Logger.Instance().Log(LogType.Warn,
+                                          f"Plug-in for device type '{deviceName}'" +\
+                                           " is not derived from plug-in class.  It cannot be " +\
+                                           "used and was removed from the devices list.")
                     continue
 
                 self.__deviceTypes[deviceName] = importedCls
-                self.__logger.info(f"Loaded plug-in for device type '{deviceName}'")
+                Logger.Instance().Log(LogType.Info,
+                                      f"Loaded plug-in for device type '{deviceName}'")
 
             except AttributeError:
                 pass

@@ -13,29 +13,29 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 '''
-import logging
 import os
 import signal
 import sys
 import time
+from CentralController.ApiController import ApiController
 from CentralController.ConfigurationManager import ConfigurationManager
 from CentralController.ControllerDBInterface import ControllerDBInterface
 from CentralController.DevicesConfigLoader import DevicesConfigLoader
 from CentralController.DeviceManager import DeviceManager
 from CentralController.DeviceTypeManager import DeviceTypeManager
-from CentralController.ApiController import ApiController
 import CentralController.Events as Evts
+from CentralController.LogStore import LogStore
 from CentralController.StateManager import StateManager
 from CentralController.WorkerThread import WorkerThread
 from common.Event import Event
 from common.EventManager import EventManager
 from common.Version import COPYRIGHT, VERSION
-
+from common.Logger import Logger, LogType
 
 class CentralControllerApp:
     __slots__ = ['__configFile', '__currDevices', '__db', '__deviceMgr',
-                 '__endpoint', '__eventManager',
-                 '__logger', '__stateMgr', '__workerThread']
+                 '__endpoint', '__eventManager', '_logStore', '__stateMgr',
+                 '__workerThread']
 
 
     def __init__(self, endpoint):
@@ -45,80 +45,79 @@ class CentralControllerApp:
         self.__deviceMgr = None
         self.__endpoint = endpoint
         self.__eventManager = None
-        self.__logger = None
+        self._logStore = LogStore()
         self.__stateMgr = None
         self.__workerThread = None
 
 
     def StartApp(self):
-        # Configure the logging for the application.
-        formatter = logging.Formatter("%(asctime)s [%(levelname)s] %(message)s",
-                                      "%Y-%m-%d %H:%M:%S")
-        self.__logger = logging.getLogger('system log')
-        consoleStream = logging.StreamHandler()
-        consoleStream.setFormatter(formatter)
-        self.__logger.setLevel(logging.DEBUG)
-        self.__logger.addHandler(consoleStream)
+        Logger.Instance().WriteToConsole = True
+        Logger.Instance().ExternalLogger = self
+        Logger.Instance().Initialise()
 
         signal.signal(signal.SIGINT, self.__SignalHandler)
 
-        self.__logger.info('Secure Shed Central Controller V%s', VERSION)
-        self.__logger.info('Copyright %s Secure Shed Project Dev Team',
-                           COPYRIGHT)
-        self.__logger.info('Licensed under the Apache License, Version 2.0')
+        Logger.Instance().Log(LogType.Info,
+                              'Secure Shed Central Controller V%s', VERSION)
+        Logger.Instance().Log(LogType.Info,
+                              'Copyright %s Secure Shed Project Dev Team',
+                              COPYRIGHT)
+        Logger.Instance().Log(LogType.Info,
+                              'Licensed under the Apache License, Version 2.0')
 
         configManger = ConfigurationManager()
 
         configuration = configManger.ParseConfigFile(self.__configFile)
         if not configuration:
-            self.__logger.error('Parse failed, last message : %s',
-                                configManger.lastErrorMsg)
+            Logger.Instance().Log(LogType.Error,
+                                  'Parse failed, last message : %s',
+                                  configManger.lastErrorMsg)
             sys.exit(1)
 
-        self.__logger.info('=== Configuration Parameters ===')
-        self.__logger.info('Environment Variables:')
-        self.__logger.info('|=> Configuration file       : %s',
-                           self.__configFile)
-        self.__logger.info('|=> Database                 : %s',
-                           self.__db)
-        self.__logger.info('===================================')
-        self.__logger.info('=== Configuration File Settings ===')
-        self.__logger.info('General Settings:')
-        self.__logger.info('|=> Devices Config File      : %s',
-                           configuration.generalSettings.devicesConfigFile)
-        self.__logger.info('|=> Device Types Config File : %s',
-                           configuration.generalSettings.deviceTypesConfigFile)
-        self.__logger.info('Keypad Controller Settings:')
-        self.__logger.info('|=> Authentication Key       : %s',
-                           configuration.keypadController.authKey)
-        self.__logger.info('|=> Endpoint                 : %s',
-                           configuration.keypadController.endpoint)
-        self.__logger.info('Central Controller Settings:')
-        self.__logger.info('|=> Authentication Key       : %s',
-                           configuration.centralControllerApi.authKey)
-        self.__logger.info('|=> Network Port             : %s',
-                           configuration.centralControllerApi.networkPort)
-        self.__logger.info('================================')
+        Logger.Instance().Log(LogType.Info, '=== Configuration Parameters ===')
+        Logger.Instance().Log(LogType.Info, 'Environment Variables:')
+        Logger.Instance().Log(LogType.Info, '|=> Configuration file       : %s',
+                              self.__configFile)
+        Logger.Instance().Log(LogType.Info, '|=> Database                 : %s',
+                              self.__db)
+        Logger.Instance().Log(LogType.Info, '===================================')
+        Logger.Instance().Log(LogType.Info, '=== Configuration File Settings ===')
+        Logger.Instance().Log(LogType.Info, 'General Settings:')
+        Logger.Instance().Log(LogType.Info, '|=> Devices Config File      : %s',
+                              configuration.generalSettings.devicesConfigFile)
+        Logger.Instance().Log(LogType.Info, '|=> Device Types Config File : %s',
+                              configuration.generalSettings.deviceTypesConfigFile)
+        Logger.Instance().Log(LogType.Info, 'Keypad Controller Settings:')
+        Logger.Instance().Log(LogType.Info, '|=> Authentication Key       : %s',
+                              configuration.keypadController.authKey)
+        Logger.Instance().Log(LogType.Info, '|=> Endpoint                 : %s',
+                              configuration.keypadController.endpoint)
+        Logger.Instance().Log(LogType.Info, 'Central Controller Settings:')
+        Logger.Instance().Log(LogType.Info, '|=> Authentication Key       : %s',
+                              configuration.centralControllerApi.authKey)
+        Logger.Instance().Log(LogType.Info, '|=> Network Port             : %s',
+                              configuration.centralControllerApi.networkPort)
+        Logger.Instance().Log(LogType.Info, '================================')
 
         self.__eventManager = EventManager()
 
         controllerDb = ControllerDBInterface()
         if not controllerDb.Connect(self.__db):
-            self.__logger.error("Database '%s' is missing!", self.__db)
+            Logger.Instance().Log(LogType.Error, "Database '%s' is missing!",
+                                  self.__db)
             sys.exit(1)
 
         # Build state manager which manages the state of the alarm itself and
         # how states are changed due to hardware device(s) being triggered.
-        self.__stateMgr = StateManager(controllerDb, self.__logger, configuration,
-                                       self.__eventManager)
+        self.__stateMgr = StateManager(controllerDb, configuration, self.__eventManager)
 
         # Attempt to load the device types plug-ins, if a plug-in cannot be
         # found or is invalid then a warning is logged and it's not loaded.
-        deviceTypeMgr = DeviceTypeManager(self.__logger)
+        deviceTypeMgr = DeviceTypeManager()
         deviceTypesCfg = deviceTypeMgr.ReadDeviceTypesConfig(
             configuration.generalSettings.deviceTypesConfigFile)
         if not deviceTypesCfg:
-            self.__logger.error(deviceTypeMgr.lastErrorMsg)
+            Logger.Instance().Log(LogType.Error, deviceTypeMgr.lastErrorMsg)
             sys.exit(1)
 
         deviceTypeMgr.LoadDeviceTypes()
@@ -130,11 +129,10 @@ class CentralControllerApp:
         devicesConfigLoader = DevicesConfigLoader()
         self.__currDevices = devicesConfigLoader.ReadDevicesConfigFile(devicesCfg)
         if not self.__currDevices:
-            self.__logger.error(devicesConfigLoader.lastErrorMsg)
+            Logger.Instance().Log(LogType.Error, devicesConfigLoader.lastErrorMsg)
             sys.exit(1)
 
-        self.__deviceMgr = DeviceManager(self.__logger, deviceTypeMgr,
-                                         self.__eventManager)
+        self.__deviceMgr = DeviceManager(deviceTypeMgr, self.__eventManager)
         devLst = self.__currDevices[devicesConfigLoader.JsonTopElement.Devices]
         self.__deviceMgr.Load(devLst)
         self.__deviceMgr.InitialiseHardware()
@@ -143,17 +141,17 @@ class CentralControllerApp:
 
         # Create the IO processing thread which handles IO requests from
         # hardware devices.
-        self.__workerThread = WorkerThread(self.__logger, configuration,
+        self.__workerThread = WorkerThread(configuration,
                                            self.__deviceMgr,
                                            self.__eventManager,
                                            self.__stateMgr)
         self.__workerThread.start()
 
-        apiController = ApiController(self.__logger,
-                                      self.__eventManager,
+        apiController = ApiController(self.__eventManager,
                                       controllerDb,
                                       configuration,
-                                      self.__endpoint)
+                                      self.__endpoint,
+                                      self._logStore)
 
         sendAlivePingEvt = Event(Evts.EvtType.KeypadApiSendAlivePing)
         self.__eventManager.QueueEvent(sendAlivePingEvt)
@@ -214,7 +212,7 @@ class CentralControllerApp:
     def __SignalHandler(self, signum, frame):
         #pylint: disable=unused-argument
 
-        self.__logger.info('Shutting down...')
+        Logger.Instance().Log(LogType.Info, 'Shutting down...')
         self.__Shutdown()
         sys.exit(1)
 
@@ -225,4 +223,8 @@ class CentralControllerApp:
         while not self.__workerThread.shutdownCompleted:
             time.sleep(1)
 
-        self.__logger.info('Worker thread has Shut down')
+        Logger.Instance().Log(LogType.Info, 'Worker thread has Shut down')
+
+
+    def AddLogEvent(self, currTime, logLevel, msg):
+        self._logStore.AddLogEvent(currTime, logLevel, msg)

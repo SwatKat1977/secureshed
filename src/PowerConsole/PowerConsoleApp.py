@@ -17,6 +17,7 @@ import logging
 import os
 import sys
 import wx
+from ConfigurationManager import ConfigurationManager
 from Gui.MainWindow import MainWindow
 
 
@@ -26,7 +27,6 @@ class PowerConsoleApp:
 
     ## __slots__ allow us to explicitly declare data members
     __slots__ = ['_configMgr', '_logger']
-
 
     ## KeypadApp class constructor.
     #  @param self The object pointer.
@@ -55,16 +55,17 @@ class PowerConsoleApp:
             self._logger.error('PWRCON_CONFIG environment variable missing!')
             sys.exit(1)
 
-        #self.__configMgr = ConfigurationManager()
-        #config = self.__configMgr.ParseConfigFile('configuration.json')
+        configFile = os.getenv('PWRCON_CONFIG')
+        self._configMgr = ConfigurationManager()
+        config = self._configMgr.ParseConfigFile(configFile)
 
-        #if not config:
-        #    self.__logger.error(self.__configMgr.lastErrorMsg)
-        #    return
+        if not config:
+            print(f"ERROR: {self._configMgr.lastErrorMsg}")
+            return
 
         wxApp = wx.App()
 
-        mainWindow = MainWindow()
+        mainWindow = MainWindow(config)
         mainWindow.Show()
 
         wxApp.MainLoop()
@@ -74,3 +75,4 @@ class PowerConsoleApp:
     #  @param self The object pointer.
     def StopApp(self):
         self._logger.info('Stopping power console, cleaning up...')
+

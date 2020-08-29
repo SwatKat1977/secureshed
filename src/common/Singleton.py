@@ -13,12 +13,22 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 '''
-import wx
 
 
-class CentralControllerConfigPanel(wx.Panel):
+class Singleton:
 
-    def __init__(self, parent):
-        wx.Panel.__init__(self, parent)
+    def __init__(self, cls):
+        self._cls = cls
 
-        wx.StaticText(parent, -1, 'Central Controller Config')
+    def Instance(self):
+        try:
+            return self._instance
+        except AttributeError:
+            self._instance = self._cls()
+            return self._instance
+
+    def __call__(self):
+        raise TypeError('Singletons must be called via ::Instance()')
+
+    def __instancecheck__(self, inst):
+        return isinstance(inst, self._cls)
