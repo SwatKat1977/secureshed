@@ -14,14 +14,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 '''
 import wx
+from common.APIClient.APIEndpointClient import APIEndpointClient
 from Gui.ConsoleLogsPanel import ConsoleLogsPanel
 from Gui.KeypadControllerConfigPanel import KeypadControllerConfigPanel
 
 
 class KeypadControllerPanel(wx.Panel):
 
-    def __init__(self, parent):
+    def __init__(self, parent, config):
         wx.Panel.__init__(self, parent)
+
+        self._config = config
+        self._apiClient = APIEndpointClient(config.keypadController.endpoint)
 
         topSplitter = wx.SplitterWindow(self)
         self._configPanel = KeypadControllerConfigPanel(topSplitter)
