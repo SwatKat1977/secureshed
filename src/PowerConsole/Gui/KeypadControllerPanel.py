@@ -14,9 +14,27 @@ See the License for the specific language governing permissions and
 limitations under the License.
 '''
 import wx
+from Gui.ConsoleLogsPanel import ConsoleLogsPanel
+from Gui.KeypadControllerConfigPanel import KeypadControllerConfigPanel
+
+
+class PlaceholderPanel(wx.Panel):
+
+    def __init__(self, parent):
+        wx.Panel.__init__(self, parent)
 
 
 class KeypadControllerPanel(wx.Panel):
 
     def __init__(self, parent):
         wx.Panel.__init__(self, parent)
+
+        topSplitter = wx.SplitterWindow(self)
+        self._configPanel = KeypadControllerConfigPanel(topSplitter)
+        self._logsPanel = ConsoleLogsPanel(topSplitter)
+        topSplitter.SplitHorizontally(self._configPanel, self._logsPanel)
+        topSplitter.SetSashGravity(0.5)
+
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add(topSplitter, 1, wx.EXPAND)
+        self.SetSizer(sizer)

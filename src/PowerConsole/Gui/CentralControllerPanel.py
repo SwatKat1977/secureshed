@@ -15,12 +15,7 @@ limitations under the License.
 '''
 import wx
 from Gui.ConsoleLogsPanel import ConsoleLogsPanel
-
-
-class PlaceholderPanel(wx.Panel):
-
-    def __init__(self, parent):
-        wx.Panel.__init__(self, parent)
+from Gui.CentralControllerConfigPanel import CentralControllerConfigPanel
 
 
 class CentralControllerPanel(wx.Panel):
@@ -29,7 +24,7 @@ class CentralControllerPanel(wx.Panel):
         wx.Panel.__init__(self, parent)
 
         topSplitter = wx.SplitterWindow(self)
-        self._configPanel = PlaceholderPanel(topSplitter)
+        self._configPanel = CentralControllerConfigPanel(topSplitter)
         self._logsPanel = ConsoleLogsPanel(topSplitter)
         topSplitter.SplitHorizontally(self._configPanel, self._logsPanel)
         topSplitter.SetSashGravity(0.5)
