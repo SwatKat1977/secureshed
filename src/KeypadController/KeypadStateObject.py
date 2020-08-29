@@ -19,6 +19,7 @@ from twisted.internet import reactor
 from common.APIClient.APIEndpointClient import APIEndpointClient
 from common.APIClient.HTTPStatusCode import HTTPStatusCode
 from common.APIClient.MIMEType import MIMEType
+from common.Logger import Logger, LogType
 from Gui.KeypadPanel import KeypadPanel
 from Gui.LockedPanel import LockedPanel
 from Gui.CommsLostPanel import CommsLostPanel
@@ -26,7 +27,7 @@ from Gui.CommsLostPanel import CommsLostPanel
 
 class KeypadStateObject:
     __slots__ = ['__centralCtrlApiClient', '__config', '__currentPanel',
-                 '__keypadCode', '__logger', '__newPanel', '__commsLostPanel',
+                 '__keypadCode', '__newPanel', '__commsLostPanel',
                  '__keypadLockedPanel', '__keypadPanel', '__lastReconnectTime']
 
     CommLostRetryInterval = 5
@@ -57,7 +58,7 @@ class KeypadStateObject:
         return self.__currentPanel
 
 
-    def __init__(self, config, logger):
+    def __init__(self, config):
         self.__config = config
         self.__currentPanel = (None, None)
         self.__newPanel = (self.PanelType.CommunicationsLost, {})
@@ -68,8 +69,6 @@ class KeypadStateObject:
         self.__keypadPanel = KeypadPanel(self.__config)
 
         self.__lastReconnectTime = 0
-
-        self.__logger = logger
 
         endpoint = self.__config.centralController.endpoint
         self.__centralCtrlApiClient = APIEndpointClient(endpoint)
@@ -117,25 +116,28 @@ class KeypadStateObject:
             'pleaseRespondToKeypad', MIMEType.JSON, additionalHeaders)
 
         if response is None:
-            self.__logger.warn('failed to transmit, reason : %s',
-                               self.__centralCtrlApiClient.LastErrMsg)
+            Logger.Instance().Log(LogType.Warn,
+                                  'failed to transmit, reason : %s',
+                                  self.__centralCtrlApiClient.LastErrMsg)
             return
 
         # 400 Bad Request : Missing or invalid json body or validation failed.
         if response.status_code == HTTPStatusCode.BadRequest:
-            self.__logger.warn('failed to transmit, reason : BadRequest')
+            Logger.Instance().Log(LogType.Warn,
+                                  'failed to transmit, reason : BadRequest')
             return
 
         # 401 Unauthenticated : Missing or invalid authentication key.
         if response.status_code == HTTPStatusCode.Unauthenticated:
-            self.__logger.warn('failed to transmit, reason : Unauthenticated')
+            Logger.Instance().Log(LogType.Warn,
+                                  'failed to transmit, reason : Unauthenticated')
             return
 
         # 200 OK : code accepted, code incorrect or code refused.
         if response.status_code == HTTPStatusCode.OK:
             return
 
-          
+
     ## Display a new panel by firstly hiding all of panels and then after that
     ## show just the expected one.
     #  @param self The object pointer.
