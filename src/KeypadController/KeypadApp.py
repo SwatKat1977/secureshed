@@ -69,7 +69,8 @@ class KeypadApp:
 
         self.__stateObject = KeypadStateObject(config)
 
-        keypadApiCtrl = KeypadApiController(config, self.__stateObject)
+        keypadApiCtrl = KeypadApiController(config, self.__stateObject,
+                                            self._logStore)
         apiServer = server.Site(keypadApiCtrl)
         reactor.listenTCP(config.keypadController.networkPort, apiServer)
 
