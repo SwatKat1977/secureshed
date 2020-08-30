@@ -180,7 +180,7 @@ class MainWindow(wx.Frame):
     #  @param self The object pointer.
     #  @param event Required, but not used.
     def OnTimerTick(self, event):
-        #self._keypadControllerPanel.UpdatePage()
+        self._keypadControllerPanel.GetLogs()
         self._centralControllerPanel.GetLogs()
 
 
