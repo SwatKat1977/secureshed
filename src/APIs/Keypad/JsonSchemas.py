@@ -59,3 +59,47 @@ class RetrieveConsoleLogs:
 
     class BodyElement:
         StartTimestamp = 'startTimestamp'
+
+
+class RequestLogsResponse:
+    Schema = {
+        "definitions":
+        {
+            "LogEntry":
+            {
+                "type": "object",
+                "additionalProperties" : False,
+                "required": ["timestamp", "level", "message"],
+                "properties":
+                {
+                    "timestamp": {"type": "number"},
+                    "level": {"type": "integer"},
+                    "message": {"type": "string"}
+                }
+            }
+        },
+        "type" : "object",
+        "properties":
+        {
+            "additionalProperties" : False,
+            "lastTimestamp" :
+            {
+                "type" : "number",
+                "minimum": 0
+            },
+            "entries":
+            {
+                "type": "array",
+                "items": {"$ref": "#/definitions/LogEntry"}
+            }
+        },
+        "required": ["lastTimestamp", "entries"],
+        "additionalProperties" : False
+    }
+
+    class BodyElement:
+        LastTimestamp = 'lastTimestamp'
+        Entries = 'entries'
+        EntryMsgLevel = 'level'
+        EntryMessage = 'message'
+        EntryTimestamp = 'timestamp'
