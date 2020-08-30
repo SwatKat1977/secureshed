@@ -67,7 +67,7 @@ class CentralControllerPanel(wx.Panel):
 
         # Not able to communicated with the central controller.
         if response is None:
-            print("NOT able to communicate with central controller...")
+            # NOT able to communicate with central controller...
             return
 
         if response.status_code != HTTPStatusCode.OK:
