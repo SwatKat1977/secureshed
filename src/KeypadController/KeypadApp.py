@@ -61,7 +61,7 @@ class KeypadApp:
         config = self.__configMgr.ParseConfigFile('configuration.json')
 
         if not config:
-            self.__logger.error(self.__configMgr.lastErrorMsg)
+            Logger.Instance().Log(LogType.Error, self.__configMgr.lastErrorMsg)
             return
 
         wxApp = wx.App()
