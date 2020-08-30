@@ -21,9 +21,11 @@ wxreactor.install()
 from twisted.internet import reactor
 from twisted.web import server
 import wx
+from common.Logger import Logger, LogType
 from ConfigurationManager import ConfigurationManager
 from KeypadApiController import KeypadApiController
 from KeypadStateObject import KeypadStateObject
+from LogStore import LogStore
 
 
 ## The main application class for the keypad controller application.
@@ -31,7 +33,7 @@ class KeypadApp:
     # pylint: disable=R0903
 
     ## __slots__ allow us to explicitly declare data members
-    __slots__ = ['__configMgr', '__logger', '__stateObject']
+    __slots__ = ['__configMgr', '_logStore', '__stateObject']
 
 
     ## KeypadApp class constructor.
@@ -39,16 +41,11 @@ class KeypadApp:
     def __init__(self):
         ## Instance of a configuration manager class.
         self.__configMgr = None
+        self._logStore = LogStore()
 
-        formatter = logging.Formatter("%(asctime)s [%(levelname)s] %(message)s",
-                                      "%Y-%m-%d %H:%M:%S")
-
-        ## Instance of a logger.
-        self.__logger = logging.getLogger('system log')
-        consoleStream = logging.StreamHandler()
-        consoleStream.setFormatter(formatter)
-        self.__logger.setLevel(logging.DEBUG)
-        self.__logger.addHandler(consoleStream)
+        Logger.Instance().WriteToConsole = True
+        Logger.Instance().ExternalLogger = self
+        Logger.Instance().Initialise()
 
         ## Instance of the keypad state object.
         self.__stateObject = None
@@ -64,16 +61,16 @@ class KeypadApp:
         config = self.__configMgr.ParseConfigFile('configuration.json')
 
         if not config:
-            self.__logger.error(self.__configMgr.lastErrorMsg)
+            Logger.Instance().Log(LogType.Error, self.__configMgr.lastErrorMsg)
             return
 
         wxApp = wx.App()
         reactor.registerWxApp(wxApp)
 
-        self.__stateObject = KeypadStateObject(config, self.__logger)
+        self.__stateObject = KeypadStateObject(config)
 
-        keypadApiCtrl = KeypadApiController(self.__logger, config,
-                                            self.__stateObject)
+        keypadApiCtrl = KeypadApiController(config, self.__stateObject,
+                                            self._logStore)
         apiServer = server.Site(keypadApiCtrl)
         reactor.listenTCP(config.keypadController.networkPort, apiServer)
 
@@ -85,4 +82,9 @@ class KeypadApp:
     ## Stop the application.
     #  @param self The object pointer.
     def StopApp(self):
-        self.__logger.info('Stopping keypad controller, cleaning up...')
+        Logger.Instance().Log(LogType.Info,
+                              'Stopping keypad controller, cleaning up...')
+
+
+    def AddLogEvent(self, currTime, logLevel, msg):
+        self._logStore.AddLogEvent(currTime, logLevel, msg)
