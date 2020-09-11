@@ -36,24 +36,23 @@ class APIEndpointClient:
         self._lastErrMsg = ''
 
 
-    def SendGetMsg(self, route, mimeType, additionalHeaders=None,
-                   body=None):
 
+    def SendGetMsg(self, route, mimeType, additionalHeaders=None,
+                   body=None, timeout=1):
         self._lastErrMsg = ''
-        return self.__SendMessage(route, self.__MethodType.Get, mimeType,
-                                  additionalHeaders, body)
+        return self._send_message(route, self.__MethodType.Get, mimeType,
+                                  additionalHeaders, body, timeout)
 
 
     def SendPostMsg(self, route, mimeType, additionalHeaders=None,
-                    body=None):
-
+                    body=None, timeout=1):
         self._lastErrMsg = ''
-        return self.__SendMessage(route, self.__MethodType.Post, mimeType,
-                                  additionalHeaders, body)
+        return self._send_message(route, self.__MethodType.Post, mimeType,
+                                  additionalHeaders, body, timeout)
 
 
-    def __SendMessage(self, route, clientMethodType, mimeType,
-                      additionalHeaders, body):
+    def _send_message(self, route, clientMethodType, mimeType,
+                      additionalHeaders, body, timeout):
 
         url = f'{self.__urlBase}{route}'
 
@@ -72,10 +71,12 @@ class APIEndpointClient:
 
         try:
             if clientMethodType == self.__MethodType.Get:
-                pass
+                return requests.get(url, data=body, headers=headerDict,
+                                    timeout=timeout)
 
             elif clientMethodType == self.__MethodType.Post:
-                return requests.post(url, data=body, headers=headerDict)
+                return requests.post(url, data=body, headers=headerDict,
+                                     timeout=timeout)
 
         except requests.exceptions.ConnectionError:
             self._lastErrMsg = 'A Connection error occurred.'

@@ -15,11 +15,13 @@ limitations under the License.
 '''
 #pylint: disable=unused-argument
 import enum
+import time
 import wx
 from common.Version import VERSION, COPYRIGHT
 from Gui.ConsoleLogsPanel import ConsoleLogsPanel
 from Gui.CentralControllerPanel import CentralControllerPanel
 from Gui.KeypadControllerPanel import KeypadControllerPanel
+from WorkerThread import WorkerThread
 
 
 ID_toolbarKeypadCtrl = 1001
@@ -30,12 +32,6 @@ CentralCtrlToolbarImg = 'art/icons8-motherboard-48.png'
 
 
 class MainWindow(wx.Frame):
-
-    # Event ID's for main dialog.
-    EventID_updateTimer = 0x100
-
-    # Update timer interval.
-    UpdateTimerInterval = 2000
 
     ## Enumeration for current page selected.
     class PageSelection(enum.Enum):
@@ -74,14 +70,10 @@ class MainWindow(wx.Frame):
         self._keypadControllerPanel = KeypadControllerPanel(self, config)
         self._keypadControllerPanel.Hide()
 
-        # Create update timer
-        self._updateTimer = wx.Timer(self, id = self.EventID_updateTimer)
-        self._updateTimer.Start(self.UpdateTimerInterval, wx.TIMER_CONTINUOUS)
+        self._worker_thread = WorkerThread(self._keypadControllerPanel,
+                                          self._centralControllerPanel)
+        self._worker_thread.start()
 
-        # ----------------
-        #  Bind events to functions
-        #  ----------------
-        self.Bind(wx.EVT_TIMER, self.OnTimerTick)
         self.Bind(wx.EVT_CLOSE, self.OnCloseApplication)
 
 
@@ -176,18 +168,14 @@ class MainWindow(wx.Frame):
         self._keypadControllerPanel.Refresh()
 
 
-    # Event when the timer ticks, the panels are updated.
-    #  @param self The object pointer.
-    #  @param event Required, but not used.
-    def OnTimerTick(self, event):
-        self._keypadControllerPanel.GetLogs()
-        self._centralControllerPanel.GetLogs()
-
-
     # Event when the main dialog is closed.  Ensure that the update timer is
     # stopped.
     #  @param self The object pointer.
     #  @param event Required, but not used.
     def OnCloseApplication(self, event):
-        self._updateTimer.Stop()
+        self._worker_thread.request_shutdown()
+
+        while not self._worker_thread.shutdown_completed:
+            time.sleep(1)
+
         self.Destroy()
