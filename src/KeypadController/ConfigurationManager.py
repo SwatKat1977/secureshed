@@ -16,7 +16,7 @@ limitations under the License.
 import collections
 import json
 import jsonschema
-from configurationJsonSchema import CONFIGURATIONJSONSCHEMA
+from ConfigurationJsonSchema import CONFIGURATIONJSONSCHEMA
 
 ## Central controller section configuration items.
 CentralController = collections.namedtuple('CentralController',

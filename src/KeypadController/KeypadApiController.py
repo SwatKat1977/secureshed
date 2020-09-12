@@ -48,7 +48,7 @@ class KeypadApiController(resource.Resource):
         self._logStore = logStore
 
 
-    ## Render a GET HTTP method type.
+    ## Render a POST HTTP method type.
     #  Note: Disabled pylint warning about name as inherited method.
     #  @param self The object pointer.
     #  @param requestInst GET request to process.
@@ -65,6 +65,22 @@ class KeypadApiController(resource.Resource):
 
         if requestUri == 'retrieveConsoleLogs':
             return self._RetrieveConsoleLogs(requestInst)
+
+        requestInst.setResponseCode(HTTPStatusCode.NotFound)
+        return b''
+
+
+    ## Render a GET HTTP method type.
+    #  Note: Disabled pylint warning about name as inherited method.
+    #  @param self The object pointer.
+    #  @param requestInst GET request to process.
+    def render_GET(self, requestInst):
+        # pylint: disable=C0103
+
+        requestUri = str(requestInst.path, 'utf-8').lstrip('/')
+
+        if requestUri == '_healthStatus':
+            return self._health_status(requestInst)
 
         requestInst.setResponseCode(HTTPStatusCode.NotFound)
         return b''
@@ -200,6 +216,16 @@ class KeypadApiController(resource.Resource):
         requestInst.setResponseCode(HTTPStatusCode.OK)
         requestInst.setHeader('Content-Type', MIMEType.JSON)
         return str.encode(json.dumps(logEvents))
+
+
+    #  @param self The object pointer.
+    def _health_status(self, requestInst):
+        return_json = {
+            "health": "normal"
+        }
+        requestInst.setResponseCode(HTTPStatusCode.OK)
+        requestInst.setHeader('Content-Type', MIMEType.JSON)
+        return json.dumps(return_json).encode("UTF-8")
 
 
     ## Validate the authentication key for a request.
