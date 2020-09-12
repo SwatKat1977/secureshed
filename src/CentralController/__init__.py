@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 '''
+import logging
 import os
 import sys
 from flask import Flask
@@ -25,6 +26,9 @@ def create_app(test_config=None):
     # pylint: disable=W0613,E1101,C0103
 
     app = Flask(__name__)
+
+    log = logging.getLogger('werkzeug')
+    log.setLevel(logging.ERROR)
 
     if not os.getenv('CENCON_CONFIG'):
         app.logger.error(f'CENCON_CONFIG environment variable missing!')
