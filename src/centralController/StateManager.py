@@ -19,7 +19,7 @@ import json
 import time
 import APIs.CentralController.JsonSchemas as schemas
 import APIs.Keypad.JsonSchemas as keypadApi
-import CentralController.Events as Evts
+import centralController.Events as Evts
 from common.APIClient.APIEndpointClient import APIEndpointClient
 from common.APIClient.HTTPStatusCode import HTTPStatusCode
 from common.APIClient.MIMEType import MIMEType
