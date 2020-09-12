@@ -14,15 +14,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 '''
 import collections
-from CentralController.DevicesConfigLoader import DevicesConfigLoader
-import CentralController.Events as Evts
+from centralController.DevicesConfigLoader import DevicesConfigLoader
+import centralController.Events as Evts
 from common.Logger import Logger, LogType
 
 try:
     import RPi.GPIO as GPIO
     RPIO_EMULATED = False
 except ModuleNotFoundError:
-    from CentralController.EmulatedRaspberryPiIO import GPIO
+    from centralController.EmulatedRaspberryPiIO import GPIO
     RPIO_EMULATED = True
 
 

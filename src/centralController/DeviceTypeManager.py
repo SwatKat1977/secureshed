@@ -17,7 +17,7 @@ import collections
 import json
 import importlib
 import jsonschema
-from CentralController.DeviceTypes.BaseDeviceType import BaseDeviceType
+from centralController.DeviceTypes.BaseDeviceType import BaseDeviceType
 from common.Logger import Logger, LogType
 
 
