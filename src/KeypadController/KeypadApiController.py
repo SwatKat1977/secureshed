@@ -19,13 +19,14 @@ from twisted.web import resource
 import APIs.Keypad.JsonSchemas as schemas
 from common.APIClient.HTTPStatusCode import HTTPStatusCode
 from common.APIClient.MIMEType import MIMEType
+from common.Logger import Logger, LogType
 from KeypadStateObject import KeypadStateObject
 
 
 ## Implementation of thread that handles API calls to the keypad API.
 class KeypadApiController(resource.Resource):
     ## __slots__ allow us to explicitly declare data members.
-    __slots__ = ['__config', '__logger', '__stateObject']
+    __slots__ = ['__config', '__stateObject']
 
     isLeaf = True
 
@@ -33,20 +34,18 @@ class KeypadApiController(resource.Resource):
     ## KeypadAPIThread class constructor, passing in the network port that the
     #  API will listen to.
     #  @param self The object pointer.
-    #  @param logger Logger instance.
     #  @param config Configuration items.
     #  @param stateObject Instance of the state object.
-    def __init__(self, logger, config, stateObject):
+    def __init__(self, config, stateObject, logStore):
         super().__init__()
 
         ## Instance of the current configuration.
         self.__config = config
 
-        ## Instance of a logger.
-        self.__logger = logger
-
         ## Instance of the keypad state object.
         self.__stateObject = stateObject
+        
+        self._logStore = logStore
 
 
     ## Render a GET HTTP method type.
@@ -63,6 +62,9 @@ class KeypadApiController(resource.Resource):
 
         if requestUri == 'receiveKeypadLock':
             return self.__ReceiveKeypadLock(requestInst)
+
+        if requestUri == 'retrieveConsoleLogs':
+            return self._RetrieveConsoleLogs(requestInst)
 
         requestInst.setResponseCode(HTTPStatusCode.NotFound)
         return b''
@@ -100,7 +102,8 @@ class KeypadApiController(resource.Resource):
             newPanel = (KeypadStateObject.PanelType.Keypad, {})
             self.__stateObject.newPanel = newPanel
 
-        self.__logger.info("Received an 'alive ping' from central controller")
+        Logger.Instance().Log(LogType.Info,
+                              "Received an 'alive ping' from central controller")
         requestInst.setResponseCode(HTTPStatusCode.OK)
         requestInst.setHeader('Content-Type', MIMEType.Text)
         return b'OK'
@@ -139,7 +142,7 @@ class KeypadApiController(resource.Resource):
         except jsonschema.exceptions.ValidationError as ex:
             errrMsg = "ReceiveKeypadLockReq message failed validation, " +\
                       f"reason: {ex}"
-            self.__logger.error(errrMsg)
+            Logger.Instance().Log(LogType.Error, errrMsg)
             requestInst.setResponseCode(HTTPStatusCode.BadRequest)
             requestInst.setHeader('Content-Type', MIMEType.Text)
             return str.encode(errrMsg)
@@ -148,10 +151,55 @@ class KeypadApiController(resource.Resource):
         newPanel = (KeypadStateObject.PanelType.KeypadIsLocked, lockTime)
         self.__stateObject.newPanel = newPanel
 
-        self.__logger.info("Received an 'lock keypad' from central controller")
+        Logger.Instance().Log(LogType.Info,
+                              "Received an 'lock keypad' from central controller")
         requestInst.setResponseCode(HTTPStatusCode.OK)
         requestInst.setHeader('Content-Type', MIMEType.Text)
         return b'OK'
+
+
+    def _RetrieveConsoleLogs(self, requestInst):
+        # Validate the request to ensure that the auth key is firstly present,
+        # then if it's valid.  None is returned if successful.
+        response = self.__ValidateAuthKey(requestInst)
+        if response is not None:
+            return response
+
+       # Check for that if a message body exists and if so, is it in a json
+        # MIME type, if not report a 400 error status with a human-readable.
+        contentType = requestInst.getHeader(b'content-type')
+        if contentType is None or contentType != str.encode(MIMEType.JSON):
+            requestInst.setResponseCode(HTTPStatusCode.BadRequest)
+            requestInst.setHeader('Content-Type', MIMEType.Text)
+            return b'Message body not type JSON'
+
+        try:
+            rawBody = requestInst.content.read()
+            body = json.loads(rawBody)
+
+        except json.decoder.JSONDecodeError:
+            requestInst.setResponseCode(HTTPStatusCode.BadRequest)
+            requestInst.setHeader('Content-Type', MIMEType.Text)
+            return b'Message body not valid JSON'
+
+        try:
+            jsonschema.validate(instance=body,
+                                schema=schemas.RetrieveConsoleLogs.Schema)
+
+        except jsonschema.exceptions.ValidationError as ex:
+            errrMsg = "ReceiveKeypadLockReq message failed validation, " +\
+                      f"reason: {ex}"
+            Logger.Instance().Log(LogType.Error, errrMsg)
+            requestInst.setResponseCode(HTTPStatusCode.BadRequest)
+            requestInst.setHeader('Content-Type', MIMEType.Text)
+            return str.encode(errrMsg)
+
+        start = body[schemas.RetrieveConsoleLogs.BodyElement.StartTimestamp]
+        logEvents = self._logStore.GetLogEvents(start)
+
+        requestInst.setResponseCode(HTTPStatusCode.OK)
+        requestInst.setHeader('Content-Type', MIMEType.JSON)
+        return str.encode(json.dumps(logEvents))
 
 
     ## Validate the authentication key for a request.
