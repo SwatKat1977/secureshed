@@ -17,7 +17,7 @@ import collections
 import json
 import importlib
 import jsonschema
-from CentralController.DeviceTypes.BaseDeviceType import BaseDeviceType
+from centralController.DeviceTypes.BaseDeviceType import BaseDeviceType
 from common.Logger import Logger, LogType
 
 
@@ -142,7 +142,7 @@ class DeviceTypeManager:
 
     #  @param self The object pointer.
     def LoadDeviceTypes(self):
-        defaultModulePath = 'CentralController.DeviceTypes.'
+        defaultModulePath = 'centralController.DeviceTypes.'
 
         for device in self.__expectedTypes:
             deviceName = device.name

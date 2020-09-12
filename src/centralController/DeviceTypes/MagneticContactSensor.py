@@ -15,8 +15,8 @@ limitations under the License.
 '''
 import enum
 import time
-from CentralController.DeviceTypes.BaseDeviceType import BaseDeviceType
-import CentralController.Events as Evts
+from centralController.DeviceTypes.BaseDeviceType import BaseDeviceType
+import centralController.Events as Evts
 from common.Event import Event
 from common.Logger import Logger, LogType
 
