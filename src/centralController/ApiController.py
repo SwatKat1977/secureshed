@@ -57,6 +57,10 @@ class ApiController:
         self.__endpoint.add_url_rule('/retrieveConsoleLogs', methods=['POST'],
                                      view_func=self._RetrieveConsoleLogs)
 
+        # Add route : /retrieveConsoleLogs
+        self.__endpoint.add_url_rule('/_healthStatus', methods=['GET'],
+                                     view_func=self._healthStatus)
+
 
     ## API route : receiveKeyCode
     #  Recieve a key code from the keypad.  This is for unlocking/disabling the
@@ -153,6 +157,23 @@ class ApiController:
 
         return self.__endpoint.response_class(
             response=json.dumps(logEvents), status=HTTPStatusCode.OK,
+            mimetype=MIMEType.JSON)
+
+
+
+    def _healthStatus(self):
+        # Validate the request to ensure that the auth key is firstly present,
+        # then if it's valid.  None is returned if successful.
+        validate_return = self.__ValidateAuthKey()
+        if validate_return is not None:
+            return validate_return
+
+        return_json = {
+            "health": "normal"
+        }
+
+        return self.__endpoint.response_class(
+            response=json.dumps(return_json), status=HTTPStatusCode.OK,
             mimetype=MIMEType.JSON)
 
 
