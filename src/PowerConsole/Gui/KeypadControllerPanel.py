@@ -27,23 +27,17 @@ from Gui.KeypadControllerConfigPanel import KeypadControllerConfigPanel
 
 class KeypadControllerPanel(wx.Panel):
 
-<<<<<<< HEAD
-=======
     RetrieveConsoleLogsPath = '/retrieveConsoleLogs'
 
 
->>>>>>> development
     def __init__(self, parent, config):
         wx.Panel.__init__(self, parent)
 
         self._config = config
         self._apiClient = APIEndpointClient(config.keypadController.endpoint)
-<<<<<<< HEAD
-=======
         self._logs = []
         self._logsLastMsgTimestamp = 0
         self._lastLogId = 0
->>>>>>> development
 
         topSplitter = wx.SplitterWindow(self)
         self._configPanel = KeypadControllerConfigPanel(topSplitter)
@@ -54,8 +48,6 @@ class KeypadControllerPanel(wx.Panel):
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(topSplitter, 1, wx.EXPAND)
         self.SetSizer(sizer)
-<<<<<<< HEAD
-=======
 
     def GetLogs(self):
 
@@ -124,4 +116,3 @@ class KeypadControllerPanel(wx.Panel):
             self._logsPanel.AddLogEntry(self._lastLogId,
                                         entry[bodyElements.EntryMsgLevel], msg)
             self._lastLogId += 1
->>>>>>> development
