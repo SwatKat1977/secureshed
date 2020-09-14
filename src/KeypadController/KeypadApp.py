@@ -21,7 +21,7 @@ from twisted.internet import reactor
 from twisted.web import server
 import wx
 from common.Logger import Logger, LogType
-from ConfigurationManager import ConfigurationManager
+from configuration_manager import ConfigurationManager
 from KeypadApiController import KeypadApiController
 from keypad_state_object import KeypadStateObject
 from LogStore import LogStore
