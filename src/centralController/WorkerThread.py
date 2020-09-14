@@ -16,7 +16,7 @@ limitations under the License.
 import enum
 import threading
 import time
-from common.Logger import Logger, LogType
+from common.Logger import LogType
 
 
 ## Main worker thread for the central controller.
@@ -38,11 +38,12 @@ class WorkerThread(threading.Thread):
     #  @param deviceManager Device hardware management class.
     #  @param eventManager Event management class instance.
     #  @param stateMsr Statement management class instance.
-    def __init__(self, config, deviceManager, eventManager, stateMsr):
+    def __init__(self, config, deviceManager, eventManager, stateMsr, logger):
         threading.Thread.__init__(self)
         self.__config = config
         self.__deviceManager = deviceManager
         self.__eventManager = eventManager
+        self._logger = logger
         self.__shutdownRequested = False
         self.__shutdownCompleted = False
         self.__stateMgr = stateMsr
@@ -51,7 +52,7 @@ class WorkerThread(threading.Thread):
     ## Thread execution function, in this case run the Flask API interface.
     #  @param self The object pointer.
     def run(self):
-        Logger.Instance().Log(LogType.Info, 'starting IO processing thread')
+        self._logger.Log(LogType.Info, 'starting IO processing thread')
 
         while not self.__shutdownRequested:
             self.__stateMgr.UpdateTransitoryEvents()

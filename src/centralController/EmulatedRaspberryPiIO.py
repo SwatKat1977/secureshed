@@ -17,7 +17,7 @@ import enum
 import hashlib
 import json
 import jsonschema
-from common.Logger import Logger, LogType
+from common.Logger import LogType
 
 
 ## Simulation of the Raspberry GPIO package.
@@ -139,6 +139,8 @@ class GPIO:
         PinEntryGPIO24Element : PinState.High,
         PinEntryGPIO25Element : PinState.High
     }
+
+    logger = None
 
     ## Last MD5 for the pinout file.
     PinOutFileHash = None
@@ -293,8 +295,8 @@ class GPIO:
 
         status, pinouts = GPIO.ReadPinoutFile()
         if status or not pinouts:
-            Logger.Instance().Log(LogType.Info,
-                                  f'Unable to read pin file, reason: {status}')
+            GPIO.logger.Log(LogType.Info,
+                            f'Unable to read pin file, reason: {status}')
             return
 
         for key in pinouts:
@@ -304,5 +306,5 @@ class GPIO:
                 else GPIO.PinState.Low
 
         GPIO.CurrentPinOutStates = newPinOutStates
-        Logger.Instance().Log(LogType.Debug,
-                              f'Emulated Pin states : {GPIO.CurrentPinOutStates}')
+        GPIO.logger.Log(LogType.Debug,
+                        f'Emulated Pin states : {GPIO.CurrentPinOutStates}')
