@@ -22,8 +22,8 @@ from KeypadApp import KeypadApp
 ## Keypad controller application entry point.
 def Main():
     keypadApp = KeypadApp()
-    keypadApp.StartApp()
-    keypadApp.StopApp()
+    keypadApp.start_app()
+    keypadApp.stop_app()
 
 if __name__ == "__main__":
     Main()

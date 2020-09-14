@@ -27,7 +27,7 @@ from Gui.CommsLostPanel import CommsLostPanel
 
 class KeypadStateObject:
     __slots__ = ['__centralCtrlApiClient', '__config', '__currentPanel',
-                 '__keypadCode', '__newPanel', '__commsLostPanel',
+                 '__keypadCode', '_logger', '__newPanel', '__commsLostPanel',
                  '__keypadLockedPanel', '__keypadPanel', '__lastReconnectTime']
 
     CommLostRetryInterval = 5
@@ -58,11 +58,12 @@ class KeypadStateObject:
         return self.__currentPanel
 
 
-    def __init__(self, config):
+    def __init__(self, config, logger):
         self.__config = config
         self.__currentPanel = (None, None)
         self.__newPanel = (self.PanelType.CommunicationsLost, {})
         self.__keypadCode = ''
+        self._logger = logger
 
         self.__commsLostPanel = CommsLostPanel(self.__config)
         self.__keypadLockedPanel = LockedPanel(self.__config)
@@ -116,20 +117,20 @@ class KeypadStateObject:
             'pleaseRespondToKeypad', MIMEType.JSON, additionalHeaders)
 
         if response is None:
-            Logger.Instance().Log(LogType.Warn,
+            self._logger.Log(LogType.Warn,
                                   'failed to transmit, reason : %s',
                                   self.__centralCtrlApiClient.LastErrMsg)
             return
 
         # 400 Bad Request : Missing or invalid json body or validation failed.
         if response.status_code == HTTPStatusCode.BadRequest:
-            Logger.Instance().Log(LogType.Warn,
+            self._logger.Log(LogType.Warn,
                                   'failed to transmit, reason : BadRequest')
             return
 
         # 401 Unauthenticated : Missing or invalid authentication key.
         if response.status_code == HTTPStatusCode.Unauthenticated:
-            Logger.Instance().Log(LogType.Warn,
+            self._logger.Log(LogType.Warn,
                                   'failed to transmit, reason : Unauthenticated')
             return
 
