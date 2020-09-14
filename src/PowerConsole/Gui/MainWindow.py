@@ -77,16 +77,21 @@ class MainWindow(wx.Frame):
         self.Bind(wx.EVT_CLOSE, self.OnCloseApplication)
 
 
+    def update_keypad_status(self, new_state_str):
+        keypad_status = f"Keypad: {new_state_str}"
+        self._statusBar.SetStatusText(keypad_status, 0)
+
+
     #  @param self The object pointer.
     def BuildStatusBar(self):
         self._statusBar = self.CreateStatusBar()
         self._statusBar.SetFieldsCount(2)
 
-        keypadStatus = "Keypad: DISCONNECTED"
-        self._statusBar.SetStatusText(keypadStatus, 0)
+        keypad_status = "Keypad: DISCONNECTED"
+        self._statusBar.SetStatusText(keypad_status, 0)
 
-        controllerStatus = "Controller: DISCONNECTED"
-        self._statusBar.SetStatusText(controllerStatus, 1)
+        controller_status = "Controller: DISCONNECTED"
+        self._statusBar.SetStatusText(controller_status, 1)
 
 
     #  @param self The object pointer.

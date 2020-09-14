@@ -33,6 +33,6 @@ class ConsoleLogsPanel(wx.Panel):
 
 
     def AddLogEntry(self, indexPosition, logLevel, msg):
-        logLevelStr = Logger.Instance().LoggerMappings[LogType(logLevel)][0]
+        logLevelStr = Logger.LoggerMappings[LogType(logLevel)][0]
         self._logsList.InsertItem(indexPosition, logLevelStr)
         self._logsList.SetItem(indexPosition, 1, msg)

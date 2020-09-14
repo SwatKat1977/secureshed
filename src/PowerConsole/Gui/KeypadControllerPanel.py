@@ -39,7 +39,8 @@ class KeypadControllerPanel(wx.Panel):
         self._logs = []
         self._logsLastMsgTimestamp = 0
         self._lastLogId = 0
-        self._status = (False, 'No connection')
+        self._main_window = parent
+        self._status = (False, '')
 
         topSplitter = wx.SplitterWindow(self)
         self._configPanel = KeypadControllerConfigPanel(topSplitter)
@@ -56,18 +57,18 @@ class KeypadControllerPanel(wx.Panel):
         if not self._check_connection_status():
             return
 
-        msgBody = {
+        msg_body = {
             "startTimestamp" : self._logsLastMsgTimestamp
         }
 
-        additionalHeaders = {
+        additional_headers = {
             'authorisationKey' : self._config.keypadController.authKey
         }
 
         response = self._apiClient.SendPostMsg(self.RetrieveConsoleLogsPath,
                                                MIMEType.JSON,
-                                               additionalHeaders,
-                                               json.dumps(msgBody))
+                                               additional_headers,
+                                               json.dumps(msg_body))
 
         # Not able to communicated with the central controller.
         if response is None:
@@ -125,9 +126,9 @@ class KeypadControllerPanel(wx.Panel):
             'authorisationKey' : self._config.keypadController.authKey
         }
 
-        response = self._apiClient.SendPostMsg(self.HealthStatusPath,
-                                               MIMEType.JSON,
-                                               additional_headers)
+        response = self._apiClient.SendGetMsg(self.HealthStatusPath,
+                                              MIMEType.JSON,
+                                              additional_headers)
 
         # We are not able to communicate with the keypad controller...
         if response is None:
@@ -151,11 +152,12 @@ class KeypadControllerPanel(wx.Panel):
         if curr_state == new_state and curr_str == new_str:
             return
 
-        if new_status:
+        if new_state:
             new_str = f'Connected: ({new_str})'
-            print(new_str)
+            self._main_window.update_keypad_status(new_str)
 
         else:
-            new_str = f'DISCONNECTED: ({new_str})'
-            print(new_str)
-            self._status = new_status
+            new_str = f'Disconnected: ({new_str})'
+            self._main_window.update_keypad_status(new_str)
+
+        self._status = new_status
