@@ -112,8 +112,8 @@ class KeypadApiController(resource.Resource):
         # return an OK.
         currentPanel, _ = self.__stateObject.currentPanel
         if currentPanel == KeypadStateObject.PanelType.CommunicationsLost:
-            newPanel = (KeypadStateObject.PanelType.Keypad, {})
-            self.__stateObject.newPanel = newPanel
+            new_panel = (KeypadStateObject.PanelType.Keypad, {})
+            self.__stateObject.new_panel = new_panel
 
         self._logger.Log(LogType.Info,
                          "Received an 'alive ping' from central controller")
@@ -162,7 +162,7 @@ class KeypadApiController(resource.Resource):
 
         lockTime = body[schemas.KeypadLockRequest.BodyElement.LockTime]
         newPanel = (KeypadStateObject.PanelType.KeypadIsLocked, lockTime)
-        self.__stateObject.newPanel = newPanel
+        self.__stateObject.new_panel = newPanel
 
         self._logger.Log(LogType.Info,
                               "Received an 'lock keypad' from central controller")

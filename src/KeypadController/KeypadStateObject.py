@@ -19,16 +19,17 @@ from twisted.internet import reactor
 from common.APIClient.APIEndpointClient import APIEndpointClient
 from common.APIClient.HTTPStatusCode import HTTPStatusCode
 from common.APIClient.MIMEType import MIMEType
-from common.Logger import Logger, LogType
+from common.Logger import LogType
 from Gui.KeypadPanel import KeypadPanel
 from Gui.LockedPanel import LockedPanel
 from Gui.CommsLostPanel import CommsLostPanel
 
 
 class KeypadStateObject:
-    __slots__ = ['__centralCtrlApiClient', '__config', '__currentPanel',
-                 '__keypadCode', '_logger', '__newPanel', '__commsLostPanel',
-                 '__keypadLockedPanel', '__keypadPanel', '__lastReconnectTime']
+    __slots__ = ['_central_ctrl_api_client', '_comms_lost_panel', '__config',
+                 '_current_panel', '_keypad_code', '_keypad_locked_panel',
+                 '_keypad_panel', '_last_reconnect_time', '_logger',
+                 '_new_panel']
 
     CommLostRetryInterval = 5
 
@@ -39,99 +40,100 @@ class KeypadStateObject:
 
     @property
     def keypadCode(self):
-        return self.__keypadCode
+        return self._keypad_code
 
     @keypadCode.setter
     def keypadCode(self, newCode):
-        self.__keypadCode = newCode
+        self._keypad_code = newCode
 
     @property
-    def newPanel(self):
-        return self.__newPanel
+    def new_panel(self):
+        return self._new_panel
 
-    @newPanel.setter
-    def newPanel(self, newPanelType):
-        self.__newPanel = newPanelType
+    @new_panel.setter
+    def new_panel(self, newPanelType):
+        self._new_panel = newPanelType
 
     @property
     def currentPanel(self):
-        return self.__currentPanel
+        return self._current_panel
 
 
     def __init__(self, config, logger):
         self.__config = config
-        self.__currentPanel = (None, None)
-        self.__newPanel = (self.PanelType.CommunicationsLost, {})
-        self.__keypadCode = ''
+        self._current_panel = (None, None)
+        self._new_panel = (self.PanelType.CommunicationsLost, {})
+        self._keypad_code = ''
         self._logger = logger
 
-        self.__commsLostPanel = CommsLostPanel(self.__config)
-        self.__keypadLockedPanel = LockedPanel(self.__config)
-        self.__keypadPanel = KeypadPanel(self.__config)
+        self._comms_lost_panel = CommsLostPanel(self.__config)
+        self._keypad_locked_panel = LockedPanel(self.__config)
+        self._keypad_panel = KeypadPanel(self.__config)
 
-        self.__lastReconnectTime = 0
+        self._last_reconnect_time = 0
 
         endpoint = self.__config.centralController.endpoint
-        self.__centralCtrlApiClient = APIEndpointClient(endpoint)
+        self._central_ctrl_api_client = APIEndpointClient(endpoint)
 
 
     ## Function that is called to check if the panel has changed or needs to
     ## be changed (e.g. keypad lock expired).
     #  @param self The object pointer.
     def CheckPanel(self):
-        if self.__currentPanel[0] != self.__newPanel[0]:
-            self.__currentPanel = self.__newPanel
-            self.__UpdateDisplayedPanel()
+        if self._current_panel[0] != self._new_panel[0]:
+            self._current_panel = self._new_panel
+            self._update_displayed_panel()
             return
 
         # If the keypad is currently locked then we need to check to see if
         # the keypad lock has timed out, if it has then reset the panel.
-        if self.__currentPanel[0] == KeypadStateObject.PanelType.KeypadIsLocked:
-            currTime = time.time()
+        if self._current_panel[0] == KeypadStateObject.PanelType.KeypadIsLocked:
+            curr_time = time.time()
 
-            if currTime >= self.__currentPanel[1]:
-                keypadPanel = (KeypadStateObject.PanelType.Keypad, {})
-                self.__currentPanel = keypadPanel
-                self.__UpdateDisplayedPanel()
+            if curr_time >= self._current_panel[1]:
+                keypad_panel = (KeypadStateObject.PanelType.Keypad, {})
+                self._current_panel = keypad_panel
+                self._update_displayed_panel()
 
             return
 
         # If the current panel is 'communications lost' then try to send a
         # please respond message to the central controller only at the alotted
         # intervals.
-        if self.__currentPanel[0] == KeypadStateObject.PanelType.CommunicationsLost:
-            curTime = time.time()
-            if curTime > self.__lastReconnectTime + self.CommLostRetryInterval:
-                self.__lastReconnectTime = curTime
-                reactor.callFromThread(self.__SendPleaseRespondMsg)
+        if self._current_panel[0] == KeypadStateObject.PanelType.CommunicationsLost:
+            curr_time = time.time()
+
+            if curr_time > self._last_reconnect_time + self.CommLostRetryInterval:
+                self._last_reconnect_time = curr_time
+                reactor.callFromThread(self._send_please_respond_msg)
 
 
     #  @param self The object pointer.
-    def __SendPleaseRespondMsg(self):
+    def _send_please_respond_msg(self):
 
-        additionalHeaders = {
+        additional_headers = {
             'authorisationKey' : self.__config.centralController.authKey
         }
 
-        response = self.__centralCtrlApiClient.SendPostMsg(
-            'pleaseRespondToKeypad', MIMEType.JSON, additionalHeaders)
+        response = self._central_ctrl_api_client.SendPostMsg(
+            'pleaseRespondToKeypad', MIMEType.JSON, additional_headers)
 
         if response is None:
             self._logger.Log(LogType.Warn,
-                                  'failed to transmit, reason : %s',
-                                  self.__centralCtrlApiClient.LastErrMsg)
+                             'failed to transmit, reason : %s',
+                             self._central_ctrl_api_client.LastErrMsg)
             return
 
         # 400 Bad Request : Missing or invalid json body or validation failed.
         if response.status_code == HTTPStatusCode.BadRequest:
             self._logger.Log(LogType.Warn,
-                                  'failed to transmit, reason : BadRequest')
+                             'failed to transmit, reason : BadRequest')
             return
 
         # 401 Unauthenticated : Missing or invalid authentication key.
         if response.status_code == HTTPStatusCode.Unauthenticated:
             self._logger.Log(LogType.Warn,
-                                  'failed to transmit, reason : Unauthenticated')
+                             'failed to transmit, reason : Unauthenticated')
             return
 
         # 200 OK : code accepted, code incorrect or code refused.
@@ -142,21 +144,21 @@ class KeypadStateObject:
     ## Display a new panel by firstly hiding all of panels and then after that
     ## show just the expected one.
     #  @param self The object pointer.
-    def __UpdateDisplayedPanel(self):
-        self.__commsLostPanel.Hide()
-        self.__keypadPanel.Hide()
-        self.__keypadLockedPanel.Hide()
+    def _update_displayed_panel(self):
+        self._comms_lost_panel.Hide()
+        self._keypad_panel.Hide()
+        self._keypad_locked_panel.Hide()
 
-        panel, _ = self.__currentPanel
+        panel, _ = self._current_panel
 
         if panel == KeypadStateObject.PanelType.KeypadIsLocked:
-            self.__keypadLockedPanel.Display()
+            self._keypad_locked_panel.Display()
 
         elif panel == KeypadStateObject.PanelType.CommunicationsLost:
-            self.__commsLostPanel.Display()
+            self._comms_lost_panel.Display()
 
         elif panel == KeypadStateObject.PanelType.Keypad:
-            self.__keypadPanel.Display()
+            self._keypad_panel.Display()
 
         # The displayed panel has changed, we can now reset newPanel.
-        self.__newPanel = self.__currentPanel
+        self._new_panel = self._current_panel
