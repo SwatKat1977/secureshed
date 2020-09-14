@@ -74,7 +74,7 @@ class KeypadApp:
         api_server = server.Site(keypad_api_ctrl)
         reactor.listenTCP(config.keypadController.networkPort, api_server)
 
-        check_panel_loop = LoopingCall(self._state_object.CheckPanel)
+        check_panel_loop = LoopingCall(self._state_object.check_panel)
         check_panel_loop.start(0.01, now=False)
 
         reactor.run()

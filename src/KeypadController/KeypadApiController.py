@@ -25,7 +25,6 @@ from KeypadStateObject import KeypadStateObject
 
 ## Implementation of thread that handles API calls to the keypad API.
 class KeypadApiController(resource.Resource):
-    ## __slots__ allow us to explicitly declare data members.
     __slots__ = ['__config', '__stateObject']
 
     isLeaf = True
@@ -110,7 +109,7 @@ class KeypadApiController(resource.Resource):
         # 'CommunicationsLost', changing otherwise is unsafe and may result in
         # unexpected behaviour.  Since we don't need to report this we will
         # return an OK.
-        currentPanel, _ = self.__stateObject.currentPanel
+        currentPanel, _ = self.__stateObject.current_panel
         if currentPanel == KeypadStateObject.PanelType.CommunicationsLost:
             new_panel = (KeypadStateObject.PanelType.Keypad, {})
             self.__stateObject.new_panel = new_panel

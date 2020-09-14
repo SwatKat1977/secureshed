@@ -26,6 +26,8 @@ from Gui.CommsLostPanel import CommsLostPanel
 
 
 class KeypadStateObject:
+    # pylint: disable=too-many-instance-attributes
+
     __slots__ = ['_central_ctrl_api_client', '_comms_lost_panel', '__config',
                  '_current_panel', '_keypad_code', '_keypad_locked_panel',
                  '_keypad_panel', '_last_reconnect_time', '_logger',
@@ -39,23 +41,15 @@ class KeypadStateObject:
         Keypad = 2
 
     @property
-    def keypadCode(self):
-        return self._keypad_code
-
-    @keypadCode.setter
-    def keypadCode(self, newCode):
-        self._keypad_code = newCode
-
-    @property
     def new_panel(self):
         return self._new_panel
 
     @new_panel.setter
-    def new_panel(self, newPanelType):
-        self._new_panel = newPanelType
+    def new_panel(self, new_panel_type):
+        self._new_panel = new_panel_type
 
     @property
-    def currentPanel(self):
+    def current_panel(self):
         return self._current_panel
 
 
@@ -79,7 +73,7 @@ class KeypadStateObject:
     ## Function that is called to check if the panel has changed or needs to
     ## be changed (e.g. keypad lock expired).
     #  @param self The object pointer.
-    def CheckPanel(self):
+    def check_panel(self):
         if self._current_panel[0] != self._new_panel[0]:
             self._current_panel = self._new_panel
             self._update_displayed_panel()
