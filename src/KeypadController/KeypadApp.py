@@ -24,7 +24,7 @@ from common.Logger import Logger, LogType
 from configuration_manager import ConfigurationManager
 from KeypadApiController import KeypadApiController
 from keypad_state_object import KeypadStateObject
-from LogStore import LogStore
+from log_store import LogStore
 
 
 ## The main application class for the keypad controller application.
