@@ -58,10 +58,10 @@ class KeypadApp:
     def start_app(self):
 
         self._config_mgr = ConfigurationManager()
-        config = self._config_mgr.ParseConfigFile('configuration.json')
+        config = self._config_mgr.parse_config_file('configuration.json')
 
         if not config:
-            self._logger.Log(LogType.Error, self._config_mgr.lastErrorMsg)
+            self._logger.Log(LogType.Error, self._config_mgr.last_error_msg)
             return
 
         wx_app = wx.App()

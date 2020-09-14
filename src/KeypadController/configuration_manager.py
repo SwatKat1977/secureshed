@@ -81,15 +81,15 @@ class ConfigurationManager:
 
     ## Property getter : Last error message
     @property
-    def lastErrorMsg(self):
-        return self.__lastErrorMsg
+    def last_error_msg(self):
+        return self._last_error_msg
 
 
     ## ConfigurationManager class constructor.
     #  @param self The object pointer.
     def __init__(self):
         ## Holding member variable for last error message property.
-        self.__lastErrorMsg = ''
+        self._last_error_msg = ''
 
 
     ## Parse a configuration file, if the parse fails then the last error
@@ -98,71 +98,72 @@ class ConfigurationManager:
     #  @param filename Name of the configuration file to parse.
     #  @return Returns an instance of Configuration if successful, otherwise
     #  None is returned and the lastErrorMsg is populated.
-    def ParseConfigFile(self, filename):
-        self.__lastErrorMsg = ''
+    def parse_config_file(self, filename):
+        self._last_error_msg = ''
 
         try:
-            with open(filename) as fileHandle:
-                fileContents = fileHandle.read()
+            with open(filename) as file_handle:
+                file_contents = file_handle.read()
 
         except IOError as excpt:
-            self.__lastErrorMsg = "Unable to open configuration file '" + \
+            self._last_error_msg = "Unable to open configuration file '" + \
                 f"{filename}', reason: {excpt.strerror}"
             return None
 
         try:
-            configJson = json.loads(fileContents)
+            config_json = json.loads(file_contents)
 
         except json.JSONDecodeError as excpt:
-            self.__lastErrorMsg = "Unable to parse configuration file" + \
+            self._last_error_msg = "Unable to parse configuration file" + \
                 f"{filename}, reason: {excpt}"
             return None
 
         try:
-            jsonschema.validate(instance=configJson,
+            jsonschema.validate(instance=config_json,
                                 schema=CONFIGURATIONJSONSCHEMA)
 
         except jsonschema.exceptions.ValidationError as ex:
-            self.__lastErrorMsg = f"Configuration file {filename} failed " + \
+            self._last_error_msg = f"Configuration file {filename} failed " + \
                 "to validate against expected schema.  Please check!.  "+ \
                 f"Msg: {ex}"
             return None
 
-        centralController = self.__ProcessCentralControllerSection(configJson)
-        guiSection = self.__ProcessGuiSection(configJson)
-        keypadController = self.__ProcessKeypadControllerSection(configJson)
-        return Configuration(centralController=centralController,
-                             gui=guiSection, keypadController=keypadController)
+        central_controller = self._process_central_controller_section(config_json)
+        gui_section = self._process_gui_section(config_json)
+        keypad_controller = self._process_keypad_controller_section(config_json)
+        return Configuration(centralController=central_controller,
+                             gui=gui_section,
+                             keypadController=keypad_controller)
 
 
     ## Process the Central Controller section of the configuration.
     #  @param self The object pointer.
     #  @param config Raw configuration entry.
-    def __ProcessCentralControllerSection(self, config):
+    def _process_central_controller_section(self, config):
         sctn = config[self.JSON_CentralControllerSettings]
         endpoint = sctn[self.JSON_CentralControllerSettings_Endpoint]
-        authKey = sctn[self.JSON_CentralControllerSettings_AuthKey]
+        auth_key = sctn[self.JSON_CentralControllerSettings_AuthKey]
 
-        return CentralController(endpoint, authKey)
+        return CentralController(endpoint, auth_key)
 
 
     ## Process the GUI section of the configuration.
     #  @param self The object pointer.
     #  @param config Raw configuration entry.
-    def __ProcessGuiSection(self, config):
+    def _process_gui_section(self, config):
         sctn = config[self.JSON_GuiSettings]
         fullscreen = sctn[self.JSON_Gui_Fullscreen]
-        windowHeight = sctn[self.JSON_Gui_WindowHeight]
-        windowWidth = sctn[self.JSON_Gui_WindowWidth]
+        window_height = sctn[self.JSON_Gui_WindowHeight]
+        window_width = sctn[self.JSON_Gui_WindowWidth]
 
-        return GuiSettings(fullscreen, windowHeight, windowWidth)
+        return GuiSettings(fullscreen, window_height, window_width)
 
 
     ## Process the Keypad Controller section of the configuration.
     #  @param self The object pointer.
     #  @param config Raw configuration entry.
-    def __ProcessKeypadControllerSection(self, config):
+    def _process_keypad_controller_section(self, config):
         section = config[self.JSON_KeypadControllerSettings]
-        authKey = section[self.JSON_KeypadController_AuthKey]
-        networkPort = section[self.JSON_KeypadController_NetworkPort]
-        return KeypadController(authKey, networkPort)
+        auth_key = section[self.JSON_KeypadController_AuthKey]
+        network_port = section[self.JSON_KeypadController_NetworkPort]
+        return KeypadController(auth_key, network_port)
