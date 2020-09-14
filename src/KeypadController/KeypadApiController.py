@@ -19,13 +19,12 @@ from twisted.web import resource
 import APIs.Keypad.JsonSchemas as schemas
 from common.APIClient.HTTPStatusCode import HTTPStatusCode
 from common.APIClient.MIMEType import MIMEType
-from common.Logger import Logger, LogType
-from KeypadStateObject import KeypadStateObject
+from common.Logger import LogType
+from keypad_state_object import KeypadStateObject
 
 
 ## Implementation of thread that handles API calls to the keypad API.
 class KeypadApiController(resource.Resource):
-    ## __slots__ allow us to explicitly declare data members.
     __slots__ = ['__config', '__stateObject']
 
     isLeaf = True
@@ -36,15 +35,12 @@ class KeypadApiController(resource.Resource):
     #  @param self The object pointer.
     #  @param config Configuration items.
     #  @param stateObject Instance of the state object.
-    def __init__(self, config, stateObject, logStore):
+    def __init__(self, config, stateObject, logStore, logger):
         super().__init__()
 
-        ## Instance of the current configuration.
         self.__config = config
-
-        ## Instance of the keypad state object.
         self.__stateObject = stateObject
-        
+        self._logger = logger
         self._logStore = logStore
 
 
@@ -113,13 +109,13 @@ class KeypadApiController(resource.Resource):
         # 'CommunicationsLost', changing otherwise is unsafe and may result in
         # unexpected behaviour.  Since we don't need to report this we will
         # return an OK.
-        currentPanel, _ = self.__stateObject.currentPanel
+        currentPanel, _ = self.__stateObject.current_panel
         if currentPanel == KeypadStateObject.PanelType.CommunicationsLost:
-            newPanel = (KeypadStateObject.PanelType.Keypad, {})
-            self.__stateObject.newPanel = newPanel
+            new_panel = (KeypadStateObject.PanelType.Keypad, {})
+            self.__stateObject.new_panel = new_panel
 
-        Logger.Instance().Log(LogType.Info,
-                              "Received an 'alive ping' from central controller")
+        self._logger.Log(LogType.Info,
+                         "Received an 'alive ping' from central controller")
         requestInst.setResponseCode(HTTPStatusCode.OK)
         requestInst.setHeader('Content-Type', MIMEType.Text)
         return b'OK'
@@ -158,16 +154,16 @@ class KeypadApiController(resource.Resource):
         except jsonschema.exceptions.ValidationError as ex:
             errrMsg = "ReceiveKeypadLockReq message failed validation, " +\
                       f"reason: {ex}"
-            Logger.Instance().Log(LogType.Error, errrMsg)
+            self._logger.Log(LogType.Error, errrMsg)
             requestInst.setResponseCode(HTTPStatusCode.BadRequest)
             requestInst.setHeader('Content-Type', MIMEType.Text)
             return str.encode(errrMsg)
 
         lockTime = body[schemas.KeypadLockRequest.BodyElement.LockTime]
         newPanel = (KeypadStateObject.PanelType.KeypadIsLocked, lockTime)
-        self.__stateObject.newPanel = newPanel
+        self.__stateObject.new_panel = newPanel
 
-        Logger.Instance().Log(LogType.Info,
+        self._logger.Log(LogType.Info,
                               "Received an 'lock keypad' from central controller")
         requestInst.setResponseCode(HTTPStatusCode.OK)
         requestInst.setHeader('Content-Type', MIMEType.Text)
@@ -205,7 +201,7 @@ class KeypadApiController(resource.Resource):
         except jsonschema.exceptions.ValidationError as ex:
             errrMsg = "ReceiveKeypadLockReq message failed validation, " +\
                       f"reason: {ex}"
-            Logger.Instance().Log(LogType.Error, errrMsg)
+            self._logger.Log(LogType.Error, errrMsg)
             requestInst.setResponseCode(HTTPStatusCode.BadRequest)
             requestInst.setHeader('Content-Type', MIMEType.Text)
             return str.encode(errrMsg)

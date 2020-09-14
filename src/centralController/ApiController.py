@@ -28,7 +28,8 @@ from common.Logger import Logger, LogType
 class ApiController:
     # pylint: disable=too-few-public-methods
 
-    __slots__ = ['__config', '__db', '__endpoint', '__eventMgr', '_logStore']
+    __slots__ = ['__config', '__db', '__endpoint', '__eventMgr', '_logger',
+                 '_logStore']
 
     ## KeypadAPIThread class constructor, passing in the network port that the
     #  API will listen to.
@@ -38,11 +39,13 @@ class ApiController:
     #  @param config Configuration items.
     #  @param endpoint REST api endpoint instance.
     #  @param logStore Instance of log store.
-    def __init__(self, eventMgr, controllerDb, config, endpoint, logStore):
+    def __init__(self, eventMgr, controllerDb, config, endpoint, logStore,
+                 logger):
         self.__config = config
         self.__db = controllerDb
         self.__endpoint = endpoint
         self.__eventMgr = eventMgr
+        self._logger = logger
         self._logStore = logStore
 
         # Add route : /receiveKeyCode
@@ -182,7 +185,7 @@ class ApiController:
         # Verify that an authorisation key exists in the requet header, if not
         # then return a 401 error with a human-readable reasoning.
         if schemas.AUTH_KEY not in request.headers:
-            Logger.Instance().Log(LogType.Critical,
+            self._logger.Log(LogType.Critical,
                                   'Missing controller auth key from keypad')
             errMsg = 'Authorisation key is missing'
             return self.__endpoint.response_class(
@@ -195,7 +198,7 @@ class ApiController:
         # configuration file.  If the key isn't valid then the error
         # code of 403 (Forbidden) is returned.
         if authorisationKey != self.__config.centralControllerApi.authKey:
-            Logger.Instance().Log(LogType.Critical,
+            self._logger.Log(LogType.Critical,
                                   'Invalid controller auth key from keypad')
             errMsg = 'Authorisation key is invalid'
             return self.__endpoint.response_class(

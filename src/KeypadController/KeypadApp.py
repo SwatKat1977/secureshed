@@ -14,7 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 '''
 # pylint: disable=C0413
-import logging
 from twisted.internet import wxreactor
 from twisted.internet.task import LoopingCall
 wxreactor.install()
@@ -22,10 +21,10 @@ from twisted.internet import reactor
 from twisted.web import server
 import wx
 from common.Logger import Logger, LogType
-from ConfigurationManager import ConfigurationManager
+from configuration_manager import ConfigurationManager
 from KeypadApiController import KeypadApiController
-from KeypadStateObject import KeypadStateObject
-from LogStore import LogStore
+from keypad_state_object import KeypadStateObject
+from log_store import LogStore
 
 
 ## The main application class for the keypad controller application.
@@ -33,58 +32,60 @@ class KeypadApp:
     # pylint: disable=R0903
 
     ## __slots__ allow us to explicitly declare data members
-    __slots__ = ['__configMgr', '_logStore', '__stateObject']
+    __slots__ = ['_config_mgr', '_logger', '_log_store', '_state_object']
 
 
     ## KeypadApp class constructor.
     #  @param self The object pointer.
     def __init__(self):
         ## Instance of a configuration manager class.
-        self.__configMgr = None
-        self._logStore = LogStore()
+        self._config_mgr = None
+        self._logger = Logger()
+        self._log_store = LogStore()
 
-        Logger.Instance().WriteToConsole = True
-        Logger.Instance().ExternalLogger = self
-        Logger.Instance().Initialise()
+        self._logger.WriteToConsole = True
+        self._logger.ExternalLogger = self
+        self._logger.Initialise()
 
         ## Instance of the keypad state object.
-        self.__stateObject = None
+        self._state_object = None
 
 
     ## Start the application, this will not exit until both the GUI and the
     #  Twisted reactor have been destroyed.  The only exception is if any
     #  elements of the startup fail (e.g. loading the configuration).
     #  @param self The object pointer.
-    def StartApp(self):
+    def start_app(self):
 
-        self.__configMgr = ConfigurationManager()
-        config = self.__configMgr.ParseConfigFile('configuration.json')
+        self._config_mgr = ConfigurationManager()
+        config = self._config_mgr.parse_config_file('configuration.json')
 
         if not config:
-            Logger.Instance().Log(LogType.Error, self.__configMgr.lastErrorMsg)
+            self._logger.Log(LogType.Error, self._config_mgr.last_error_msg)
             return
 
-        wxApp = wx.App()
-        reactor.registerWxApp(wxApp)
+        wx_app = wx.App()
+        reactor.registerWxApp(wx_app)
 
-        self.__stateObject = KeypadStateObject(config)
+        self._state_object = KeypadStateObject(config, self._logger)
 
-        keypadApiCtrl = KeypadApiController(config, self.__stateObject,
-                                            self._logStore)
-        apiServer = server.Site(keypadApiCtrl)
-        reactor.listenTCP(config.keypadController.networkPort, apiServer)
+        keypad_api_ctrl = KeypadApiController(config, self._state_object,
+                                              self._log_store, self._logger)
+        api_server = server.Site(keypad_api_ctrl)
+        reactor.listenTCP(config.keypadController.networkPort, api_server)
 
-        checkPanelLoopingCall = LoopingCall(self.__stateObject.CheckPanel)
-        checkPanelLoopingCall.start(0.01, now=False)
+        check_panel_loop = LoopingCall(self._state_object.check_panel)
+        check_panel_loop.start(0.01, now=False)
 
         reactor.run()
 
+
     ## Stop the application.
     #  @param self The object pointer.
-    def StopApp(self):
-        Logger.Instance().Log(LogType.Info,
-                              'Stopping keypad controller, cleaning up...')
+    def stop_app(self):
+        self._logger.Log(LogType.Info,
+                         'Stopping keypad controller, cleaning up...')
 
 
-    def AddLogEvent(self, currTime, logLevel, msg):
-        self._logStore.AddLogEvent(currTime, logLevel, msg)
+    def AddLogEvent(self, current_time, log_level, msg):
+        self._log_store.AddLogEvent(current_time, log_level, msg)

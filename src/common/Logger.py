@@ -16,7 +16,6 @@ limitations under the License.
 import enum
 import logging
 import time
-from common.Singleton import Singleton
 
 
 class LogType(enum.Enum):
@@ -27,7 +26,6 @@ class LogType(enum.Enum):
     Critical = 4
 
 
-@Singleton
 class Logger:
     __slots__ = ['_externalLogger', '_isInitialised', '_loggerInst',
                  '_writeToConsole']
