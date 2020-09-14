@@ -23,7 +23,7 @@ import wx
 from common.Logger import Logger, LogType
 from ConfigurationManager import ConfigurationManager
 from KeypadApiController import KeypadApiController
-from KeypadStateObject import KeypadStateObject
+from keypad_state_object import KeypadStateObject
 from LogStore import LogStore
 
 
