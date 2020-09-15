@@ -17,6 +17,7 @@ import wx
 
 
 class CentralControllerConfigPanel(wx.Panel):
+    # pylint: disable=too-few-public-methods
 
     def __init__(self, parent):
         wx.Panel.__init__(self, parent)

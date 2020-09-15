@@ -13,14 +13,17 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 '''
+# pylint: disable=wrong-import-position
 import sys
 sys.path.append('..')
 from PowerConsoleApp import PowerConsoleApp
 
-def Main():
-    powerConsoleApp = PowerConsoleApp()
-    powerConsoleApp.StartApp()
+
+def main():
+    power_console_app = PowerConsoleApp()
+    power_console_app.start_app()
+    power_console_app.stop_app()
 
 
 if __name__ == "__main__":
-    Main()
+    main()
