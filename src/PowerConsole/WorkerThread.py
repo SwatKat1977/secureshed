@@ -42,7 +42,7 @@ class WorkerThread(threading.Thread):
     #  @param self The object pointer.
     def run(self):
         while not self._shutdown_is_requested:
-            self._keypad_controller_panel.GetLogs()
+            self._keypad_controller_panel.get_logs()
             self._central_controller_panel.get_logs()
             time.sleep(0.1)
 

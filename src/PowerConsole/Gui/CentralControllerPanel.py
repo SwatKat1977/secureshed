@@ -109,6 +109,6 @@ class CentralControllerPanel(wx.Panel):
 
             msg = f"{timestamp_str} {entry[body_elements.EntryMessage]}"
 
-            self._logs_panel.AddLogEntry(self._last_log_id,
+            self._logs_panel.add_log_entry(self._last_log_id,
                                          entry[body_elements.EntryMsgLevel], msg)
             self._last_log_id += 1

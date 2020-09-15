@@ -54,7 +54,7 @@ class KeypadControllerPanel(wx.Panel):
         sizer.Add(top_splitter, 1, wx.EXPAND)
         self.SetSizer(sizer)
 
-    def GetLogs(self):
+    def get_logs(self):
 
         if not self._check_connection_status():
             return
@@ -98,10 +98,10 @@ class KeypadControllerPanel(wx.Panel):
         self._update_log_entries(msg_body)
 
 
-    def _update_log_entries(self, msgBody):
+    def _update_log_entries(self, msg_body):
         body_elements = schemas.RequestLogsResponse.BodyElement
 
-        last_msg_timestamp = msgBody[body_elements.LastTimestamp]
+        last_msg_timestamp = msg_body[body_elements.LastTimestamp]
 
         # If the last message timestamp is 0 then we have no new log messages.
         if last_msg_timestamp == 0:
@@ -109,14 +109,14 @@ class KeypadControllerPanel(wx.Panel):
 
         self._logs_last_msg_timestamp = last_msg_timestamp
 
-        for entry in msgBody[body_elements.Entries]:
+        for entry in msg_body[body_elements.Entries]:
             timestamp = entry[body_elements.EntryTimestamp]
             timestamp_str = datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S')
 
             msg = f"{timestamp_str} {entry[body_elements.EntryMessage]}"
 
-            self._logs_panel.AddLogEntry(self._last_log_id,
-                                         entry[body_elements.EntryMsgLevel], msg)
+            self._logs_panel.add_log_entry(self._last_log_id,
+                                           entry[body_elements.EntryMsgLevel], msg)
             self._last_log_id += 1
 
 
