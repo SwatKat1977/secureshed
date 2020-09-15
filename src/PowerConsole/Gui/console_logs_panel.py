@@ -15,7 +15,7 @@ limitations under the License.
 '''
 import wx
 from common.Logger import Logger, LogType
-from Gui.ConsoleLogsPanelListCtrl import ConsoleLogsPanelListCtrl
+from Gui.console_logs_panel_list_ctrl import ConsoleLogsPanelListCtrl
 
 
 class ConsoleLogsPanel(wx.Panel):

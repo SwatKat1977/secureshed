@@ -18,7 +18,7 @@ import os
 import sys
 import wx
 from configuration_manager import ConfigurationManager
-from Gui.MainWindow import MainWindow
+from Gui.main_window import MainWindow
 
 
 ## The main application class for the keypad controller application.

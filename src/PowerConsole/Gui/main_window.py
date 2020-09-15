@@ -18,8 +18,8 @@ import enum
 import time
 import wx
 from common.Version import VERSION
-from Gui.CentralControllerPanel import CentralControllerPanel
-from Gui.KeypadControllerPanel import KeypadControllerPanel
+from Gui.central_controller_panel import CentralControllerPanel
+from Gui.keypad_controller_panel import KeypadControllerPanel
 from worker_thread import WorkerThread
 
 

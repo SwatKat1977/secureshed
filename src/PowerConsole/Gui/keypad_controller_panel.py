@@ -21,8 +21,8 @@ import APIs.Keypad.JsonSchemas as schemas
 from common.APIClient.APIEndpointClient import APIEndpointClient
 from common.APIClient.HTTPStatusCode import HTTPStatusCode
 from common.APIClient.MIMEType import MIMEType
-from Gui.ConsoleLogsPanel import ConsoleLogsPanel
-from Gui.KeypadControllerConfigPanel import KeypadControllerConfigPanel
+from Gui.console_logs_panel import ConsoleLogsPanel
+from Gui.keypad_controller_config_panel import KeypadControllerConfigPanel
 
 
 class KeypadControllerPanel(wx.Panel):

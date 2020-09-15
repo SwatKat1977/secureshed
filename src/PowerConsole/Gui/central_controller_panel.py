@@ -21,8 +21,8 @@ import APIs.CentralController.JsonSchemas as schemas
 from common.APIClient.APIEndpointClient import APIEndpointClient
 from common.APIClient.HTTPStatusCode import HTTPStatusCode
 from common.APIClient.MIMEType import MIMEType
-from Gui.ConsoleLogsPanel import ConsoleLogsPanel
-from Gui.CentralControllerConfigPanel import CentralControllerConfigPanel
+from Gui.console_logs_panel import ConsoleLogsPanel
+from Gui.central_controller_config_panel import CentralControllerConfigPanel
 
 
 class CentralControllerPanel(wx.Panel):
