@@ -37,12 +37,12 @@ class MagneticContactSensor(BaseDeviceType):
 
     #  @param self The object pointer.
     def __init__(self, hardwareIO, eventMgr, logger):
-        self.__eventMgr = eventMgr
+        self._event_mgr = eventMgr
         self.__ioPin = None
-        self.__hardwareIO = hardwareIO
+        self._hardware_io = hardwareIO
         self.__isTriggered = False
         self.__deviceName = None
-        self.__graceTimeout = None
+        self._grace_timeout = None
         self.__additionalParams = None
         self._logger = logger
         self.__stateType = self.StateType.AlarmInactive
@@ -62,20 +62,20 @@ class MagneticContactSensor(BaseDeviceType):
         # Expecting one pin.
         if len(pins) != 1:
             self._logger.Log(LogType.Warn,
-                                  "Device '%s' was expecting 1 pin, actually %s",
-                                  deviceName, len(pins))
+                             "Device '%s' was expecting 1 pin, actually %s",
+                             deviceName, len(pins))
             return False
 
         pin = [pin for pin in pins if pin['identifier'] == self.ExpectedPinId]
         if not pin:
             self._logger.Log(LogType.Warn,
-                                  "Device '%s' missing expected pin '%s'",
-                                  deviceName, self.ExpectedPinId)
+                             "Device '%s' missing expected pin '%s'",
+                             deviceName, self.ExpectedPinId)
             return False
 
         self.__ioPin = int(pin[0]['ioPin'][len(pinPrefix):])
-        self.__hardwareIO.setup(self.__ioPin, self.__hardwareIO.IN,
-                                pull_up_down=self.__hardwareIO.PUD_UP)
+        self._hardware_io.setup(self.__ioPin, self._hardware_io.IN,
+                                pull_up_down=self._hardware_io.PUD_UP)
 
         return True
 
@@ -84,7 +84,7 @@ class MagneticContactSensor(BaseDeviceType):
     #  triggered etc.
     #  @param self The object pointer.
     def CheckDevice(self):
-        contactState = self.__hardwareIO.input(self.__ioPin)
+        contactState = self._hardware_io.input(self.__ioPin)
 
         # If we are in the alarmed set grace period then the triggered flag is
         # not changable until the grace period has expired.  Once it has then
@@ -124,7 +124,7 @@ class MagneticContactSensor(BaseDeviceType):
                     self._logger.Log(LogType.Info,
                                           "Device '%s' sensor triggered, entered " +\
                                           "grace period of %s seconds", self.__deviceName, graceSecs)
-                    self.__graceTimeout = time.time() + graceSecs
+                    self._grace_timeout = time.time() + graceSecs
 
                 else:
                     self.__isTriggered = contactState
@@ -141,7 +141,7 @@ class MagneticContactSensor(BaseDeviceType):
         if eventInst.id == Evts.EvtType.AlarmActivated:
             if 'triggerGracePeriodSecs' in self.__additionalParams:
                 graceSecs = self.__additionalParams['triggerGracePeriodSecs']
-                self.__graceTimeout = eventInst.body['activationTimestamp'] +\
+                self._grace_timeout = eventInst.body['activationTimestamp'] +\
                     graceSecs
                 self._logger.Log(LogType.Info,
                                       "Alarm activated, device '%s' is in " +\
@@ -162,7 +162,7 @@ class MagneticContactSensor(BaseDeviceType):
             Evts.SensorDeviceBodyItem.State: self.__isTriggered
         }
         evt = Event(Evts.EvtType.SensorDeviceStateChange, evtBody)
-        self.__eventMgr.QueueEvent(evt)
+        self._event_mgr.QueueEvent(evt)
 
 
     #  @param self The object pointer.
@@ -171,7 +171,7 @@ class MagneticContactSensor(BaseDeviceType):
 
         # Still in grace period, thus __isTriggered flag currently cannot be
         # changed.
-        if currTime <= self.__graceTimeout:
+        if currTime <= self._grace_timeout:
             return
 
         # The grace period has expired, change to the state 'AlarmActivate'
@@ -195,7 +195,7 @@ class MagneticContactSensor(BaseDeviceType):
 
         # Still in grace period, thus __isTriggered flag currently cannot be
         # changed.
-        if currTime <= self.__graceTimeout:
+        if currTime <= self._grace_timeout:
             return
 
         # If we have come out of the grace period and the alarm hasn't been
