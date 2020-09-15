@@ -20,7 +20,7 @@ import wx
 from common.Version import VERSION
 from Gui.CentralControllerPanel import CentralControllerPanel
 from Gui.KeypadControllerPanel import KeypadControllerPanel
-from WorkerThread import WorkerThread
+from worker_thread import WorkerThread
 
 
 ID_TOOLBAR_KEYPAD_CTRL = 1001

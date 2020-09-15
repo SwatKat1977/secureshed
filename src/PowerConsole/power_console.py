@@ -16,7 +16,7 @@ limitations under the License.
 # pylint: disable=wrong-import-position
 import sys
 sys.path.append('..')
-from PowerConsoleApp import PowerConsoleApp
+from power_console_app import PowerConsoleApp
 
 
 def main():

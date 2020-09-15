@@ -17,7 +17,7 @@ import logging
 import os
 import sys
 import wx
-from ConfigurationManager import ConfigurationManager
+from configuration_manager import ConfigurationManager
 from Gui.MainWindow import MainWindow
 
 
