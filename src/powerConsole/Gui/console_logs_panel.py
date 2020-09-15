@@ -15,24 +15,25 @@ limitations under the License.
 '''
 import wx
 from common.Logger import Logger, LogType
-from Gui.ConsoleLogsPanelListCtrl import ConsoleLogsPanelListCtrl
+from Gui.console_logs_panel_list_ctrl import ConsoleLogsPanelListCtrl
 
 
 class ConsoleLogsPanel(wx.Panel):
+    # pylint: disable=too-few-public-methods
 
     def __init__(self, parent):
         wx.Panel.__init__(self, parent)
 
-        topSizer = wx.BoxSizer(wx.HORIZONTAL)
+        top_sizer = wx.BoxSizer(wx.HORIZONTAL)
 
-        self._logsList = ConsoleLogsPanelListCtrl(self, style=wx.LC_REPORT)
+        self._logs_list = ConsoleLogsPanelListCtrl(self, style=wx.LC_REPORT)
 
-        topSizer.Add(self._logsList, 1, wx.EXPAND)
-        self.SetSizer(topSizer)
+        top_sizer.Add(self._logs_list, 1, wx.EXPAND)
+        self.SetSizer(top_sizer)
         self.Fit()
 
 
-    def AddLogEntry(self, indexPosition, logLevel, msg):
-        logLevelStr = Logger.LoggerMappings[LogType(logLevel)][0]
-        self._logsList.InsertItem(indexPosition, logLevelStr)
-        self._logsList.SetItem(indexPosition, 1, msg)
+    def add_log_entry(self, index_position, log_level, msg):
+        log_level_str = Logger.LoggerMappings[LogType(log_level)][0]
+        self._logs_list.InsertItem(index_position, log_level_str)
+        self._logs_list.SetItem(index_position, 1, msg)

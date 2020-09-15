@@ -21,11 +21,13 @@ import APIs.Keypad.JsonSchemas as schemas
 from common.APIClient.APIEndpointClient import APIEndpointClient
 from common.APIClient.HTTPStatusCode import HTTPStatusCode
 from common.APIClient.MIMEType import MIMEType
-from Gui.ConsoleLogsPanel import ConsoleLogsPanel
-from Gui.KeypadControllerConfigPanel import KeypadControllerConfigPanel
+from Gui.console_logs_panel import ConsoleLogsPanel
+from Gui.keypad_controller_config_panel import KeypadControllerConfigPanel
 
 
 class KeypadControllerPanel(wx.Panel):
+    # pylint: disable=too-few-public-methods
+    # pylint: disable=too-many-instance-attributes
 
     RetrieveConsoleLogsPath = '/retrieveConsoleLogs'
     HealthStatusPath = '/_healthStatus'
@@ -35,40 +37,40 @@ class KeypadControllerPanel(wx.Panel):
         wx.Panel.__init__(self, parent)
 
         self._config = config
-        self._apiClient = APIEndpointClient(config.keypadController.endpoint)
+        self._api_client = APIEndpointClient(config.keypadController.endpoint)
         self._logs = []
-        self._logsLastMsgTimestamp = 0
-        self._lastLogId = 0
+        self._logs_last_msg_timestamp = 0
+        self._last_log_id = 0
         self._main_window = parent
         self._status = (False, '')
 
-        topSplitter = wx.SplitterWindow(self)
-        self._configPanel = KeypadControllerConfigPanel(topSplitter)
-        self._logsPanel = ConsoleLogsPanel(topSplitter)
-        topSplitter.SplitHorizontally(self._configPanel, self._logsPanel)
-        topSplitter.SetSashGravity(0.5)
+        top_splitter = wx.SplitterWindow(self)
+        self._config_panel = KeypadControllerConfigPanel(top_splitter)
+        self._logs_panel = ConsoleLogsPanel(top_splitter)
+        top_splitter.SplitHorizontally(self._config_panel, self._logs_panel)
+        top_splitter.SetSashGravity(0.5)
 
         sizer = wx.BoxSizer(wx.VERTICAL)
-        sizer.Add(topSplitter, 1, wx.EXPAND)
+        sizer.Add(top_splitter, 1, wx.EXPAND)
         self.SetSizer(sizer)
 
-    def GetLogs(self):
+    def get_logs(self):
 
         if not self._check_connection_status():
             return
 
         msg_body = {
-            "startTimestamp" : self._logsLastMsgTimestamp
+            "startTimestamp" : self._logs_last_msg_timestamp
         }
 
         additional_headers = {
             'authorisationKey' : self._config.keypadController.authKey
         }
 
-        response = self._apiClient.SendPostMsg(self.RetrieveConsoleLogsPath,
-                                               MIMEType.JSON,
-                                               additional_headers,
-                                               json.dumps(msg_body))
+        response = self._api_client.SendPostMsg(self.RetrieveConsoleLogsPath,
+                                                MIMEType.JSON,
+                                                additional_headers,
+                                                json.dumps(msg_body))
 
         # Not able to communicated with the central controller.
         if response is None:
@@ -81,54 +83,52 @@ class KeypadControllerPanel(wx.Panel):
             print(response.text)
             return
 
-        msgBody = response.json()
+        msg_body = response.json()
 
         # Validate that the json body conforms to the expected schema.
         # If the message isn't valid then a 400 error should be generated.
         try:
-            jsonschema.validate(instance=msgBody,
+            jsonschema.validate(instance=msg_body,
                                 schema=schemas.RequestLogsResponse.Schema)
 
         # Caught a message body validation failed, abort read.
         except jsonschema.exceptions.ValidationError:
             return
 
-        self._UpdateLogEntries(msgBody)
+        self._update_log_entries(msg_body)
 
 
-    def _UpdateLogEntries(self, msgBody):
-        bodyElements = schemas.RequestLogsResponse.BodyElement
+    def _update_log_entries(self, msg_body):
+        body_elements = schemas.RequestLogsResponse.BodyElement
 
-        lastMsgTimestamp = msgBody[bodyElements.LastTimestamp]
+        last_msg_timestamp = msg_body[body_elements.LastTimestamp]
 
         # If the last message timestamp is 0 then we have no new log messages.
-        if lastMsgTimestamp == 0:
+        if last_msg_timestamp == 0:
             return
 
-        self._logsLastMsgTimestamp = lastMsgTimestamp
+        self._logs_last_msg_timestamp = last_msg_timestamp
 
-        for entry in msgBody[bodyElements.Entries]:
-            timestamp = entry[bodyElements.EntryTimestamp]
-            timestampStr = datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S')
+        for entry in msg_body[body_elements.Entries]:
+            timestamp = entry[body_elements.EntryTimestamp]
+            timestamp_str = datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S')
 
-            msg = f"{timestampStr} {entry[bodyElements.EntryMessage]}"
+            msg = f"{timestamp_str} {entry[body_elements.EntryMessage]}"
 
-            self._logsPanel.AddLogEntry(self._lastLogId,
-                                        entry[bodyElements.EntryMsgLevel], msg)
-            self._lastLogId += 1
+            self._logs_panel.add_log_entry(self._last_log_id,
+                                           entry[body_elements.EntryMsgLevel], msg)
+            self._last_log_id += 1
 
 
     def _check_connection_status(self):
-
-        curr_status = self._status
 
         additional_headers = {
             'authorisationKey' : self._config.keypadController.authKey
         }
 
-        response = self._apiClient.SendGetMsg(self.HealthStatusPath,
-                                              MIMEType.JSON,
-                                              additional_headers)
+        response = self._api_client.SendGetMsg(self.HealthStatusPath,
+                                               MIMEType.JSON,
+                                               additional_headers)
 
         # We are not able to communicate with the keypad controller...
         if response is None:

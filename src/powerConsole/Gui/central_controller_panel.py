@@ -21,11 +21,12 @@ import APIs.CentralController.JsonSchemas as schemas
 from common.APIClient.APIEndpointClient import APIEndpointClient
 from common.APIClient.HTTPStatusCode import HTTPStatusCode
 from common.APIClient.MIMEType import MIMEType
-from Gui.ConsoleLogsPanel import ConsoleLogsPanel
-from Gui.CentralControllerConfigPanel import CentralControllerConfigPanel
+from Gui.console_logs_panel import ConsoleLogsPanel
+from Gui.central_controller_config_panel import CentralControllerConfigPanel
 
 
 class CentralControllerPanel(wx.Panel):
+    # pylint: disable=too-few-public-methods
 
     RetrieveConsoleLogsPath = '/retrieveConsoleLogs'
 
@@ -34,36 +35,36 @@ class CentralControllerPanel(wx.Panel):
         wx.Panel.__init__(self, parent)
 
         self._config = config
-        self._apiClient = APIEndpointClient(config.centralController.endpoint)
+        self._api_client = APIEndpointClient(config.centralController.endpoint)
         self._logs = []
-        self._logsLastMsgTimestamp = 0
-        self._lastLogId = 0
+        self._logs_last_msg_timestamp = 0
+        self._last_log_id = 0
 
-        topSplitter = wx.SplitterWindow(self)
-        self._configPanel = CentralControllerConfigPanel(topSplitter)
-        self._logsPanel = ConsoleLogsPanel(topSplitter)
-        topSplitter.SplitHorizontally(self._configPanel, self._logsPanel)
-        topSplitter.SetSashGravity(0.5)
+        top_splitter = wx.SplitterWindow(self)
+        self._config_panel = CentralControllerConfigPanel(top_splitter)
+        self._logs_panel = ConsoleLogsPanel(top_splitter)
+        top_splitter.SplitHorizontally(self._config_panel, self._logs_panel)
+        top_splitter.SetSashGravity(0.5)
 
         sizer = wx.BoxSizer(wx.VERTICAL)
-        sizer.Add(topSplitter, 1, wx.EXPAND)
+        sizer.Add(top_splitter, 1, wx.EXPAND)
         self.SetSizer(sizer)
 
 
-    def GetLogs(self):
+    def get_logs(self):
 
-        msgBody = {
-            "startTimestamp" : self._logsLastMsgTimestamp
+        msg_body = {
+            "startTimestamp" : self._logs_last_msg_timestamp
         }
 
-        additionalHeaders = {
+        additional_headers = {
             'authorisationKey' : self._config.centralController.authKey
         }
 
-        response = self._apiClient.SendPostMsg(self.RetrieveConsoleLogsPath,
-                                               MIMEType.JSON,
-                                               additionalHeaders,
-                                               json.dumps(msgBody))
+        response = self._api_client.SendPostMsg(self.RetrieveConsoleLogsPath,
+                                                MIMEType.JSON,
+                                                additional_headers,
+                                                json.dumps(msg_body))
 
         # Not able to communicated with the central controller.
         if response is None:
@@ -76,44 +77,38 @@ class CentralControllerPanel(wx.Panel):
             print(response.text)
             return
 
-        msgBody = response.json()
+        msg_body = response.json()
 
         # Validate that the json body conforms to the expected schema.
         # If the message isn't valid then a 400 error should be generated.
         try:
-            jsonschema.validate(instance=msgBody,
+            jsonschema.validate(instance=msg_body,
                                 schema=schemas.RequestLogsResponse.Schema)
 
         # Caught a message body validation failed, abort read.
         except jsonschema.exceptions.ValidationError:
             return
 
-        self._UpdateLogEntries(msgBody)
+        self._update_log_entries(msg_body)
 
 
-    def CommunicationsIsGood(self):
-        # Placeholder for status check functionality.
-        # Currently it will always return True
-        return True
+    def _update_log_entries(self, msg_body):
+        body_elements = schemas.RequestLogsResponse.BodyElement
 
-
-    def _UpdateLogEntries(self, msgBody):
-        bodyElements = schemas.RequestLogsResponse.BodyElement
-
-        lastMsgTimestamp = msgBody[bodyElements.LastTimestamp]
+        last_msg_timestamp = msg_body[body_elements.LastTimestamp]
 
         # If the last message timestamp is 0 then we have no new log messages.
-        if lastMsgTimestamp == 0:
+        if last_msg_timestamp == 0:
             return
 
-        self._logsLastMsgTimestamp = lastMsgTimestamp
+        self._logs_last_msg_timestamp = last_msg_timestamp
 
-        for entry in msgBody[bodyElements.Entries]:
-            timestamp = entry[bodyElements.EntryTimestamp]
-            timestampStr = datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S')
+        for entry in msg_body[body_elements.Entries]:
+            timestamp = entry[body_elements.EntryTimestamp]
+            timestamp_str = datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S')
 
-            msg = f"{timestampStr} {entry[bodyElements.EntryMessage]}"
+            msg = f"{timestamp_str} {entry[body_elements.EntryMessage]}"
 
-            self._logsPanel.AddLogEntry(self._lastLogId,
-                                        entry[bodyElements.EntryMsgLevel], msg)
-            self._lastLogId += 1
+            self._logs_panel.add_log_entry(self._last_log_id,
+                                           entry[body_elements.EntryMsgLevel], msg)
+            self._last_log_id += 1

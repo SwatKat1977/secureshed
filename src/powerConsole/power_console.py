@@ -1,5 +1,5 @@
 '''
-Copyright 2019-2020 Secure Shed Project Dev Team
+Copyright 2019 Secure Shed Project Dev Team
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,12 +13,17 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 '''
-import wx
+# pylint: disable=wrong-import-position
+import sys
+sys.path.append('..')
+from power_console_app import PowerConsoleApp
 
 
-class CentralControllerConfigPanel(wx.Panel):
+def main():
+    power_console_app = PowerConsoleApp()
+    power_console_app.start_app()
+    power_console_app.stop_app()
 
-    def __init__(self, parent):
-        wx.Panel.__init__(self, parent)
 
-        wx.StaticText(parent, -1, 'Central Controller Config')
+if __name__ == "__main__":
+    main()

@@ -17,8 +17,8 @@ import logging
 import os
 import sys
 import wx
-from ConfigurationManager import ConfigurationManager
-from Gui.MainWindow import MainWindow
+from configuration_manager import ConfigurationManager
+from Gui.main_window import MainWindow
 
 
 ## The main application class for the keypad controller application.
@@ -26,53 +26,53 @@ class PowerConsoleApp:
     # pylint: disable=R0903
 
     ## __slots__ allow us to explicitly declare data members
-    __slots__ = ['_configMgr', '_logger']
+    __slots__ = ['_config_mgr', '_logger']
 
     ## KeypadApp class constructor.
     #  @param self The object pointer.
     def __init__(self):
         ## Instance of a configuration manager class.
-        self._configMgr = None
+        self._config_mgr = None
 
         formatter = logging.Formatter("%(asctime)s [%(levelname)s] %(message)s",
                                       "%Y-%m-%d %H:%M:%S")
 
         ## Instance of a logger.
         self._logger = logging.getLogger('system log')
-        consoleStream = logging.StreamHandler()
-        consoleStream.setFormatter(formatter)
+        console_stream = logging.StreamHandler()
+        console_stream.setFormatter(formatter)
         self._logger.setLevel(logging.DEBUG)
-        self._logger.addHandler(consoleStream)
+        self._logger.addHandler(console_stream)
 
 
     ## Start the application, this will not exit until both the GUI and the
     #  Twisted reactor have been destroyed.  The only exception is if any
     #  elements of the startup fail (e.g. loading the configuration).
     #  @param self The object pointer.
-    def StartApp(self):
+    def start_app(self):
 
         if not os.getenv('PWRCON_CONFIG'):
             self._logger.error('PWRCON_CONFIG environment variable missing!')
             sys.exit(1)
 
-        configFile = os.getenv('PWRCON_CONFIG')
-        self._configMgr = ConfigurationManager()
-        config = self._configMgr.ParseConfigFile(configFile)
+        config_file = os.getenv('PWRCON_CONFIG')
+
+        self._config_mgr = ConfigurationManager()
+        config = self._config_mgr.parse_config_file(config_file)
 
         if not config:
-            print(f"ERROR: {self._configMgr.lastErrorMsg}")
+            print(f"ERROR: {self._config_mgr.last_error_msg}")
             return
 
-        wxApp = wx.App()
+        wx_app = wx.App()
 
-        mainWindow = MainWindow(config)
-        mainWindow.Show()
+        main_window = MainWindow(config)
+        main_window.Show()
 
-        wxApp.MainLoop()
+        wx_app.MainLoop()
 
 
     ## Stop the application.
     #  @param self The object pointer.
-    def StopApp(self):
+    def stop_app(self):
         self._logger.info('Stopping power console, cleaning up...')
-

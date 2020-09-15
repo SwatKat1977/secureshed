@@ -16,7 +16,7 @@ limitations under the License.
 import collections
 import json
 import jsonschema
-from ConfigurationJsonSchema import CONFIGURATIONJSONSCHEMA
+from configuration_json_schema import CONFIGURATIONJSONSCHEMA
 
 ## Central controller section configuration items.
 CentralController = collections.namedtuple('CentralController',
@@ -33,6 +33,7 @@ Configuration = collections.namedtuple('Configuration',
 
 ## Class that encompasses management and reading of a configuration file.
 class ConfigurationManager:
+    __slots__ = ['_last_error_msg']
 
     # -----------------------------
     # -- Top-level json elements --
@@ -61,15 +62,15 @@ class ConfigurationManager:
 
     ## Property getter : Last error message
     @property
-    def lastErrorMsg(self):
-        return self.__lastErrorMsg
+    def last_error_msg(self):
+        return self._last_error_msg
 
 
     ## ConfigurationManager class constructor.
     #  @param self The object pointer.
     def __init__(self):
         ## Holding member variable for last error message property.
-        self.__lastErrorMsg = ''
+        self._last_error_msg = ''
 
 
     ## Parse a configuration file, if the parse fails then the last error
@@ -78,57 +79,57 @@ class ConfigurationManager:
     #  @param filename Name of the configuration file to parse.
     #  @return Returns an instance of Configuration if successful, otherwise
     #  None is returned and the lastErrorMsg is populated.
-    def ParseConfigFile(self, filename):
-        self.__lastErrorMsg = ''
+    def parse_config_file(self, filename):
+        self._last_error_msg = ''
 
         try:
-            with open(filename) as fileHandle:
-                fileContents = fileHandle.read()
+            with open(filename) as file_handle:
+                file_contents = file_handle.read()
 
         except IOError as excpt:
-            self.__lastErrorMsg = "Unable to open configuration file '" + \
+            self._last_error_msg = "Unable to open configuration file '" + \
                 f"{filename}', reason: {excpt.strerror}"
             return None
 
         try:
-            configJson = json.loads(fileContents)
+            config_json = json.loads(file_contents)
 
         except json.JSONDecodeError as excpt:
-            self.__lastErrorMsg = "Unable to parse configuration file" + \
+            self._last_error_msg = "Unable to parse configuration file" + \
                 f"{filename}, reason: {excpt}"
             return None
 
         try:
-            jsonschema.validate(instance=configJson,
+            jsonschema.validate(instance=config_json,
                                 schema=CONFIGURATIONJSONSCHEMA)
 
         except jsonschema.exceptions.ValidationError as ex:
-            self.__lastErrorMsg = f"Configuration file {filename} failed " + \
+            self._last_error_msg = f"Configuration file {filename} failed " + \
                 "to validate against expected schema.  Please check!.  "+ \
                 f"Msg: {ex}"
             return None
 
-        centralController = self.__ProcessCentralControllerSection(configJson)
-        keypadController = self.__ProcessKeypadControllerSection(configJson)
-        return Configuration(centralController=centralController,
-                             keypadController=keypadController)
+        central_controller = self._process_central_controller_section(config_json)
+        keypad_controller = self._process_keypad_controller_section(config_json)
+        return Configuration(centralController=central_controller,
+                             keypadController=keypad_controller)
 
 
     ## Process the Central Controller section of the configuration.
     #  @param self The object pointer.
     #  @param config Raw configuration entry.
-    def __ProcessCentralControllerSection(self, config):
+    def _process_central_controller_section(self, config):
         sctn = config[self.JSON_CentralControllerSettings]
         endpoint = sctn[self.JSON_CentralControllerSettings_Endpoint]
-        authKey = sctn[self.JSON_CentralControllerSettings_AuthKey]
-        return CentralController(endpoint, authKey)
+        auth_key = sctn[self.JSON_CentralControllerSettings_AuthKey]
+        return CentralController(endpoint, auth_key)
 
 
     ## Process the Keypad Controller section of the configuration.
     #  @param self The object pointer.
     #  @param config Raw configuration entry.
-    def __ProcessKeypadControllerSection(self, config):
+    def _process_keypad_controller_section(self, config):
         section = config[self.JSON_KeypadControllerSettings]
         endpoint = section[self.JSON_KeypadControllerSettings_Endpoint]
-        authKey = section[self.JSON_KeypadControllerSettings_AuthKey]
-        return KeypadController(endpoint, authKey)
+        auth_key = section[self.JSON_KeypadControllerSettings_AuthKey]
+        return KeypadController(endpoint, auth_key)
