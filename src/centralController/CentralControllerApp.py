@@ -232,4 +232,4 @@ class CentralControllerApp:
 
 
     def AddLogEvent(self, currTime, logLevel, msg):
-        self._logStore.AddLogEvent(currTime, logLevel, msg)
+        self._logStore.add_log_event(currTime, logLevel, msg)

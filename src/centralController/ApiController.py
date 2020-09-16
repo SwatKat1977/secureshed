@@ -156,7 +156,7 @@ class ApiController:
                 mimetype='text')
 
         start = body[schemas.RetrieveConsoleLogs.BodyElement.StartTimestamp]
-        logEvents = self._logStore.GetLogEvents(start)
+        logEvents = self._logStore.get_log_events(start)
 
         return self.__endpoint.response_class(
             response=json.dumps(logEvents), status=HTTPStatusCode.OK,
