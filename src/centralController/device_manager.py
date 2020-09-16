@@ -15,7 +15,7 @@ limitations under the License.
 '''
 import collections
 from centralController.devices_config_loader import DevicesConfigLoader
-import centralController.Events as Evts
+import centralController.events as Evts
 from common.Logger import LogType
 
 try:

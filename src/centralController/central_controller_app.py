@@ -23,7 +23,7 @@ from centralController.controller_db_interface import ControllerDBInterface
 from centralController.devices_config_loader import DevicesConfigLoader
 from centralController.device_manager import DeviceManager
 from centralController.device_type_manager import DeviceTypeManager
-import centralController.Events as Evts
+import centralController.events as Evts
 from centralController.log_store import LogStore
 from centralController.state_manager import StateManager
 from centralController.worker_thread import WorkerThread

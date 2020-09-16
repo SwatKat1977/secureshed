@@ -17,7 +17,7 @@ import collections
 import json
 import importlib
 import jsonschema
-from centralController.DeviceTypes.BaseDeviceType import BaseDeviceType
+from centralController.DeviceTypes.base_device_type import BaseDeviceType
 from common.Logger import LogType
 
 
@@ -138,6 +138,8 @@ class DeviceTypeManager:
             device_type_entry = self.DeviceTypeCfg(
                 name=device_type[self.JsonDeviceTypeElement_Name],
                 enabled=device_type[self.JsonDeviceTypeElement_Enabled])
+            self._logger.Log(LogType.Info,
+                             f"Loading device name: {device_type[self.JsonDeviceTypeElement_Name]}")
             self._expected_types.append(device_type_entry)
 
         return True
