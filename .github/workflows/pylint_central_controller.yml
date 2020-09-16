@@ -12,9 +12,6 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    env:
-      working-directory: ../src
-
     steps:
     - uses: actions/checkout@v1
     - name: Set up Python 3.7
@@ -27,5 +24,6 @@ jobs:
         pip install pylint
     - name: Run Pylint
       run: |
+        cd ./src
         echo `pwd`
         python ./pipelines/lint.py --path ./central_controller --threshold 2
