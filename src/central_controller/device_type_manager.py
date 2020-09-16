@@ -148,7 +148,7 @@ class DeviceTypeManager:
 
     #  @param self The object pointer.
     def load_device_types(self):
-        default_module_path = 'centralController.DeviceTypes.'
+        default_module_path = 'central_controller.DeviceTypes.'
 
         for device in self._expected_types:
             device_name = device.name
