@@ -5,7 +5,10 @@ name: Lint Keypad Controller
 on:
   push:
     branches: [ development ]
-
+  pull_request:
+    branches:
+      - master
+      - development
 jobs:
   build:
 
