@@ -13,7 +13,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 '''
-import collections
 import enum
 import json
 import time
@@ -276,7 +275,7 @@ class StateManager:
         device_name = body[Evts.SensorDeviceBodyItem.DeviceName]
         state = body[Evts.SensorDeviceBodyItem.State]
 
-        triggered = True if state == 1 else False
+        triggered = bool(state == 1)
         state_str = "opened" if triggered else "closed"
 
         # If the alarm is deactived then ignore the sensor state change after
