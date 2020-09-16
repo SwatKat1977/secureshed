@@ -24,6 +24,6 @@ jobs:
         pip install pylint
     - name: Run Pylint
       run: |
-        cd ./src
+        cd src
         echo `pwd`
         python ./pipelines/lint.py --path ./central_controller --threshold 2
