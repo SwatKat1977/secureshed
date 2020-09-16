@@ -12,6 +12,9 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    env:
+      working-directory: ../src
+
     steps:
     - uses: actions/checkout@v1
     - name: Set up Python 3.7
