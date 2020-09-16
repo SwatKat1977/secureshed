@@ -17,7 +17,7 @@ limitations under the License.
 class BaseDeviceType:
 
     #  @param self The object pointer.
-    def Initialise(self, deviceName, pins, additionalParams):
+    def Initialise(self, device_name, pins, additional_params):
         raise NotImplementedError
 
 
@@ -27,5 +27,5 @@ class BaseDeviceType:
 
 
     #  @param self The object pointer.
-    def ReceiveEvent(self, eventInst):
+    def ReceiveEvent(self, event):
         raise NotImplementedError

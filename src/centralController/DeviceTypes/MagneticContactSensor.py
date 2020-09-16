@@ -18,12 +18,14 @@ import time
 from centralController.DeviceTypes.base_device_type import BaseDeviceType
 import centralController.events as Evts
 from common.Event import Event
-from common.Logger import Logger, LogType
+from common.Logger import LogType
 
 
 ## Implementation of generic magnetic contact sensor device which supports
 ## a configurable grace period if the state changes.
 class MagneticContactSensor(BaseDeviceType):
+    # pylint: disable=too-many-instance-attributes
+
     SensorName = 'Magnetic Contact Sensor'
 
     ExpectedPinId = 'sensorPin'
@@ -37,6 +39,8 @@ class MagneticContactSensor(BaseDeviceType):
 
     #  @param self The object pointer.
     def __init__(self, hardwareIO, eventMgr, logger):
+        # pylint: disable=too-many-instance-attributes
+
         self._event_mgr = eventMgr
         self._io_pin = None
         self._hardware_io = hardwareIO
@@ -141,13 +145,13 @@ class MagneticContactSensor(BaseDeviceType):
     def ReceiveEvent(self, event):
         if event.id == Evts.EvtType.AlarmActivated:
             if 'triggerGracePeriodSecs' in self._additional_params:
-                graceSecs = self._additional_params['triggerGracePeriodSecs']
+                grace_secs = self._additional_params['triggerGracePeriodSecs']
                 self._grace_timeout = event.body['activationTimestamp'] + \
-                    graceSecs
+                    grace_secs
                 self._logger.Log(LogType.Info,
                                  "Alarm activated, device '%s' is in " + \
                                  "grace period of %s seconds",
-                                 self._device_name, graceSecs)
+                                 self._device_name, grace_secs)
                 self._state_type = self.StateType.AlarmSetPeriod
             self._is_triggered = False
 
@@ -158,12 +162,12 @@ class MagneticContactSensor(BaseDeviceType):
     ## Generate and queue the event when a device state changes.
     #  @param self The object pointer.
     def _generate_device_state_change_evt(self):
-        evtBody = {
+        evt_body = {
             Evts.SensorDeviceBodyItem.DeviceType: self.SensorName,
             Evts.SensorDeviceBodyItem.DeviceName: self._device_name,
             Evts.SensorDeviceBodyItem.State: self._is_triggered
         }
-        evt = Event(Evts.EvtType.SensorDeviceStateChange, evtBody)
+        evt = Event(Evts.EvtType.SensorDeviceStateChange, evt_body)
         self._event_mgr.QueueEvent(evt)
 
 

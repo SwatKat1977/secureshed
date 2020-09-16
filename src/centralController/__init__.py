@@ -39,5 +39,5 @@ def create_app(test_config=None):
         sys.exit(1)
 
     centralControllerApp = CentralControllerApp(app)
-    centralControllerApp.StartApp()
+    centralControllerApp.start_app()
     return app

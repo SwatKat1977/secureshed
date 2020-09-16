@@ -130,7 +130,7 @@ class DeviceManager:
     def CheckHardwareDevices(self):
 
         if RPIO_EMULATED:
-            GPIO.UpdateFromPinOutFile()
+            GPIO.update_from_pinout_file()
 
         for device in self._devices:
             try:

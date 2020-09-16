@@ -33,30 +33,32 @@ from common.Version import COPYRIGHT, VERSION
 from common.Logger import Logger, LogType
 
 class CentralControllerApp:
-    __slots__ = ['__configFile', '__currDevices', '__db', '__deviceMgr',
-                 '__endpoint', '__eventManager', '_logger', '_logStore',
-                 '__stateMgr', '__workerThread']
+    # pylint: disable=too-many-instance-attributes
+
+    __slots__ = ['_config_file', '_curr_devices', '__db', '_device_mgr',
+                 '_endpoint', '_event_manager', '_logger', '_log_store',
+                 '_state_mgr', '_worker_thread']
 
 
     def __init__(self, endpoint):
-        self.__configFile = os.getenv('CENCON_CONFIG')
-        self.__currDevices = None
+        self._config_file = os.getenv('CENCON_CONFIG')
+        self._curr_devices = None
         self.__db = os.getenv('CENCON_DB')
-        self.__deviceMgr = None
-        self.__endpoint = endpoint
-        self.__eventManager = None
-        self._logStore = LogStore()
-        self.__stateMgr = None
-        self.__workerThread = None
+        self._device_mgr = None
+        self._endpoint = endpoint
+        self._event_manager = None
+        self._log_store = LogStore()
+        self._state_mgr = None
+        self._worker_thread = None
         self._logger = Logger()
 
 
-    def StartApp(self):
+    def start_app(self):
         self._logger.WriteToConsole = True
         self._logger.ExternalLogger = self
         self._logger.Initialise()
 
-        signal.signal(signal.SIGINT, self.__SignalHandler)
+        signal.signal(signal.SIGINT, self._signal_handler)
 
         self._logger.Log(LogType.Info, 'Secure Shed Central Controller V%s',
                          VERSION)
@@ -64,23 +66,23 @@ class CentralControllerApp:
                          'Copyright %s Secure Shed Project Dev Team',
                          COPYRIGHT)
         self._logger.Log(LogType.Info,
-                              'Licensed under the Apache License, Version 2.0')
+                         'Licensed under the Apache License, Version 2.0')
 
-        configManger = ConfigurationManager()
+        config_manger = ConfigurationManager()
 
-        configuration = configManger.parse_config_file(self.__configFile)
+        configuration = config_manger.parse_config_file(self._config_file)
         if not configuration:
             self._logger.Log(LogType.Error,
-                                  'Parse failed, last message : %s',
-                                  configManger.last_error_msg)
+                             'Parse failed, last message : %s',
+                             config_manger.last_error_msg)
             sys.exit(1)
 
         self._logger.Log(LogType.Info, '=== Configuration Parameters ===')
         self._logger.Log(LogType.Info, 'Environment Variables:')
         self._logger.Log(LogType.Info, '|=> Configuration file       : %s',
-                              self.__configFile)
+                         self._config_file)
         self._logger.Log(LogType.Info, '|=> Database                 : %s',
-                              self.__db)
+                         self.__db)
         self._logger.Log(LogType.Info, '===================================')
         self._logger.Log(LogType.Info, '=== Configuration File Settings ===')
         self._logger.Log(LogType.Info, 'General Settings:')
@@ -100,105 +102,110 @@ class CentralControllerApp:
                          configuration.centralControllerApi.networkPort)
         self._logger.Log(LogType.Info, '================================')
 
-        self.__eventManager = EventManager()
+        self._event_manager = EventManager()
 
-        controllerDb = ControllerDBInterface()
-        if not controllerDb.Connect(self.__db):
+        controller_db = ControllerDBInterface()
+        if not controller_db.connect(self.__db):
             self._logger.Log(LogType.Error, "Database '%s' is missing!",
                              self.__db)
             sys.exit(1)
 
         # Build state manager which manages the state of the alarm itself and
         # how states are changed due to hardware device(s) being triggered.
-        self.__stateMgr = StateManager(controllerDb, configuration,
-                                       self.__eventManager, self._logger)
+        self._state_mgr = StateManager(controller_db, configuration,
+                                       self._event_manager, self._logger)
 
         # Attempt to load the device types plug-ins, if a plug-in cannot be
         # found or is invalid then a warning is logged and it's not loaded.
-        deviceTypeMgr = DeviceTypeManager(self._logger)
-        deviceTypesCfg = deviceTypeMgr.ReadDeviceTypesConfig(
+        device_type_mgr = DeviceTypeManager(self._logger)
+        device_types_cfg = device_type_mgr.ReadDeviceTypesConfig(
             configuration.generalSettings.deviceTypesConfigFile)
-        if not deviceTypesCfg:
-            self._logger.Log(LogType.Error, deviceTypeMgr.lastErrorMsg)
+        if not device_types_cfg:
+            self._logger.Log(LogType.Error, device_type_mgr.lastErrorMsg)
             sys.exit(1)
 
-        deviceTypeMgr.LoadDeviceTypes()
+        device_type_mgr.LoadDeviceTypes()
 
         # Load the devices configuration file which contains the devices
         # attached to the alarm.  The devices are matched to the device types
         # loaded above.
-        devicesCfg = configuration.generalSettings.devicesConfigFile
-        devicesConfigLoader = DevicesConfigLoader()
-        self.__currDevices = devicesConfigLoader.read_devices_config_file(devicesCfg)
-        if not self.__currDevices:
-            self._logger.Log(LogType.Error, devicesConfigLoader.last_error_msg)
+        devices_cfg = configuration.generalSettings.devicesConfigFile
+        devices_cfg_loader = DevicesConfigLoader()
+        self._curr_devices = devices_cfg_loader.read_devices_config_file(devices_cfg)
+        if not self._curr_devices:
+            self._logger.Log(LogType.Error, devices_cfg_loader.last_error_msg)
             sys.exit(1)
 
-        self.__deviceMgr = DeviceManager(deviceTypeMgr, self.__eventManager,
+        self._device_mgr = DeviceManager(device_type_mgr, self._event_manager,
                                          self._logger)
-        devLst = self.__currDevices[devicesConfigLoader.JsonTopElement.Devices]
-        self.__deviceMgr.Load(devLst)
-        self.__deviceMgr.InitialiseHardware()
+        dev_lst = self._curr_devices[devices_cfg_loader.JsonTopElement.Devices]
+        self._device_mgr.Load(dev_lst)
+        self._device_mgr.InitialiseHardware()
 
-        self.__RegisterEventCallbacks()
+        self._register_event_callbacks()
 
         # Create the IO processing thread which handles IO requests from
         # hardware devices.
-        self.__workerThread = WorkerThread(configuration,
-                                           self.__deviceMgr,
-                                           self.__eventManager,
-                                           self.__stateMgr,
+        self._worker_thread = WorkerThread(configuration,
+                                           self._device_mgr,
+                                           self._event_manager,
+                                           self._state_mgr,
                                            self._logger)
-        self.__workerThread.start()
+        self._worker_thread.start()
 
-        apiController = ApiController(self.__eventManager,
-                                      controllerDb,
-                                      configuration,
-                                      self.__endpoint,
-                                      self._logStore,
-                                      self._logger)
+        # pylint: disable=unused-variable
+        api_controller = ApiController(self._event_manager,
+                                       controller_db,
+                                       configuration,
+                                       self._endpoint,
+                                       self._log_store,
+                                       self._logger)
 
-        sendAlivePingEvt = Event(Evts.EvtType.KeypadApiSendAlivePing)
-        self.__eventManager.QueueEvent(sendAlivePingEvt)
+        send_alive_ping_evt = Event(Evts.EvtType.KeypadApiSendAlivePing)
+        self._event_manager.QueueEvent(send_alive_ping_evt)
 
 
-    def __RegisterEventCallbacks(self):
+    def AddLogEvent(self, curr_time, log_level, msg):
+        self._log_store.add_log_event(curr_time, log_level, msg)
+
+
+    def _register_event_callbacks(self):
 
         # =============================
         # == Register event : Keypad ==
         # =============================
 
         # Register event: Receive keypad event.
-        self.__eventManager.RegisterEvent(Evts.EvtType.KeypadKeyCodeEntered,
-                                          self.__stateMgr.RcvKeypadEvent)
+        self._event_manager.RegisterEvent(Evts.EvtType.KeypadKeyCodeEntered,
+                                          self._state_mgr.RcvKeypadEvent)
 
         # Register event: Receive keypad event.
-        self.__eventManager.RegisterEvent(Evts.EvtType.SensorDeviceStateChange,
-                                          self.__stateMgr.RcvDeviceEvent)
+        self._event_manager.RegisterEvent(Evts.EvtType.SensorDeviceStateChange,
+                                          self._state_mgr.RcvDeviceEvent)
 
         # ===============================
         # == Register event : Hardware ==
         # ===============================
 
         # Register event: Activate alarm sirens.
-        self.__eventManager.RegisterEvent(Evts.EvtType.ActivateSiren,
-                                          self.__deviceMgr.ReceiveEvent)
+        self._event_manager.RegisterEvent(Evts.EvtType.ActivateSiren,
+                                          self._device_mgr.ReceiveEvent)
 
         # Register event: Deactivate alarm sirens.
-        self.__eventManager.RegisterEvent(Evts.EvtType.DeactivateSiren,
-                                          self.__deviceMgr.ReceiveEvent)
+        self._event_manager.RegisterEvent(Evts.EvtType.DeactivateSiren,
+                                          self._device_mgr.ReceiveEvent)
 
         # =========================================
         # == Register event : Alarm state change ==
         # =========================================
 
         # Register event: Alarm activated.
-        self.__eventManager.RegisterEvent(Evts.EvtType.AlarmActivated,
-                                          self.__deviceMgr.ReceiveEvent)
+        self._event_manager.RegisterEvent(Evts.EvtType.AlarmActivated,
+                                          self._device_mgr.ReceiveEvent)
 
         # Register event: Alarm activated.
-        self.__eventManager.RegisterEvent(Evts.EvtType.AlarmDeactivated,
-                                          self.__deviceMgr.ReceiveEvent)
+        self._event_manager.RegisterEvent(Evts.EvtType.AlarmDeactivated,
+                                          self._device_mgr.ReceiveEvent)
 
 
         # =================================
@@ -206,30 +213,26 @@ class CentralControllerApp:
         # =================================
 
         # Register event: Request sending of 'Alive Ping' message.
-        self.__eventManager.RegisterEvent(Evts.EvtType.KeypadApiSendAlivePing,
-                                          self.__stateMgr.SendAlivePingMsg)
+        self._event_manager.RegisterEvent(Evts.EvtType.KeypadApiSendAlivePing,
+                                          self._state_mgr.SendAlivePingMsg)
 
         # Register event: Request sending of 'Keypad Locked' message.
-        self.__eventManager.RegisterEvent(Evts.EvtType.KeypadApiSendKeypadLock,
-                                          self.__stateMgr.SendKeypadLockedMsg)
+        self._event_manager.RegisterEvent(Evts.EvtType.KeypadApiSendKeypadLock,
+                                          self._state_mgr.SendKeypadLockedMsg)
 
 
-    def __SignalHandler(self, signum, frame):
+    def _signal_handler(self, signum, frame):
         #pylint: disable=unused-argument
 
         self._logger.Log(LogType.Info, 'Shutting down...')
-        self.__Shutdown()
+        self._shutdown()
         sys.exit(1)
 
 
-    def __Shutdown(self):
-        self.__workerThread.signal_shutdown_requested()
+    def _shutdown(self):
+        self._worker_thread.signal_shutdown_requested()
 
-        while not self.__workerThread.shutdown_completed:
+        while not self._worker_thread.shutdown_completed:
             time.sleep(1)
 
         self._logger.Log(LogType.Info, 'Worker thread has Shut down')
-
-
-    def AddLogEvent(self, currTime, logLevel, msg):
-        self._logStore.add_log_event(currTime, logLevel, msg)

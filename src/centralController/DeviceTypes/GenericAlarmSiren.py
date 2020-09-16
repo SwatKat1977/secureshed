@@ -24,36 +24,38 @@ class GenericAlarmSiren(BaseDeviceType):
 
 
     def __init__(self, hardwareIO, eventMgr, logger):
-        self.__eventMgr = eventMgr
-        self.__ioPin = None
-        self.__hardwareIO = hardwareIO
-        self.__isTriggered = False
-        self.__deviceName = None
+        self._additional_params = None
+        self._device_name = None
+        self._event_mgr = eventMgr
+        self._hardware_io = hardwareIO
+        self._io_pin = None
+        self._is_triggered = False
         self._logger = logger
 
 
-    def Initialise(self, deviceName, pins, additionalParams):
-        self.__deviceName = deviceName
+    def Initialise(self, device_name, pins, additional_params):
+        self._device_name = device_name
+        self._additional_params = additional_params
 
-        pinPrefix = 'GPIO'
+        pin_prefix = 'GPIO'
 
         # Expecting one pin.
         if len(pins) != 1:
             self._logger.Log(LogType.Warn,
-                                  "Device '%s' was expecting 1 pin, actually %s",
-                                  deviceName, len(pins))
+                             "Device '%s' was expecting 1 pin, actually %s",
+                             device_name, len(pins))
             return False
 
         pin = [pin for pin in pins if pin['identifier'] == self.ExpectedPinId]
         if not pin:
             self._logger.Log(LogType.Warn,
-                                  "Device '%s' missing expected pin '%s'",
-                                  deviceName, self.ExpectedPinId)
+                             "Device '%s' missing expected pin '%s'",
+                             device_name, self.ExpectedPinId)
             return False
 
-        self.__ioPin = int(pin[0]['ioPin'][len(pinPrefix):])
-        self.__hardwareIO.setup(self.__ioPin, self.__hardwareIO.OUT)
-        self.__hardwareIO.output(self.__ioPin, self.__hardwareIO.HIGH)
+        self._io_pin = int(pin[0]['ioPin'][len(pin_prefix):])
+        self._hardware_io.setup(self._io_pin, self._hardware_io.OUT)
+        self._hardware_io.output(self._io_pin, self._hardware_io.HIGH)
 
         return True
 
@@ -64,7 +66,7 @@ class GenericAlarmSiren(BaseDeviceType):
 
     def ReceiveEvent(self, eventInst):
         if eventInst.id == Evts.EvtType.ActivateSiren:
-            self.__hardwareIO.output(self.__ioPin, self.__hardwareIO.LOW)
+            self._hardware_io.output(self._io_pin, self._hardware_io.LOW)
 
         elif eventInst.id == Evts.EvtType.DeactivateSiren:
-            self.__hardwareIO.output(self.__ioPin, self.__hardwareIO.HIGH)
+            self._hardware_io.output(self._io_pin, self._hardware_io.HIGH)
