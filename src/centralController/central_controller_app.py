@@ -223,9 +223,9 @@ class CentralControllerApp:
 
 
     def __Shutdown(self):
-        self.__workerThread.SignalShutdownRequested()
+        self.__workerThread.signal_shutdown_requested()
 
-        while not self.__workerThread.shutdownCompleted:
+        while not self.__workerThread.shutdown_completed:
             time.sleep(1)
 
         self._logger.Log(LogType.Info, 'Worker thread has Shut down')
