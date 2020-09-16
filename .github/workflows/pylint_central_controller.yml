@@ -27,6 +27,6 @@ jobs:
     - name: Run Pylint
       run: |
         cd src
-        `ls -al`
+        ls -al
         echo `pwd`
         python ../pipelines/lint.py --path ./central_controller --threshold 2
