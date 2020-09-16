@@ -129,9 +129,9 @@ class CentralControllerApp:
         # loaded above.
         devicesCfg = configuration.generalSettings.devicesConfigFile
         devicesConfigLoader = DevicesConfigLoader()
-        self.__currDevices = devicesConfigLoader.ReadDevicesConfigFile(devicesCfg)
+        self.__currDevices = devicesConfigLoader.read_devices_config_file(devicesCfg)
         if not self.__currDevices:
-            self._logger.Log(LogType.Error, devicesConfigLoader.lastErrorMsg)
+            self._logger.Log(LogType.Error, devicesConfigLoader.last_error_msg)
             sys.exit(1)
 
         self.__deviceMgr = DeviceManager(deviceTypeMgr, self.__eventManager,
