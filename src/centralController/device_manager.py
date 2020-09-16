@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 '''
 import collections
-from centralController.DevicesConfigLoader import DevicesConfigLoader
+from centralController.devices_config_loader import DevicesConfigLoader
 import centralController.Events as Evts
 from common.Logger import LogType
 

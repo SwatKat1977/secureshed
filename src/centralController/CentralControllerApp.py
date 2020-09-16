@@ -20,13 +20,13 @@ import time
 from centralController.ApiController import ApiController
 from centralController.configuration_manager import ConfigurationManager
 from centralController.controller_db_interface import ControllerDBInterface
-from centralController.DevicesConfigLoader import DevicesConfigLoader
-from centralController.DeviceManager import DeviceManager
+from centralController.devices_config_loader import DevicesConfigLoader
+from centralController.device_manager import DeviceManager
 from centralController.device_type_manager import DeviceTypeManager
 import centralController.Events as Evts
 from centralController.log_store import LogStore
-from centralController.StateManager import StateManager
-from centralController.WorkerThread import WorkerThread
+from centralController.state_manager import StateManager
+from centralController.worker_thread import WorkerThread
 from common.Event import Event
 from common.EventManager import EventManager
 from common.Version import COPYRIGHT, VERSION
