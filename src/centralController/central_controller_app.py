@@ -17,7 +17,7 @@ import os
 import signal
 import sys
 import time
-from centralController.ApiController import ApiController
+from centralController.api_controller import ApiController
 from centralController.configuration_manager import ConfigurationManager
 from centralController.controller_db_interface import ControllerDBInterface
 from centralController.devices_config_loader import DevicesConfigLoader

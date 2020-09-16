@@ -17,11 +17,11 @@ import json
 from flask import request
 import jsonschema
 import APIs.CentralController.JsonSchemas as schemas
-import centralController.Events as Evts
+import centralController.events as Evts
 from common.APIClient.HTTPStatusCode import HTTPStatusCode
 from common.APIClient.MIMEType import MIMEType
 from common.Event import Event
-from common.Logger import Logger, LogType
+from common.Logger import LogType
 
 
 ## Implementation of thread that handles API calls to the keypad API.
