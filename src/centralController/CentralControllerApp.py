@@ -68,11 +68,11 @@ class CentralControllerApp:
 
         configManger = ConfigurationManager()
 
-        configuration = configManger.ParseConfigFile(self.__configFile)
+        configuration = configManger.parse_config_file(self.__configFile)
         if not configuration:
             self._logger.Log(LogType.Error,
                                   'Parse failed, last message : %s',
-                                  configManger.lastErrorMsg)
+                                  configManger.last_error_msg)
             sys.exit(1)
 
         self._logger.Log(LogType.Info, '=== Configuration Parameters ===')

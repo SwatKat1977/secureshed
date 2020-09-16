@@ -22,6 +22,7 @@ from centralController.FailedCodeAttemptAction import (FailedCodeAttemptActionTy
 
 
 class ConfigurationManager:
+    # pylint: disable=too-many-locals
 
     # -----------------------------
     # -- Top-level json elements --
@@ -66,135 +67,135 @@ class ConfigurationManager:
 
     ## Property getter : Last error message
     @property
-    def lastErrorMsg(self):
-        return self.__lastErrorMsg
+    def last_error_msg(self):
+        return self._last_error_msg
 
 
     #  @param self The object pointer.
     def __init__(self):
-        self.__lastErrorMsg = ''
+        self._last_error_msg = ''
 
 
     #  @param self The object pointer.
-    def ParseConfigFile(self, filename):
+    def parse_config_file(self, filename):
 
-        self.__lastErrorMsg = ''
+        self._last_error_msg = ''
 
         try:
-            with open(filename) as fileHandle:
-                fileContents = fileHandle.read()
+            with open(filename) as file_handle:
+                file_contents = file_handle.read()
 
         except IOError as excpt:
-            self.__lastErrorMsg = "Unable to open configuration file '" + \
+            self._last_error_msg = "Unable to open configuration file '" + \
                 f"{filename}', reason: {excpt.strerror}"
             return None
 
         try:
-            configJson = json.loads(fileContents)
+            config_json = json.loads(file_contents)
 
         except json.JSONDecodeError as excpt:
-            self.__lastErrorMsg = "Unable to parse configuration file" + \
+            self._last_error_msg = "Unable to parse configuration file" + \
                 f"{filename}, reason: {excpt}"
             return None
 
         try:
-            jsonschema.validate(instance=configJson,
+            jsonschema.validate(instance=config_json,
                                 schema=CONFIGURATIONJSONSCHEMA)
 
         except jsonschema.exceptions.ValidationError:
-            self.__lastErrorMsg = f"Configuration file {filename} failed " + \
+            self._last_error_msg = f"Configuration file {filename} failed " + \
                 "to validate against expected schema.  Please check!"
             return None
 
-        centralCtrlApiSect = configJson[self.JSON_CentralCtrlApi]
-        centralApi = self.__ProcessCentralControllerSection(centralCtrlApiSect)
+        central_ctrl_api_sect = config_json[self.JSON_CentralCtrlApi]
+        central_api = self._process_central_controller_section(central_ctrl_api_sect)
 
-        generalSetting = configJson[self.JSON_GeneralSettings]
-        generalSettingsCfg = self.__ProcessGeneralSection(generalSetting)
+        general_setting = config_json[self.JSON_GeneralSettings]
+        general_settings_cfg = self._process_general_section(general_setting)
 
         # Populate the keypad controller configuration items.
-        keypadController = configJson[self.JSON_KeypadController]
-        keypadCtrlEndpoint = keypadController[self.JSON_KeypadControllerEndpoint]
-        keypadCtrlAuthKey = keypadController[self.JSON_KeypadControllerAuthKey]
-        keypadCtrlCfg = Configuration.KeypadControllerCfg(keypadCtrlEndpoint,
-                                                          keypadCtrlAuthKey)
+        keypad_controller = config_json[self.JSON_KeypadController]
+        keypad_ctrl_endpoint = keypad_controller[self.JSON_KeypadControllerEndpoint]
+        keypad_ctrl_auth_key = keypad_controller[self.JSON_KeypadControllerAuthKey]
+        keypad_ctrl_cfg = Configuration.KeypadControllerCfg(keypad_ctrl_endpoint,
+                                                            keypad_ctrl_auth_key)
 
-        failedAttemptResponses = {}
+        failed_attempt_responses = {}
 
-        for resp in configJson[self.JSON_FailedAttemptResponses]:
+        for resp in config_json[self.JSON_FailedAttemptResponses]:
 
-            processedResp = self.__ProcessFailedCodeResponse(resp)
+            processed_resp = self._process_failed_code_response(resp)
 
-            if processedResp is None:
+            if processed_resp is None:
                 return None
 
-            attemptNo, response = processedResp
-            failedAttemptResponses[attemptNo] = response
+            attempt_no, response = processed_resp
+            failed_attempt_responses[attempt_no] = response
 
-        return Configuration(centralApi, generalSettingsCfg,
-                             failedAttemptResponses, keypadCtrlCfg)
+        return Configuration(central_api, general_settings_cfg,
+                             failed_attempt_responses, keypad_ctrl_cfg)
 
 
     ## Process the central controller api settings section.
     #  @param self The object pointer.
-    def __ProcessCentralControllerSection(self, sect):
-        networkPort = sect[self.JSON_CentralCtrlApiPort]
-        authKey = sect[self.JSON_CentralCtrlApiAuthKey]
-        return Configuration.CentralControllerApiCfg(networkPort, authKey)
+    def _process_central_controller_section(self, sect):
+        network_port = sect[self.JSON_CentralCtrlApiPort]
+        auth_key = sect[self.JSON_CentralCtrlApiAuthKey]
+        return Configuration.CentralControllerApiCfg(network_port, auth_key)
 
 
     ## Process the general settings section.
     #  @param self The object pointer.
-    def __ProcessGeneralSection(self, sect):
-        devicesCfgFile = sect[self.JSON_GeneralSettingsDevicesConfigFile]
-        deviceTypesConfigFile = sect[self.JSON_GeneralSettingsDeviceTypesConfigFile]
-        return Configuration.GeneralSettings(devicesCfgFile,
-                                             deviceTypesConfigFile)
+    def _process_general_section(self, sect):
+        devices_cfg_file = sect[self.JSON_GeneralSettingsDevicesConfigFile]
+        device_types_config_file = sect[self.JSON_GeneralSettingsDeviceTypesConfigFile]
+        return Configuration.GeneralSettings(devices_cfg_file,
+                                             device_types_config_file)
 
 
     #  @param self The object pointer.
-    def __ProcessFailedCodeResponse(self, response):
+    def _process_failed_code_response(self, response):
 
-        processedResponse = {}
+        processed_response = {}
 
-        attemptNo = response[self.JSON_failedAttemptResponseAttemptNo]
+        attempt_no = response[self.JSON_failedAttemptResponseAttemptNo]
         actions = response[self.JSON_failedAttemptResponseActions]
 
         for action in actions:
-            paramsList = action[self.JSON_failedAttemptResponseActionsParams]
-            actionType = action[self.JSON_failedAttemptResponseActionsType]
+            params_list = action[self.JSON_failedAttemptResponseActionsParams]
+            action_type = action[self.JSON_failedAttemptResponseActionsType]
 
-            processedParams = {}
+            processed_params = {}
 
             # This should never happen, but verify is the action type is known
             # about, throwing an error if not.
-            if not FailedCodeAttemptActionType.IsName(actionType):
-                self.__lastErrorMsg = f'Action type {actionType} not valid'
+            if not FailedCodeAttemptActionType.IsName(action_type):
+                self._last_error_msg = f'Action type {action_type} not valid'
                 return None
 
             # Extract the name of all of the parameters for the action out and
             # then verify they are all valid.
-            paramKeys = [d['key'] for d in paramsList]
-            if not all(elem in ActionTypeParams[actionType].keys() for elem in paramKeys):
-                self.__lastErrorMsg = f'Action type {actionType} has an invalid ' +\
+            param_keys = [d['key'] for d in params_list]
+            if not all(elem in ActionTypeParams[action_type].keys() for elem in param_keys):
+                self._last_error_msg = f'Action type {action_type} has an invalid ' +\
                     'list of parameters'
                 return None
 
-            for param in paramsList:
-                paramName = param['key']
+            for param in params_list:
+                param_name = param['key']
 
-                if ActionTypeParams[actionType][paramName] == int:
+                if ActionTypeParams[action_type][param_name] == int:
                     try:
-                        processedParams[paramName] = int(param['value'])
+                        processed_params[param_name] = int(param['value'])
                     except ValueError:
-                        self.__lastErrorMsg = f'Parameter {paramName} has ' +\
+                        self._last_error_msg = f'Parameter {param_name} has ' +\
                             'an invalid type, expecting integer, value is ' +\
                             f"{param['value']}"
                         return None
 
-                elif ActionTypeParams[actionType][paramName] == str:
-                    processedParams[paramName] = param['value']
+                elif ActionTypeParams[action_type][param_name] == str:
+                    processed_params[param_name] = param['value']
 
-            processedResponse[actionType] = processedParams
+            processed_response[action_type] = processed_params
 
-        return (attemptNo, processedResponse)
+        return (attempt_no, processed_response)
