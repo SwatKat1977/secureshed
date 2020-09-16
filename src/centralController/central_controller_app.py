@@ -166,7 +166,7 @@ class CentralControllerApp:
         self._event_manager.QueueEvent(send_alive_ping_evt)
 
 
-    def AddLogEvent(self, curr_time, log_level, msg):
+    def add_log_event(self, curr_time, log_level, msg):
         self._log_store.add_log_event(curr_time, log_level, msg)
 
 
