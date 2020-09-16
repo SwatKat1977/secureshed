@@ -18,7 +18,7 @@ import jsonschema
 from central_controller.configuration import Configuration
 from central_controller.configuration_json_schema import CONFIGURATIONJSONSCHEMA
 from central_controller.failed_code_attempt_action import (FailedCodeAttemptActionType,
-                                                          ACTION_TYPE_PARAMS)
+                                                           ACTION_TYPE_PARAMS)
 
 
 class ConfigurationManager:
