@@ -18,13 +18,13 @@ import signal
 import sys
 import time
 from centralController.ApiController import ApiController
-from centralController.ConfigurationManager import ConfigurationManager
-from centralController.ControllerDBInterface import ControllerDBInterface
+from centralController.configuration_manager import ConfigurationManager
+from centralController.controller_db_interface import ControllerDBInterface
 from centralController.DevicesConfigLoader import DevicesConfigLoader
 from centralController.DeviceManager import DeviceManager
-from centralController.DeviceTypeManager import DeviceTypeManager
+from centralController.device_type_manager import DeviceTypeManager
 import centralController.Events as Evts
-from centralController.LogStore import LogStore
+from centralController.log_store import LogStore
 from centralController.StateManager import StateManager
 from centralController.WorkerThread import WorkerThread
 from common.Event import Event
