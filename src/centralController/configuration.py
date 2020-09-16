@@ -31,19 +31,19 @@ class Configuration:
     ## Property getter : Keypad API config
     #  @param self The object pointer.
     @property
-    def centralControllerApi(self):
+    def central_controller_api(self):
         return self._central_controller_api
 
     @property
-    def generalSettings(self):
+    def general_settings(self):
         return self._general_settings
 
     @property
-    def failedAttemptResponses(self):
+    def failed_attempt_responses(self):
         return self._failed_attempt_responses
 
     @property
-    def keypadController(self):
+    def keypad_controller(self):
         return self._keypad_controller
 
 

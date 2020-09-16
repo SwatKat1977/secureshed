@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 '''
+# pylint: disable=ungrouped-imports
 import collections
 from centralController.devices_config_loader import DevicesConfigLoader
 import centralController.events as Evts
@@ -48,8 +49,8 @@ class DeviceManager:
 
 
     #  @param self The object pointer.
-    def Load(self, devices):
-        device_types = self._device_type_mgr.deviceTypes
+    def load(self, devices):
+        device_types = self._device_type_mgr.device_types
 
         for device in devices:
             name = device[DevicesConfigLoader.DeviceElement.Name]
@@ -93,7 +94,7 @@ class DeviceManager:
 
 
     #  @param self The object pointer.
-    def InitialiseHardware(self):
+    def initialise_hardware(self):
 
         devices = []
 
@@ -103,7 +104,7 @@ class DeviceManager:
                     'triggerGracePeriodSecs': device.triggerGracePeriod
                 }
 
-                if not device.deviceType.Initialise(device.name, device.pins,
+                if not device.deviceType.initialise(device.name, device.pins,
                                                     additional_params):
                     self._logger.Log(LogType.Error,
                                      "Device plug-in '%s' initialisation" + \
@@ -115,7 +116,7 @@ class DeviceManager:
             except NotImplementedError:
                 self._logger.Log(LogType.Error,
                                  "Device name '%s' plug-in does not " + \
-                                 "implement Initialise() so cannot be used.",
+                                 "implement initialise() so cannot be used.",
                                  device.name)
 
             except TypeError:
@@ -127,30 +128,30 @@ class DeviceManager:
 
 
     #  @param self The object pointer.
-    def CheckHardwareDevices(self):
+    def check_hardware_devices(self):
 
         if RPIO_EMULATED:
             GPIO.update_from_pinout_file()
 
         for device in self._devices:
             try:
-                device.deviceType.CheckDevice()
+                device.deviceType.check_device()
 
             except NotImplementedError:
                 self._logger.Log(LogType.Error,
                                  "Device name '%s' plug-in does not " + \
-                                 "implement CheckDevice() so cannot be used.",
+                                 "implement check_device() so cannot be used.",
                                  device.name)
 
 
     #  @param self The object pointer.
-    def CleanupDevices(self):
+    def cleanup_devices(self):
         self._logger.Log(LogType.Info, "Cleaning up hardware devices")
         GPIO.cleanup()
 
 
     #  @param self The object pointer.
-    def ReceiveEvent(self, event):
+    def receive_event(self, event):
         # Event : Activate siren.
         if event.id == Evts.EvtType.ActivateSiren:
             self._process_activate_siren_event(event)
@@ -172,7 +173,7 @@ class DeviceManager:
         for siren in sirens:
             self._logger.Log(LogType.Info, "Activating alarm siren '%s'",
                              siren.name)
-            siren.deviceType.ReceiveEvent(event)
+            siren.deviceType.receive_event(event)
 
 
     #  @param self The object pointer.
@@ -182,7 +183,7 @@ class DeviceManager:
         for siren in sirens:
             self._logger.Log(LogType.Info,
                              "Deactivating alarm siren '%s'", siren.name)
-            siren.deviceType.ReceiveEvent(event)
+            siren.deviceType.receive_event(event)
 
 
     #  @param self The object pointer.
@@ -193,11 +194,11 @@ class DeviceManager:
         sensors = [s for s in self._devices if s.hardware == 'sensor']
         for sensor in sensors:
             try:
-                sensor.deviceType.ReceiveEvent(event)
+                sensor.deviceType.receive_event(event)
 
             except NotImplementedError:
                 self._logger.Log(LogType.Info,
-                                 "Device '%s' missing ReceiveEvent()",
+                                 "Device '%s' missing receive_event()",
                                  sensor.name)
 
 
@@ -206,9 +207,9 @@ class DeviceManager:
         sensors = [s for s in self._devices if s.hardware == 'sensor']
         for sensor in sensors:
             try:
-                sensor.deviceType.ReceiveEvent(event)
+                sensor.deviceType.receive_event(event)
 
             except NotImplementedError:
                 self._logger.Log(LogType.Error,
-                                 "Device '%s' missing ReceiveEvent()",
+                                 "Device '%s' missing receive_event()",
                                  sensor.name)

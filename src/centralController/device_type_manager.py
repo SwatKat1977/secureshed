@@ -80,11 +80,11 @@ class DeviceTypeManager:
     }
 
     @property
-    def deviceTypes(self):
+    def device_types(self):
         return self._device_types
 
     @property
-    def lastErrorMsg(self):
+    def last_error_msg(self):
         return self._last_error_msg
 
 
@@ -100,7 +100,7 @@ class DeviceTypeManager:
 
 
     #  @param self The object pointer.
-    def ReadDeviceTypesConfig(self, filename):
+    def read_device_types_config(self, filename):
         self._last_error_msg = ''
 
         try:
@@ -146,7 +146,7 @@ class DeviceTypeManager:
 
 
     #  @param self The object pointer.
-    def LoadDeviceTypes(self):
+    def load_device_types(self):
         default_module_path = 'centralController.DeviceTypes.'
 
         for device in self._expected_types:

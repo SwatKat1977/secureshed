@@ -54,6 +54,7 @@ class CentralControllerApp:
 
 
     def start_app(self):
+        # pylint: disable=too-many-statements
         self._logger.WriteToConsole = True
         self._logger.ExternalLogger = self
         self._logger.Initialise()
@@ -87,19 +88,19 @@ class CentralControllerApp:
         self._logger.Log(LogType.Info, '=== Configuration File Settings ===')
         self._logger.Log(LogType.Info, 'General Settings:')
         self._logger.Log(LogType.Info, '|=> Devices Config File      : %s',
-                         configuration.generalSettings.devicesConfigFile)
+                         configuration.general_settings.devicesConfigFile)
         self._logger.Log(LogType.Info, '|=> Device Types Config File : %s',
-                         configuration.generalSettings.deviceTypesConfigFile)
+                         configuration.general_settings.deviceTypesConfigFile)
         self._logger.Log(LogType.Info, 'Keypad Controller Settings:')
         self._logger.Log(LogType.Info, '|=> Authentication Key       : %s',
-                         configuration.keypadController.authKey)
+                         configuration.keypad_controller.authKey)
         self._logger.Log(LogType.Info, '|=> Endpoint                 : %s',
-                         configuration.keypadController.endpoint)
+                         configuration.keypad_controller.endpoint)
         self._logger.Log(LogType.Info, 'Central Controller Settings:')
         self._logger.Log(LogType.Info, '|=> Authentication Key       : %s',
-                         configuration.centralControllerApi.authKey)
+                         configuration.central_controller_api.authKey)
         self._logger.Log(LogType.Info, '|=> Network Port             : %s',
-                         configuration.centralControllerApi.networkPort)
+                         configuration.central_controller_api.networkPort)
         self._logger.Log(LogType.Info, '================================')
 
         self._event_manager = EventManager()
@@ -118,18 +119,18 @@ class CentralControllerApp:
         # Attempt to load the device types plug-ins, if a plug-in cannot be
         # found or is invalid then a warning is logged and it's not loaded.
         device_type_mgr = DeviceTypeManager(self._logger)
-        device_types_cfg = device_type_mgr.ReadDeviceTypesConfig(
-            configuration.generalSettings.deviceTypesConfigFile)
+        device_types_cfg = device_type_mgr.read_device_types_config(
+            configuration.general_settings.deviceTypesConfigFile)
         if not device_types_cfg:
-            self._logger.Log(LogType.Error, device_type_mgr.lastErrorMsg)
+            self._logger.Log(LogType.Error, device_type_mgr.last_error_msg)
             sys.exit(1)
 
-        device_type_mgr.LoadDeviceTypes()
+        device_type_mgr.load_device_types()
 
         # Load the devices configuration file which contains the devices
         # attached to the alarm.  The devices are matched to the device types
         # loaded above.
-        devices_cfg = configuration.generalSettings.devicesConfigFile
+        devices_cfg = configuration.general_settings.devicesConfigFile
         devices_cfg_loader = DevicesConfigLoader()
         self._curr_devices = devices_cfg_loader.read_devices_config_file(devices_cfg)
         if not self._curr_devices:
@@ -139,8 +140,8 @@ class CentralControllerApp:
         self._device_mgr = DeviceManager(device_type_mgr, self._event_manager,
                                          self._logger)
         dev_lst = self._curr_devices[devices_cfg_loader.JsonTopElement.Devices]
-        self._device_mgr.Load(dev_lst)
-        self._device_mgr.InitialiseHardware()
+        self._device_mgr.load(dev_lst)
+        self._device_mgr.initialise_hardware()
 
         self._register_event_callbacks()
 
@@ -177,11 +178,11 @@ class CentralControllerApp:
 
         # Register event: Receive keypad event.
         self._event_manager.RegisterEvent(Evts.EvtType.KeypadKeyCodeEntered,
-                                          self._state_mgr.RcvKeypadEvent)
+                                          self._state_mgr.rcv_keypad_event)
 
         # Register event: Receive keypad event.
         self._event_manager.RegisterEvent(Evts.EvtType.SensorDeviceStateChange,
-                                          self._state_mgr.RcvDeviceEvent)
+                                          self._state_mgr.rcv_device_event)
 
         # ===============================
         # == Register event : Hardware ==
@@ -189,11 +190,11 @@ class CentralControllerApp:
 
         # Register event: Activate alarm sirens.
         self._event_manager.RegisterEvent(Evts.EvtType.ActivateSiren,
-                                          self._device_mgr.ReceiveEvent)
+                                          self._device_mgr.receive_event)
 
         # Register event: Deactivate alarm sirens.
         self._event_manager.RegisterEvent(Evts.EvtType.DeactivateSiren,
-                                          self._device_mgr.ReceiveEvent)
+                                          self._device_mgr.receive_event)
 
         # =========================================
         # == Register event : Alarm state change ==
@@ -201,11 +202,11 @@ class CentralControllerApp:
 
         # Register event: Alarm activated.
         self._event_manager.RegisterEvent(Evts.EvtType.AlarmActivated,
-                                          self._device_mgr.ReceiveEvent)
+                                          self._device_mgr.receive_event)
 
         # Register event: Alarm activated.
         self._event_manager.RegisterEvent(Evts.EvtType.AlarmDeactivated,
-                                          self._device_mgr.ReceiveEvent)
+                                          self._device_mgr.receive_event)
 
 
         # =================================
@@ -214,11 +215,11 @@ class CentralControllerApp:
 
         # Register event: Request sending of 'Alive Ping' message.
         self._event_manager.RegisterEvent(Evts.EvtType.KeypadApiSendAlivePing,
-                                          self._state_mgr.SendAlivePingMsg)
+                                          self._state_mgr.send_alive_ping_msg)
 
         # Register event: Request sending of 'Keypad Locked' message.
         self._event_manager.RegisterEvent(Evts.EvtType.KeypadApiSendKeypadLock,
-                                          self._state_mgr.SendKeypadLockedMsg)
+                                          self._state_mgr.send_keypad_locked_msg)
 
 
     def _signal_handler(self, signum, frame):

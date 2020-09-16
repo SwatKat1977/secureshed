@@ -57,7 +57,7 @@ class MagneticContactSensor(BaseDeviceType):
     #  @param deviceName Name of device instance.
     #  @param pins Pin(s) layout.
     #  @param additionalParams Additional optional parameters for the device.
-    def Initialise(self, device_name, pins, additional_params):
+    def initialise(self, device_name, pins, additional_params):
         self._device_name = device_name
         self._additional_params = additional_params
 
@@ -87,7 +87,7 @@ class MagneticContactSensor(BaseDeviceType):
     ## Check the state of the device, e.g. has the state changed so that it is
     #  triggered etc.
     #  @param self The object pointer.
-    def CheckDevice(self):
+    def check_device(self):
         contact_state = self._hardware_io.input(self._io_pin)
 
         # If we are in the alarmed set grace period then the triggered flag is
@@ -142,7 +142,7 @@ class MagneticContactSensor(BaseDeviceType):
     #  the alarms state (activate/deactivated etc.).
     #  @param self The object pointer.
     #  @param eventInst Event instance.
-    def ReceiveEvent(self, event):
+    def receive_event(self, event):
         if event.id == Evts.EvtType.AlarmActivated:
             if 'triggerGracePeriodSecs' in self._additional_params:
                 grace_secs = self._additional_params['triggerGracePeriodSecs']

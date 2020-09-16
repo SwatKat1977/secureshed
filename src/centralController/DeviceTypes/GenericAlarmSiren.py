@@ -33,7 +33,7 @@ class GenericAlarmSiren(BaseDeviceType):
         self._logger = logger
 
 
-    def Initialise(self, device_name, pins, additional_params):
+    def initialise(self, device_name, pins, additional_params):
         self._device_name = device_name
         self._additional_params = additional_params
 
@@ -60,13 +60,13 @@ class GenericAlarmSiren(BaseDeviceType):
         return True
 
 
-    def CheckDevice(self):
+    def check_device(self):
         pass
 
 
-    def ReceiveEvent(self, eventInst):
-        if eventInst.id == Evts.EvtType.ActivateSiren:
+    def receive_event(self, event):
+        if event.id == Evts.EvtType.ActivateSiren:
             self._hardware_io.output(self._io_pin, self._hardware_io.LOW)
 
-        elif eventInst.id == Evts.EvtType.DeactivateSiren:
+        elif event.id == Evts.EvtType.DeactivateSiren:
             self._hardware_io.output(self._io_pin, self._hardware_io.HIGH)

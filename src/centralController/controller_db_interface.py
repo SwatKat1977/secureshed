@@ -79,7 +79,7 @@ class ControllerDBInterface:
     ## Get the details for a keycode. based on the keycode passed in.
     #  @param self The object pointer.
     #  @param keycode Keycode to search on.
-    def GetKeycodeDetails(self, keycode):
+    def get_keycode_details(self, keycode):
         query = "SELECT IsMasterKey FROM KeyCodes WHERE KeyCode=?"
         details = self._execute_with_return(query, (keycode,), True)
 

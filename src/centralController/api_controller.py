@@ -199,7 +199,7 @@ class ApiController:
         # Verify the authorisation key against what is specified in the
         # configuration file.  If the key isn't valid then the error
         # code of 403 (Forbidden) is returned.
-        if authorisation_key != self._config.centralControllerApi.authKey:
+        if authorisation_key != self._config.central_controller_api.authKey:
             self._logger.Log(LogType.Critical,
                              'Invalid controller auth key from keypad')
             err_msg = 'Authorisation key is invalid'

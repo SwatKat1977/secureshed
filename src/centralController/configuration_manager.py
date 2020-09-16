@@ -18,7 +18,7 @@ import jsonschema
 from centralController.configuration import Configuration
 from centralController.configuration_json_schema import CONFIGURATIONJSONSCHEMA
 from centralController.failed_code_attempt_action import (FailedCodeAttemptActionType,
-                                                          ActionTypeParams)
+                                                          ACTION_TYPE_PARAMS)
 
 
 class ConfigurationManager:
@@ -169,14 +169,14 @@ class ConfigurationManager:
 
             # This should never happen, but verify is the action type is known
             # about, throwing an error if not.
-            if not FailedCodeAttemptActionType.IsName(action_type):
+            if not FailedCodeAttemptActionType.is_name(action_type):
                 self._last_error_msg = f'Action type {action_type} not valid'
                 return None
 
             # Extract the name of all of the parameters for the action out and
             # then verify they are all valid.
             param_keys = [d['key'] for d in params_list]
-            if not all(elem in ActionTypeParams[action_type].keys() for elem in param_keys):
+            if not all(elem in ACTION_TYPE_PARAMS[action_type].keys() for elem in param_keys):
                 self._last_error_msg = f'Action type {action_type} has an invalid ' +\
                     'list of parameters'
                 return None
@@ -184,7 +184,7 @@ class ConfigurationManager:
             for param in params_list:
                 param_name = param['key']
 
-                if ActionTypeParams[action_type][param_name] == int:
+                if ACTION_TYPE_PARAMS[action_type][param_name] == int:
                     try:
                         processed_params[param_name] = int(param['value'])
                     except ValueError:
@@ -193,7 +193,7 @@ class ConfigurationManager:
                             f"{param['value']}"
                         return None
 
-                elif ActionTypeParams[action_type][param_name] == str:
+                elif ACTION_TYPE_PARAMS[action_type][param_name] == str:
                     processed_params[param_name] = param['value']
 
             processed_response[action_type] = processed_params

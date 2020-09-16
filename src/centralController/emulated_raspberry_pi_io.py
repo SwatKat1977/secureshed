@@ -236,9 +236,9 @@ class GPIO:
     #  of the Raspberry Pi GPIO output() function for testing
     #  @returns MD5 hash if the file was hashed correctly, otherwise None.
     @staticmethod
-    def hash_pinout_file(pinoutFile):
+    def hash_pinout_file(pinout_file):
         try:
-            with open(pinoutFile, 'rb') as file_handle:
+            with open(pinout_file, 'rb') as file_handle:
                 file_contents = file_handle.read()
                 return hashlib.md5(file_contents).hexdigest()
 

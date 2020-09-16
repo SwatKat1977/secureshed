@@ -14,8 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 '''
 # pylint: disable=R0903
-import json
-import jsonschema
 from common.json_enabled_class import JsonLoadingClass
 from centralController.emulated_raspberry_pi_io import GPIO
 

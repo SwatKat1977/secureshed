@@ -57,8 +57,8 @@ class WorkerThread(threading.Thread):
         self._logger.Log(LogType.Info, 'starting IO processing thread')
 
         while not self._shutdown_requested:
-            self._state_mgr.UpdateTransitoryEvents()
-            self._device_manager.CheckHardwareDevices()
+            self._state_mgr.update_transitory_events()
+            self._device_manager.check_hardware_devices()
             self._event_manager.ProcessNextEvent()
             time.sleep(0.1)
 
