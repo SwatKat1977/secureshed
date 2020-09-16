@@ -16,10 +16,11 @@ limitations under the License.
 # pylint: disable=R0903
 import json
 import jsonschema
+from common.json_enabled_class import JsonLoadingClass
 from centralController.emulated_raspberry_pi_io import GPIO
 
 
-class DevicesConfigLoader:
+class DevicesConfigLoader(JsonLoadingClass):
 
     class JsonTopElement:
         Device = 'device'
@@ -155,34 +156,10 @@ class DevicesConfigLoader:
 
         self._last_error_msg = ''
 
-        try:
-            with open(filename) as file_handle:
-                file_contents = file_handle.read()
+        data, err_msg = self.read_json_file(filename, self.JsonSchema)
 
-        except IOError as excpt:
-            self._last_error_msg = "Unable to read devices file '" + \
-                f"{filename}', reason: {excpt.strerror}"
+        if not data:
+            self._last_error_msg = err_msg
             return None
 
-        try:
-            config_json = json.loads(file_contents)
-
-        except json.JSONDecodeError as excpt:
-            self._last_error_msg = "Unable to parse devices file" + \
-                f"{filename}, reason: {excpt}"
-            return None
-
-        try:
-            jsonschema.validate(instance=config_json,
-                                schema=self.JsonSchema)
-
-        except jsonschema.exceptions.SchemaError:
-            self._last_error_msg = f"FATAL internal error, schema file invalid!"
-            return None
-
-        except jsonschema.exceptions.ValidationError:
-            self._last_error_msg = "Schema validation failed for devices " + \
-                f"file '{filename} failed."
-            return None
-
-        return config_json
+        return data

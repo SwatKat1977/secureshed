@@ -49,7 +49,7 @@ class DeviceManager:
 
     #  @param self The object pointer.
     def Load(self, devices):
-        deviceTypes = self._device_type_mgr.deviceTypes
+        device_types = self._device_type_mgr.deviceTypes
 
         for device in devices:
             name = device[DevicesConfigLoader.DeviceElement.Name]
@@ -61,34 +61,34 @@ class DeviceManager:
                 continue
 
             try:
-                triggerGracePeriod = \
+                trigger_grace_period = \
                     device[DevicesConfigLoader.DeviceElement.TriggerGracePeriodSecs]
 
             except KeyError:
-                triggerGracePeriod = None
+                trigger_grace_period = None
 
             pins = device[DevicesConfigLoader.DeviceElement.Pins]
             hardware = device[DevicesConfigLoader.DeviceElement.Hardware]
-            deviceType = device[DevicesConfigLoader.DeviceElement.DeviceType]
+            device_type = device[DevicesConfigLoader.DeviceElement.DeviceType]
 
-            if deviceType not in deviceTypes:
+            if device_type not in device_types:
                 self._logger.Log(LogType.Warn,
                                  "Ignoring device '%s' as it has invalid " +\
-                                 "device type of '%s'", name, deviceType)
+                                 "device type of '%s'", name, device_type)
                 continue
 
             try:
-                deviceInst = deviceTypes[deviceType](GPIO, self._event_mgr)
-                newDevice = self.Device(name=name, hardware=hardware,
-                                        deviceType=deviceInst, pins=pins,
-                                        triggerGracePeriod=triggerGracePeriod)
-                self._devices.append(newDevice)
+                device_inst = device_types[device_type](GPIO, self._event_mgr)
+                new_device = self.Device(name=name, hardware=hardware,
+                                         deviceType=device_inst, pins=pins,
+                                         triggerGracePeriod=trigger_grace_period)
+                self._devices.append(new_device)
 
             except TypeError:
                 self._logger.Log(LogType.Warn,
                                  "Ignoring device '%s' as unable to " +\
                                  "instantiate device type of '%s'", name,
-                                 deviceType)
+                                 device_type)
                 continue
 
 
@@ -99,12 +99,12 @@ class DeviceManager:
 
         for device in self._devices:
             try:
-                additionalParams = {
+                additional_params = {
                     'triggerGracePeriodSecs': device.triggerGracePeriod
                 }
 
                 if not device.deviceType.Initialise(device.name, device.pins,
-                                                    additionalParams):
+                                                    additional_params):
                     self._logger.Log(LogType.Error,
                                      "Device plug-in '%s' initialisation" + \
                                      " failed so cannot be used.", device.name)
@@ -150,19 +150,19 @@ class DeviceManager:
 
 
     #  @param self The object pointer.
-    def ReceiveEvent(self, eventInst):
+    def ReceiveEvent(self, event):
         # Event : Activate siren.
-        if eventInst.id == Evts.EvtType.ActivateSiren:
-            self._process_activate_siren_event(eventInst)
+        if event.id == Evts.EvtType.ActivateSiren:
+            self._process_activate_siren_event(event)
 
-        elif eventInst.id == Evts.EvtType.DeactivateSiren:
-            self._process_deactivate_siren_event(eventInst)
+        elif event.id == Evts.EvtType.DeactivateSiren:
+            self._process_deactivate_siren_event(event)
 
-        elif eventInst.id == Evts.EvtType.AlarmActivated:
-            self._process_alarm_activated_event(eventInst)
+        elif event.id == Evts.EvtType.AlarmActivated:
+            self._process_alarm_activated_event(event)
 
-        elif eventInst.id == Evts.EvtType.AlarmDeactivated:
-            self._process_alarm_deactivated_event(eventInst)
+        elif event.id == Evts.EvtType.AlarmDeactivated:
+            self._process_alarm_deactivated_event(event)
 
 
     #  @param self The object pointer.
