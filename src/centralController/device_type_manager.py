@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 '''
 import collections
+import re
 import json
 import importlib
 import jsonschema
@@ -158,7 +159,11 @@ class DeviceTypeManager:
                 self._logger.Log(LogType.Warn, msg)
                 continue
 
-            module_name = f'{default_module_path}{device_name}'
+            # The module names are in camel case so do conversion before
+            # building the module name.
+            device_name_camel = re.sub(r'(?<!^)(?=[A-Z])', '_',
+                                       device_name).lower()
+            module_name = f'{default_module_path}{device_name_camel}'
 
             try:
                 imported_module = importlib.import_module(module_name)
