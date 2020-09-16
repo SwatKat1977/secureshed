@@ -28,8 +28,8 @@ class WorkerThread(threading.Thread):
 
     ## Property getter : Last error message
     @property
-    def shutdownCompleted(self):
-        return self.__shutdownCompleted
+    def shutdown_completed(self):
+        return self._shutdown_completed
 
 
     ## WorkerThread class constructor.
@@ -39,14 +39,16 @@ class WorkerThread(threading.Thread):
     #  @param eventManager Event management class instance.
     #  @param stateMsr Statement management class instance.
     def __init__(self, config, deviceManager, eventManager, stateMsr, logger):
+        # pylint: disable=too-many-arguments
+
         threading.Thread.__init__(self)
-        self.__config = config
-        self.__deviceManager = deviceManager
-        self.__eventManager = eventManager
+        self._config = config
+        self._device_manager = deviceManager
+        self._event_manager = eventManager
         self._logger = logger
-        self.__shutdownRequested = False
-        self.__shutdownCompleted = False
-        self.__stateMgr = stateMsr
+        self._shutdown_requested = False
+        self._shutdown_completed = False
+        self._state_mgr = stateMsr
 
 
     ## Thread execution function, in this case run the Flask API interface.
@@ -54,15 +56,15 @@ class WorkerThread(threading.Thread):
     def run(self):
         self._logger.Log(LogType.Info, 'starting IO processing thread')
 
-        while not self.__shutdownRequested:
-            self.__stateMgr.UpdateTransitoryEvents()
-            self.__deviceManager.CheckHardwareDevices()
-            self.__eventManager.ProcessNextEvent()
+        while not self._shutdown_requested:
+            self._state_mgr.update_transitory_events()
+            self._device_manager.check_hardware_devices()
+            self._event_manager.ProcessNextEvent()
             time.sleep(0.1)
 
-        self.__shutdownCompleted = True
+        self._shutdown_completed = True
 
 
     #  @param self The object pointer.
-    def SignalShutdownRequested(self):
-        self.__shutdownRequested = True
+    def signal_shutdown_requested(self):
+        self._shutdown_requested = True

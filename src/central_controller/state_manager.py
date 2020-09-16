@@ -13,13 +13,12 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 '''
-import collections
 import enum
 import json
 import time
 import APIs.CentralController.JsonSchemas as schemas
 import APIs.Keypad.JsonSchemas as keypadApi
-import centralController.Events as Evts
+import central_controller.events as Evts
 from common.APIClient.APIEndpointClient import APIEndpointClient
 from common.APIClient.HTTPStatusCode import HTTPStatusCode
 from common.APIClient.MIMEType import MIMEType
@@ -35,8 +34,6 @@ class StateManager:
                  '_failed_entry_attempts', '_keypad_api_client', '_logger',
                  '_transient_states', '_unable_to_conn_error_displayed']
 
-    TransientStateEntry = collections.namedtuple('TransientStateEntry',
-                                                 'id TransientState body')
 
     ## Alarm state enumeration.
     class AlarmState(enum.Enum):
@@ -64,20 +61,20 @@ class StateManager:
         self._transient_states = []
         self._unable_to_conn_error_displayed = False
 
-        endpoint = self._config.keypadController.endpoint
+        endpoint = self._config.keypad_controller.endpoint
         self._keypad_api_client = APIEndpointClient(endpoint)
 
 
     ## Received events from the keypad.
     #  @param self The object pointer.
     #  @param eventInst Receieved keypad event.
-    def RcvKeypadEvent(self, event):
+    def rcv_keypad_event(self, event):
         if event.id == Evts.EvtType.KeypadKeyCodeEntered:
             self._handle_key_code_entered_event(event)
 
 
     #  @param self The object pointer.
-    def RcvDeviceEvent(self, event):
+    def rcv_device_event(self, event):
         if event.id == Evts.EvtType.SensorDeviceStateChange:
             self._handle_sensor_device_state_change_event(event)
 
@@ -86,10 +83,10 @@ class StateManager:
     ## the keypad needs waking up after a sytem boot.
     #  @param self The object pointer.
     #  @param eventInst Event class that was created to raise this event.
-    def SendAlivePingMsg(self, event):
+    def send_alive_ping_msg(self, event):
 
         additional_headers = {
-            'authorisationKey' : self._config.keypadController.authKey
+            'authorisationKey' : self._config.keypad_controller.authKey
         }
 
         response = self._keypad_api_client.SendPostMsg(
@@ -128,9 +125,9 @@ class StateManager:
         self._unable_to_conn_error_displayed = False
 
 
-    def SendKeypadLockedMsg(self, event):
+    def send_keypad_locked_msg(self, event):
         additional_headers = {
-            'authorisationKey' : self._config.keypadController.authKey
+            'authorisationKey' : self._config.keypad_controller.authKey
         }
         json_body = json.dumps(event.body)
         response = self._keypad_api_client.SendPostMsg('receiveKeypadLock',
@@ -167,7 +164,7 @@ class StateManager:
 
 
     #  @param self The object pointer.
-    def UpdateTransitoryEvents(self):
+    def update_transitory_events(self):
 
         # List of event id's that need to be removed
         id_list = []
@@ -190,7 +187,7 @@ class StateManager:
         key_sequence = body[schemas.ReceiveKeyCode.BodyElement.KeySeq]
 
         # Read the key code detail from the database.
-        details = self._database.GetKeycodeDetails(key_sequence)
+        details = self._database.get_keycode_details(key_sequence)
 
         if details is not None:
             if self._current_alarm_state == self.AlarmState.Triggered:
@@ -223,8 +220,8 @@ class StateManager:
             # receiveKeyCodeResponseAction_KeycodeIncorrect along with any
             # response actions that have been defined in the configuraution
             # file.
-            if attempts in self._config.failedAttemptResponses:
-                responses = self._config.failedAttemptResponses[attempts]
+            if attempts in self._config.failed_attempt_responses:
+                responses = self._config.failed_attempt_responses[attempts]
 
                 for response in responses:
 
@@ -269,11 +266,6 @@ class StateManager:
         evt = Event(Evts.EvtType.AlarmDeactivated)
         self._event_mgr.QueueEvent(evt)
 
-        # Remove any 'InAlarmSetGraceTime' transient state events once the
-        # alarm has been deactivated.
-        #self._transient_states = [evt for evt in self._transient_states if \
-        #    evt.TransientState != TransState.TransientState.InAlarmSetGraceTime]
-
 
     ## Event handler for a sensor device state change.
     #  @param self The object pointer.
@@ -283,7 +275,7 @@ class StateManager:
         device_name = body[Evts.SensorDeviceBodyItem.DeviceName]
         state = body[Evts.SensorDeviceBodyItem.State]
 
-        triggered = True if state == 1 else False
+        triggered = bool(state == 1)
         state_str = "opened" if triggered else "closed"
 
         # If the alarm is deactived then ignore the sensor state change after

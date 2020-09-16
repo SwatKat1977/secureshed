@@ -22,11 +22,11 @@ class FailedCodeAttemptActionType(Enum):
     resetAttemptAccount = 'resetAttemptAccount'
 
     @classmethod
-    def IsName(cls, name):
+    def is_name(cls, name):
         return name in cls.__members__
 
 
-ActionTypeParams = {
+ACTION_TYPE_PARAMS = {
     FailedCodeAttemptActionType.disableKeyPad.value:  {'lockTime' : int},
     FailedCodeAttemptActionType.triggerAlarm.value: {},
     FailedCodeAttemptActionType.resetAttemptAccount: {}

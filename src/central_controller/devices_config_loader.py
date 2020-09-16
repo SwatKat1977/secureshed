@@ -14,12 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 '''
 # pylint: disable=R0903
-import json
-import jsonschema
-from centralController.EmulatedRaspberryPiIO import GPIO
+from common.json_enabled_class import JsonLoadingClass
+from central_controller.emulated_raspberry_pi_io import GPIO
 
 
-class DevicesConfigLoader:
+class DevicesConfigLoader(JsonLoadingClass):
 
     class JsonTopElement:
         Device = 'device'
@@ -143,46 +142,22 @@ class DevicesConfigLoader:
 
     ## Property getter : Last error message
     @property
-    def lastErrorMsg(self):
-        return self.__lastErrorMsg
+    def last_error_msg(self):
+        return self._last_error_msg
 
 
     def __init__(self):
-        self.__lastErrorMsg = ''
+        self._last_error_msg = ''
 
 
-    def ReadDevicesConfigFile(self, filename):
+    def read_devices_config_file(self, filename):
 
-        self.__lastErrorMsg = ''
+        self._last_error_msg = ''
 
-        try:
-            with open(filename) as fileHandle:
-                fileContents = fileHandle.read()
+        data, err_msg = self.read_json_file(filename, self.JsonSchema)
 
-        except IOError as excpt:
-            self.__lastErrorMsg = "Unable to read devices file '" + \
-                f"{filename}', reason: {excpt.strerror}"
+        if not data:
+            self._last_error_msg = err_msg
             return None
 
-        try:
-            configJson = json.loads(fileContents)
-
-        except json.JSONDecodeError as excpt:
-            self.__lastErrorMsg = "Unable to parse devices file" + \
-                f"{filename}, reason: {excpt}"
-            return None
-
-        try:
-            jsonschema.validate(instance=configJson,
-                                schema=self.JsonSchema)
-
-        except jsonschema.exceptions.SchemaError:
-            self.__lastErrorMsg = f"FATAL internal error, schema file invalid!"
-            return None
-
-        except jsonschema.exceptions.ValidationError:
-            self.__lastErrorMsg = "Schema validation failed for devices " + \
-                f"file '{filename} failed."
-            return None
-
-        return configJson
+        return data

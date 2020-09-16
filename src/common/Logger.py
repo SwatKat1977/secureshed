@@ -90,4 +90,4 @@ class Logger:
         if self._externalLogger:
             currTime = time.time()
             compiledMsg = msg % args
-            self._externalLogger.AddLogEvent(currTime, logLevel, compiledMsg)
+            self._externalLogger.add_log_event(currTime, logLevel, compiledMsg)

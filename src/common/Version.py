@@ -14,6 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 '''
 
-VERSION = '0.8.0 (pre-alpha)'
+VERSION = '0.8.1 (pre-alpha)'
 
 COPYRIGHT = '2019-2020'

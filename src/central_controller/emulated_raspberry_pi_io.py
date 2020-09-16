@@ -227,8 +227,8 @@ class GPIO:
         # pylint: disable=C0103
 
         pinId = f'{GPIO.PinEntryGPIOPrefix}{pin}'
-        newValue = GPIO.PinState.High if state == 1 else GPIO.PinState.Low
-        GPIO.CurrentPinOutStates[pinId] = newValue
+        new_value = GPIO.PinState.High if state == 1 else GPIO.PinState.Low
+        GPIO.CurrentPinOutStates[pinId] = new_value
 
 
     ## Generate a MD5 hash of the pinout state file, this is to allow the file
@@ -236,11 +236,11 @@ class GPIO:
     #  of the Raspberry Pi GPIO output() function for testing
     #  @returns MD5 hash if the file was hashed correctly, otherwise None.
     @staticmethod
-    def HashPinoutFile(pinoutFile):
+    def hash_pinout_file(pinout_file):
         try:
-            with open(pinoutFile, 'rb') as fileHandle:
-                fileContents = fileHandle.read()
-                return hashlib.md5(fileContents).hexdigest()
+            with open(pinout_file, 'rb') as file_handle:
+                file_contents = file_handle.read()
+                return hashlib.md5(file_contents).hexdigest()
 
         except IOError:
             return None
@@ -253,23 +253,23 @@ class GPIO:
     # the pinout file in json format.  If read fails then the status is a
     # human-readable string with the error status and file contents is None.
     @staticmethod
-    def ReadPinoutFile():
+    def read_pinout_file():
         try:
-            with open(GPIO.PinOutFile, 'rb') as fileHandle:
-                fileContents = fileHandle.read()
+            with open(GPIO.PinOutFile, 'rb') as file_handle:
+                file_contents = file_handle.read()
 
         except IOError:
             return ('Cannot read file', None)
 
         try:
-            readJson = json.loads(fileContents)
+            read_json = json.loads(file_contents)
 
         except json.JSONDecodeError as excpt:
             return (f"Unable to parse pinout file, reason: {excpt}",
                     None)
 
         try:
-            jsonschema.validate(instance=readJson,
+            jsonschema.validate(instance=read_json,
                                 schema=GPIO.PinOutJsonFileSchema)
 
         except jsonschema.exceptions.ValidationError as ex:
@@ -278,33 +278,33 @@ class GPIO:
         except jsonschema.exceptions.SchemaError as ex:
             return (f"Internal schema syntax error, Traceback: {ex}", None)
 
-        return ('', readJson)
+        return ('', read_json)
 
 
     ## Update the simulated states of the Raspberry Pi GPIO pins only if the
     #  MD5 hash of the file has changed.
     @staticmethod
-    def UpdateFromPinOutFile():
-        newHash = GPIO.HashPinoutFile(GPIO.PinOutFile)
-        if newHash is None or newHash == GPIO.PinOutFileHash:
+    def update_from_pinout_file():
+        new_hash = GPIO.hash_pinout_file(GPIO.PinOutFile)
+        if new_hash is None or new_hash == GPIO.PinOutFileHash:
             return
 
-        GPIO.PinOutFileHash = newHash
+        GPIO.PinOutFileHash = new_hash
 
-        newPinOutStates = {}
+        new_pinout_states = {}
 
-        status, pinouts = GPIO.ReadPinoutFile()
+        status, pinouts = GPIO.read_pinout_file()
         if status or not pinouts:
             GPIO.logger.Log(LogType.Info,
                             f'Unable to read pin file, reason: {status}')
             return
 
         for key in pinouts:
-            pinState = pinouts[key][GPIO.IOPinElement_State]
-            newPinOutStates[key] = GPIO.PinState.High \
-                if pinState == GPIO.IOPinStateElement_High \
+            pin_state = pinouts[key][GPIO.IOPinElement_State]
+            new_pinout_states[key] = GPIO.PinState.High \
+                if pin_state == GPIO.IOPinStateElement_High \
                 else GPIO.PinState.Low
 
-        GPIO.CurrentPinOutStates = newPinOutStates
+        GPIO.CurrentPinOutStates = new_pinout_states
         GPIO.logger.Log(LogType.Debug,
                         f'Emulated Pin states : {GPIO.CurrentPinOutStates}')

@@ -17,8 +17,8 @@ import collections
 
 
 class Configuration:
-    __slots__ = ['__failedAttemptResponses', '__generalSettings',
-                 '__centralControllerApi', '__keypadController']
+    __slots__ = ['_failed_attempt_responses', '_general_settings',
+                 '_central_controller_api', '_keypad_controller']
 
     GeneralSettings = collections.namedtuple('GeneralSettings',
                                              'devicesConfigFile deviceTypesConfigFile')
@@ -31,20 +31,20 @@ class Configuration:
     ## Property getter : Keypad API config
     #  @param self The object pointer.
     @property
-    def centralControllerApi(self):
-        return self.__centralControllerApi
+    def central_controller_api(self):
+        return self._central_controller_api
 
     @property
-    def generalSettings(self):
-        return self.__generalSettings
+    def general_settings(self):
+        return self._general_settings
 
     @property
-    def failedAttemptResponses(self):
-        return self.__failedAttemptResponses
+    def failed_attempt_responses(self):
+        return self._failed_attempt_responses
 
     @property
-    def keypadController(self):
-        return self.__keypadController
+    def keypad_controller(self):
+        return self._keypad_controller
 
 
     ## Default constructor for Configuration class.
@@ -54,10 +54,10 @@ class Configuration:
     #  @param failedAttemptResponses Responses when an attempt fails.
     def __init__(self, cenControllerApiCfg, generalSettings,
                  failedAttemptResponses, keypadController):
-        self.__centralControllerApi = cenControllerApiCfg
+        self._central_controller_api = cenControllerApiCfg
 
-        self.__failedAttemptResponses = failedAttemptResponses
+        self._failed_attempt_responses = failedAttemptResponses
 
-        self.__generalSettings = generalSettings
+        self._general_settings = generalSettings
 
-        self.__keypadController = keypadController
+        self._keypad_controller = keypadController

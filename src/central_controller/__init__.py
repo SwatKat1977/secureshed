@@ -17,7 +17,7 @@ import logging
 import os
 import sys
 from flask import Flask
-from centralController.CentralControllerApp import CentralControllerApp
+from central_controller.central_controller_app import CentralControllerApp
 
 
 ## Flask startup function.
@@ -39,5 +39,5 @@ def create_app(test_config=None):
         sys.exit(1)
 
     centralControllerApp = CentralControllerApp(app)
-    centralControllerApp.StartApp()
+    centralControllerApp.start_app()
     return app

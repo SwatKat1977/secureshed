@@ -14,17 +14,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 '''
 import collections
+import re
 import json
 import importlib
 import jsonschema
-from centralController.DeviceTypes.BaseDeviceType import BaseDeviceType
+from central_controller.DeviceTypes.base_device_type import BaseDeviceType
 from common.Logger import LogType
 
 
 class DeviceTypeManager:
     # pylint: disable=R0903
-    __slots__ = ['__deviceTypes', '__expectedTypes', '_logger',
-                 '__lastErrorMsg']
+    __slots__ = ['_device_types', '_expected_types', '_logger',
+                 '_last_error_msg']
 
     DeviceTypeCfg = collections.namedtuple('DeviceTypeCfg', 'name enabled')
 
@@ -80,114 +81,120 @@ class DeviceTypeManager:
     }
 
     @property
-    def deviceTypes(self):
-        return self.__deviceTypes
+    def device_types(self):
+        return self._device_types
 
     @property
-    def lastErrorMsg(self):
-        return self.__lastErrorMsg
+    def last_error_msg(self):
+        return self._last_error_msg
 
 
     #  @param self The object pointer.
     def __init__(self, logger):
-        self.__expectedTypes = []
+        self._expected_types = []
 
-        self.__deviceTypes = {}
+        self._device_types = {}
 
-        self.__lastErrorMsg = ''
+        self._last_error_msg = ''
 
         self._logger = logger
 
 
     #  @param self The object pointer.
-    def ReadDeviceTypesConfig(self, filename):
-        self.__lastErrorMsg = ''
+    def read_device_types_config(self, filename):
+        self._last_error_msg = ''
 
         try:
-            with open(filename) as fileHandle:
-                fileContents = fileHandle.read()
+            with open(filename) as file_handle:
+                file_contents = file_handle.read()
 
         except IOError as excpt:
-            self.__lastErrorMsg = "Unable to read device types file '" + \
+            self._last_error_msg = "Unable to read device types file '" + \
                 f"{filename}', reason: {excpt.strerror}"
             return False
 
         try:
-            configJson = json.loads(fileContents)
+            config_json = json.loads(file_contents)
 
         except json.JSONDecodeError as excpt:
-            self.__lastErrorMsg = "Unable to parse device types file" + \
+            self._last_error_msg = "Unable to parse device types file" + \
                 f"{filename}, reason: {excpt}"
             return False
 
         try:
-            jsonschema.validate(instance=configJson,
+            jsonschema.validate(instance=config_json,
                                 schema=self.JsonSchema)
 
         except jsonschema.exceptions.SchemaError:
-            self.__lastErrorMsg = f"FATAL internal error, schema file invalid!"
+            self._last_error_msg = f"FATAL internal error, schema file invalid!"
             return False
 
         except jsonschema.exceptions.ValidationError as ex:
-            self.__lastErrorMsg = "Schema validation failed for devices " + \
+            self._last_error_msg = "Schema validation failed for devices " + \
                 f"file '{filename} failed. " + ex.message
             return False
 
         # Populate the device types from the configuration file.
-        for deviceType in configJson[self.JsonDeviceTypesArray]:
-            deviceTypeEntry = self.DeviceTypeCfg(
-                name=deviceType[self.JsonDeviceTypeElement_Name],
-                enabled=deviceType[self.JsonDeviceTypeElement_Enabled])
-            self.__expectedTypes.append(deviceTypeEntry)
+        for device_type in config_json[self.JsonDeviceTypesArray]:
+            device_type_entry = self.DeviceTypeCfg(
+                name=device_type[self.JsonDeviceTypeElement_Name],
+                enabled=device_type[self.JsonDeviceTypeElement_Enabled])
+            self._logger.Log(LogType.Info,
+                             f"Loading device name: {device_type[self.JsonDeviceTypeElement_Name]}")
+            self._expected_types.append(device_type_entry)
 
         return True
 
 
     #  @param self The object pointer.
-    def LoadDeviceTypes(self):
-        defaultModulePath = 'centralController.DeviceTypes.'
+    def load_device_types(self):
+        default_module_path = 'central_controller.DeviceTypes.'
 
-        for device in self.__expectedTypes:
-            deviceName = device.name
+        for device in self._expected_types:
+            device_name = device.name
 
             if not device.enabled:
-                msg = f"Plug-in for device type '{deviceName}' is disabled" +\
+                msg = f"Plug-in for device type '{device_name}' is disabled" +\
                        " so loading won't be attempted."
                 self._logger.Log(LogType.Warn, msg)
                 continue
 
-            moduleName = f'{defaultModulePath}{deviceName}'
+            # The module names are in camel case so do conversion before
+            # building the module name.
+            device_name_camel = re.sub(r'(?<!^)(?=[A-Z])', '_',
+                                       device_name).lower()
+            module_name = f'{default_module_path}{device_name_camel}'
 
             try:
-                importedModule = importlib.import_module(moduleName)
+                imported_module = importlib.import_module(module_name)
 
             except ModuleNotFoundError:
                 self._logger.Log(LogType.Warn,
-                                      f"No plug-in for device type '{deviceName}'," +\
-                                       " it has been removed from the devices list.")
+                                 f"No plug-in for device type '{device_name}'," +\
+                                 " it has been removed from the devices list.")
                 continue
 
             except NameError:
                 self._logger.Log(LogType.Warn,
-                                      f"Device type '{deviceName}' Plug-in has a " +\
-                                      "syntax error, it has been removed from the devices list.")
+                                 f"Device type '{device_name}' Plug-in has a " +\
+                                 "syntax error, it has been removed from the devices list.")
                 continue
 
             try:
-                importedCls = getattr(importedModule, deviceName, self._logger)
+                imported_cls = getattr(imported_module, device_name, self._logger)
 
-                valid = BaseDeviceType in importedCls.__bases__
+                valid = BaseDeviceType in imported_cls.__bases__
 
                 if not valid:
                     self._logger.Log(LogType.Warn,
-                                          f"Plug-in for device type '{deviceName}'" +\
-                                           " is not derived from plug-in class.  It cannot be " +\
-                                           "used and was removed from the devices list.")
+                                     f"Plug-in for device type '{device_name}'" +\
+                                     " is not derived from plug-in class.  It cannot be " +\
+                                     "used and was removed from the devices list.")
                     continue
 
-                self.__deviceTypes[deviceName] = importedCls
+                self._device_types[device_name] = imported_cls
                 self._logger.Log(LogType.Info,
-                                      f"Loaded plug-in for device type '{deviceName}'")
+                                 f"Loaded plug-in for device type '{device_name}'")
 
             except AttributeError:
                 pass

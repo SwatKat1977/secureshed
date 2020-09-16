@@ -87,5 +87,5 @@ class KeypadApp:
                          'Stopping keypad controller, cleaning up...')
 
 
-    def AddLogEvent(self, current_time, log_level, msg):
+    def add_log_event(self, current_time, log_level, msg):
         self._log_store.AddLogEvent(current_time, log_level, msg)
