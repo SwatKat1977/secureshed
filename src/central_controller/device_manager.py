@@ -15,8 +15,8 @@ limitations under the License.
 '''
 # pylint: disable=ungrouped-imports
 import collections
-from centralController.devices_config_loader import DevicesConfigLoader
-import centralController.events as Evts
+from central_controller.devices_config_loader import DevicesConfigLoader
+import central_controller.events as Evts
 from common.Logger import LogType
 
 try:

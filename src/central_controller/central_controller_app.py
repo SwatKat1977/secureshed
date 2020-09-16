@@ -17,16 +17,16 @@ import os
 import signal
 import sys
 import time
-from centralController.api_controller import ApiController
-from centralController.configuration_manager import ConfigurationManager
-from centralController.controller_db_interface import ControllerDBInterface
-from centralController.devices_config_loader import DevicesConfigLoader
-from centralController.device_manager import DeviceManager
-from centralController.device_type_manager import DeviceTypeManager
-import centralController.events as Evts
-from centralController.log_store import LogStore
-from centralController.state_manager import StateManager
-from centralController.worker_thread import WorkerThread
+from central_controller.api_controller import ApiController
+from central_controller.configuration_manager import ConfigurationManager
+from central_controller.controller_db_interface import ControllerDBInterface
+from central_controller.devices_config_loader import DevicesConfigLoader
+from central_controller.device_manager import DeviceManager
+from central_controller.device_type_manager import DeviceTypeManager
+import central_controller.events as Evts
+from central_controller.log_store import LogStore
+from central_controller.state_manager import StateManager
+from central_controller.worker_thread import WorkerThread
 from common.Event import Event
 from common.EventManager import EventManager
 from common.Version import COPYRIGHT, VERSION

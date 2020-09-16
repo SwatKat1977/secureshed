@@ -15,7 +15,7 @@ limitations under the License.
 '''
 # pylint: disable=R0903
 from common.json_enabled_class import JsonLoadingClass
-from centralController.emulated_raspberry_pi_io import GPIO
+from central_controller.emulated_raspberry_pi_io import GPIO
 
 
 class DevicesConfigLoader(JsonLoadingClass):

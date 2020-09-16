@@ -17,7 +17,7 @@ import logging
 import os
 import sys
 from flask import Flask
-from centralController.central_controller_app import CentralControllerApp
+from central_controller.central_controller_app import CentralControllerApp
 
 
 ## Flask startup function.
