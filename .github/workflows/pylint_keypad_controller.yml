@@ -3,8 +3,6 @@ name: Lint Keypad Controller
 # Controls when the action will run. Triggers the workflow on push or pull request
 # events but only for the development branch
 on:
-  push:
-    branches: [ development ]
   pull_request:
     branches:
       - master
@@ -26,4 +24,4 @@ jobs:
         pip install pylint
     - name: Run Pylint
       run: |
-        python lint.py --path ./src/KeypadController --threshold 2
+        python /.github/workflow/lint.py --path ./src/KeypadController --threshold 2
