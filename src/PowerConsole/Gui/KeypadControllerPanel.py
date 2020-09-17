@@ -28,6 +28,7 @@ from Gui.KeypadControllerConfigPanel import KeypadControllerConfigPanel
 class KeypadControllerPanel(wx.Panel):
 
     RetrieveConsoleLogsPath = '/retrieveConsoleLogs'
+    HealthStatusPath = '/_healthStatus'
 
 
     def __init__(self, parent, config):
@@ -38,6 +39,8 @@ class KeypadControllerPanel(wx.Panel):
         self._logs = []
         self._logsLastMsgTimestamp = 0
         self._lastLogId = 0
+        self._main_window = parent
+        self._status = (False, '')
 
         topSplitter = wx.SplitterWindow(self)
         self._configPanel = KeypadControllerConfigPanel(topSplitter)
@@ -51,18 +54,21 @@ class KeypadControllerPanel(wx.Panel):
 
     def GetLogs(self):
 
-        msgBody = {
+        if not self._check_connection_status():
+            return
+
+        msg_body = {
             "startTimestamp" : self._logsLastMsgTimestamp
         }
 
-        additionalHeaders = {
+        additional_headers = {
             'authorisationKey' : self._config.keypadController.authKey
         }
 
         response = self._apiClient.SendPostMsg(self.RetrieveConsoleLogsPath,
                                                MIMEType.JSON,
-                                               additionalHeaders,
-                                               json.dumps(msgBody))
+                                               additional_headers,
+                                               json.dumps(msg_body))
 
         # Not able to communicated with the central controller.
         if response is None:
@@ -90,12 +96,6 @@ class KeypadControllerPanel(wx.Panel):
         self._UpdateLogEntries(msgBody)
 
 
-    def CommunicationsIsGood(self):
-        # Placeholder for status check functionality.
-        # Currently it will always return True
-        return True
-
-
     def _UpdateLogEntries(self, msgBody):
         bodyElements = schemas.RequestLogsResponse.BodyElement
 
@@ -116,3 +116,48 @@ class KeypadControllerPanel(wx.Panel):
             self._logsPanel.AddLogEntry(self._lastLogId,
                                         entry[bodyElements.EntryMsgLevel], msg)
             self._lastLogId += 1
+
+
+    def _check_connection_status(self):
+
+        curr_status = self._status
+
+        additional_headers = {
+            'authorisationKey' : self._config.keypadController.authKey
+        }
+
+        response = self._apiClient.SendGetMsg(self.HealthStatusPath,
+                                              MIMEType.JSON,
+                                              additional_headers)
+
+        # We are not able to communicate with the keypad controller...
+        if response is None:
+            self._update_status((False, 'No connection'))
+            return False
+
+        if response.status_code != HTTPStatusCode.OK:
+            self._update_status((False, 'API Error'))
+            return False
+
+        # Initially hard-code to normal as it's hard-coded into the response.
+        self._update_status((True, 'Normal'))
+        return True
+
+
+    def _update_status(self, new_status):
+        curr_state, curr_str = self._status
+        new_state, new_str = new_status
+
+        # If no change at all we can leave now...
+        if curr_state == new_state and curr_str == new_str:
+            return
+
+        if new_state:
+            new_str = f'Connected: ({new_str})'
+            self._main_window.update_keypad_status(new_str)
+
+        else:
+            new_str = f'Disconnected: ({new_str})'
+            self._main_window.update_keypad_status(new_str)
+
+        self._status = new_status
