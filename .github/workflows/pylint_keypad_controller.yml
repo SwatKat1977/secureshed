@@ -24,5 +24,5 @@ jobs:
         pip install pylint
     - name: Run Pylint
       run: |
-        cd src/KeypadController
-        python ../../pipelines/lint.py --path . --threshold 0.1
+        cd src
+        python ../../pipelines/lint.py --path keypad_controller --threshold 0.1
