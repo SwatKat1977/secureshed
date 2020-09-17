@@ -21,7 +21,6 @@ LogEntry = collections.namedtuple('LogEntry',
 
 
 class LogStore:
-<<<<<<< HEAD
     __slots__ = ['_log_entries', '_max_entries_returned']
 
     def __init__(self):
@@ -47,33 +46,6 @@ class LogStore:
         last_timestamp = logs[-1].timestamp if len(logs) >= 1 else 0
         json_data = {
             'lastTimestamp': last_timestamp,
-=======
-    __slots__ = ['_logEntries', '_maxEntriesReturned']
-
-    def __init__(self):
-        self._logEntries = []
-        self._maxEntriesReturned = 50
-
-
-    def AddLogEvent(self, timestamp, logLevel, msg):
-        entry = LogEntry(timestamp=timestamp, logLevel=logLevel, msg=msg)
-        self._logEntries.append(entry)
-
-
-    def Count(self):
-        return len(self._logEntries)
-
-
-    def GetLogEvents(self, timestamp):
-
-        logs = [l for l in self._logEntries if l.timestamp > timestamp]
-
-        logs = logs[:self._maxEntriesReturned]
-
-        lastTimestamp = logs[-1].timestamp if len(logs) >= 1 else 0
-        jsonData = {
-            'lastTimestamp': lastTimestamp,
->>>>>>> 618ebfce86a74c851aa82c05c628688034c84dcd
             'entries':
             [
 
@@ -81,21 +53,11 @@ class LogStore:
         }
 
         for entry in logs:
-<<<<<<< HEAD
             new_json_entry = {
-=======
-            newJsonEntry = {
->>>>>>> 618ebfce86a74c851aa82c05c628688034c84dcd
                 'timestamp' : entry.timestamp,
                 'level'     : entry.logLevel.value,
                 'message'   : entry.msg
             }
-<<<<<<< HEAD
             json_data['entries'].append(new_json_entry)
 
         return json_data
-=======
-            jsonData['entries'].append(newJsonEntry)
-
-        return jsonData
->>>>>>> 618ebfce86a74c851aa82c05c628688034c84dcd

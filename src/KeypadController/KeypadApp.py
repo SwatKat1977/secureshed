@@ -88,4 +88,4 @@ class KeypadApp:
 
 
     def add_log_event(self, current_time, log_level, msg):
-        self._log_store.AddLogEvent(current_time, log_level, msg)
+        self._log_store.add_log_event(current_time, log_level, msg)
