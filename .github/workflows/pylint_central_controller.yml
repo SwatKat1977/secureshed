@@ -29,4 +29,4 @@ jobs:
         cd src/central_controller
         ls -al
         echo `pwd`
-        python ../pipelines/lint.py --path . --threshold 8
+        python ../../pipelines/lint.py --path . --threshold 8
