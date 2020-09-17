@@ -16,6 +16,7 @@ limitations under the License.
 import logging
 import os
 import sys
+sys.path.append("..")
 from flask import Flask
 from central_controller.central_controller_app import CentralControllerApp
 
