@@ -1,5 +1,5 @@
 '''
-Copyright 2019-2020 Secure Shed Project Dev Team
+Copyright 2019 Secure Shed Project Dev Team
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,7 +13,21 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 '''
+from enum import Enum
 
-VERSION = '0.8.1 (pre-alpha)'
 
-COPYRIGHT = '2019-2020'
+class FailedCodeAttemptActionType(Enum):
+    disableKeyPad = 'disableKeyPad'
+    triggerAlarm = 'triggerAlarm'
+    resetAttemptAccount = 'resetAttemptAccount'
+
+    @classmethod
+    def is_name(cls, name):
+        return name in cls.__members__
+
+
+ACTION_TYPE_PARAMS = {
+    FailedCodeAttemptActionType.disableKeyPad.value:  {'lockTime' : int},
+    FailedCodeAttemptActionType.triggerAlarm.value: {},
+    FailedCodeAttemptActionType.resetAttemptAccount: {}
+}

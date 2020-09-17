@@ -1,5 +1,5 @@
 '''
-Copyright 2019-2020 Secure Shed Project Dev Team
+Copyright 2019 Secure Shed Project Dev Team
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,6 +14,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 '''
 
-VERSION = '0.8.1 (pre-alpha)'
+class BaseDeviceType:
 
-COPYRIGHT = '2019-2020'
+    #  @param self The object pointer.
+    def initialise(self, device_name, pins, additional_params):
+        raise NotImplementedError
+
+
+    #  @param self The object pointer.
+    def check_device(self):
+        raise NotImplementedError
+
+
+    #  @param self The object pointer.
+    def receive_event(self, event):
+        raise NotImplementedError

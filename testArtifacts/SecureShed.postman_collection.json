@@ -127,6 +127,49 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Health Status",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "authorisationKey",
+								"type": "text",
+								"value": "ccontroller2019"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:2020/_healthStatus",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "2020",
+							"path": [
+								"_healthStatus"
+							]
+						}
+					},
+					"response": []
 				}
 			],
 			"protocolProfileBehavior": {}
@@ -209,6 +252,89 @@
 							"port": "1100",
 							"path": [
 								"receiveKeypadLock"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieve Console Logs",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "authorisationKey",
+								"type": "text",
+								"value": "keypad2019"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"startTimestamp\" : 0\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:1100/retrieveConsoleLogs",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "1100",
+							"path": [
+								"retrieveConsoleLogs"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Health Status",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "authorisationKey",
+								"type": "text",
+								"value": "keypad2019"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:1100/_healthStatus",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "1100",
+							"path": [
+								"_healthStatus"
 							]
 						}
 					},
