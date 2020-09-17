@@ -180,8 +180,6 @@ class ApiController:
         return self._endpoint.response_class(
             response=json.dumps(return_json), status=HTTPStatusCode.OK,
             mimetype=MIMEType.JSON)
-
-
     #  @param self The object pointer.
     def _validate_auth_key(self):
         # Verify that an authorisation key exists in the requet header, if not
