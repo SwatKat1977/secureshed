@@ -1,4 +1,4 @@
-name: Lint Keypad Controller
+name: Lint Power Console
 
 # Controls when the action will run. Triggers the workflow on push or pull request
 # events but only for the development branch
@@ -24,5 +24,5 @@ jobs:
         pip install pylint
     - name: Run Pylint
       run: |
-        cd src/KeypadController
+        cd src/powerConsole
         python ../../pipelines/lint.py --path . --threshold 0.1

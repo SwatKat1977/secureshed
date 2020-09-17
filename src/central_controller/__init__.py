@@ -13,9 +13,11 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 '''
+# pylint: disable=wrong-import-position
 import logging
 import os
 import sys
+sys.path.append("..")
 from flask import Flask
 from central_controller.central_controller_app import CentralControllerApp
 
@@ -31,11 +33,11 @@ def create_app(test_config=None):
     log.setLevel(logging.ERROR)
 
     if not os.getenv('CENCON_CONFIG'):
-        app.logger.error(f'CENCON_CONFIG environment variable missing!')
+        app.logger.error('CENCON_CONFIG environment variable missing!')
         sys.exit(1)
 
     if not os.getenv('CENCON_DB'):
-        app.logger.error(f'CENCON_DB environment variable missing!')
+        app.logger.error('CENCON_DB environment variable missing!')
         sys.exit(1)
 
     centralControllerApp = CentralControllerApp(app)
