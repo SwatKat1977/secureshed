@@ -25,4 +25,4 @@ jobs:
     - name: Run Pylint
       run: |
         cd src
-        python ../../pipelines/lint.py --path keypad_controller --threshold 0.1
+        python ../pipelines/lint.py --path keypad_controller --threshold 0.1

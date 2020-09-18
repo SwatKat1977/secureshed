@@ -27,4 +27,4 @@ jobs:
     - name: Run Pylint
       run: |
         cd src
-        python ../../pipelines/lint.py --path central_controller --threshold 10
+        python ../pipelines/lint.py --path central_controller --threshold 10
