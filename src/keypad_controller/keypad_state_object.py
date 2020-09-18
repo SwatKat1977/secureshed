@@ -20,9 +20,9 @@ from common.APIClient.APIEndpointClient import APIEndpointClient
 from common.APIClient.HTTPStatusCode import HTTPStatusCode
 from common.APIClient.MIMEType import MIMEType
 from common.Logger import LogType
-from Gui.KeypadPanel import KeypadPanel
-from Gui.LockedPanel import LockedPanel
-from Gui.CommsLostPanel import CommsLostPanel
+from gui.keypad_panel import KeypadPanel
+from gui.locked_panel import LockedPanel
+from gui.comms_lost_panel import CommsLostPanel
 
 
 class KeypadStateObject:
