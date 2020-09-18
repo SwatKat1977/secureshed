@@ -146,13 +146,13 @@ class KeypadStateObject:
         panel, _ = self._current_panel
 
         if panel == KeypadStateObject.PanelType.KeypadIsLocked:
-            self._keypad_locked_panel.Display()
+            self._keypad_locked_panel.display()
 
         elif panel == KeypadStateObject.PanelType.CommunicationsLost:
-            self._comms_lost_panel.Display()
+            self._comms_lost_panel.display()
 
         elif panel == KeypadStateObject.PanelType.Keypad:
-            self._keypad_panel.Display()
+            self._keypad_panel.display()
 
         # The displayed panel has changed, we can now reset newPanel.
         self._new_panel = self._current_panel

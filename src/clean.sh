@@ -8,8 +8,8 @@ rm -rf common/APIClient/__pycache__
 rm -rf central_controller/__pycache__
 rm -rf central_controller/DeviceTypes/__pycache__
 
-rm -rf KeypadController/__pycache__
-rm -rf KeypadController/Gui/__pycache__
+rm -rf keypad_controller/__pycache__
+rm -rf keypad_controller/Gui/__pycache__
 
 rm -rf PowerConsole/__pycache__
 rm -rf PowerConsole/Gui/__pycache__

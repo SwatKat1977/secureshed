@@ -20,39 +20,40 @@ from twisted.internet import reactor
 ## Panel that implements an informational pane stating comms has been lost to
 #  to the central controller.
 class CommsLostPanel(wx.Frame):
+    # pylint: disable=too-few-public-methods
 
     def __init__(self, config):
-        frameSize = (config.gui.windowWidth,
+        frame_size = (config.gui.windowWidth,
                      config.gui.windowHeight)
-        super().__init__(None, title="", size=frameSize)
+        super().__init__(None, title="", size=frame_size)
 
-        self.__config = config
+        self._config = config
 
         panel = wx.Panel(self)
 
         panel.SetBackgroundColour((215, 220, 24))
 
-        mainSizer = wx.GridSizer(1, 1, 5, 5)
+        main_sizer = wx.GridSizer(1, 1, 5, 5)
 
         font = wx.Font(18, wx.FONTFAMILY_ROMAN, wx.FONTSTYLE_NORMAL,
                        wx.FONTWEIGHT_BOLD)
-        panelText = wx.StaticText(panel, -1, "Comms lost to central controller")
-        panelText.SetFont(font)
+        panel_text = wx.StaticText(panel, -1, "Comms lost to central controller")
+        panel_text.SetFont(font)
 
-        panelText.CenterOnParent()
+        panel_text.CenterOnParent()
 
-        mainSizer.Add(panelText, 0,
-                      wx.ALL | wx.CENTRE | wx.ALIGN_CENTER_HORIZONTAL |\
-                      wx.ALIGN_CENTRE_VERTICAL)
-        panel.SetSizer(mainSizer)
+        main_sizer.Add(panel_text, 0,
+                       wx.ALL | wx.CENTRE | wx.ALIGN_CENTER_HORIZONTAL |\
+                       wx.ALIGN_CENTRE_VERTICAL)
+        panel.SetSizer(main_sizer)
 
         # make sure reactor.stop() is used to stop event loop
-        self.Bind(wx.EVT_CLOSE, self.__OnExit)
+        self.Bind(wx.EVT_CLOSE, self._on_exit)
 
 
-    def Display(self):
+    def display(self):
         self.Show()
-        if self.__config.gui.fullscreen:
+        if self._config.gui.fullscreen:
             self.ShowFullScreen(True)
             self.Maximize(True)
 
@@ -60,7 +61,7 @@ class CommsLostPanel(wx.Frame):
     ## Exit event function when the application is closed.
     #  @param self The object pointer.
     #  @param event Unused, but required.
-    def __OnExit(self, event):
+    def _on_exit(self, event):
         # pylint: disable=R0201
         # pylint: disable=W0613
         reactor.stop()
