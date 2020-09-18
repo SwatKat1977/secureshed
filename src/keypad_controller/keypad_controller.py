@@ -15,7 +15,7 @@ limitations under the License.
 '''
 # pylint: disable=C0413
 import sys
-sys.path.insert(0, '..')
+sys.path.append("..")
 from keypad_app import KeypadApp
 
 
