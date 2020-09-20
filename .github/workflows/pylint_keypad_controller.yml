@@ -27,9 +27,5 @@ jobs:
     - name: Run Pylint
       run: |
         cd src
-        echo "--- env ---"
         export PYTHONPATH=`pwd`/keypad_controller
-        echo `pwd`/keypad_controller > .env
-        cat .env
-        echo "--- /env ---"
         python ../pipelines/lint.py --path keypad_controller --threshold 10
