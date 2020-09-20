@@ -31,6 +31,7 @@ jobs:
         pip install jsonschema
         pip install pylint
         pip install twisted
+        pip install wxpython
     - name: Run Pylint
       run: |
         dpkg -l
