@@ -126,7 +126,7 @@ class DeviceTypeManager:
                                 schema=self.JsonSchema)
 
         except jsonschema.exceptions.SchemaError:
-            self._last_error_msg = f"FATAL internal error, schema file invalid!"
+            self._last_error_msg = "FATAL internal error, schema file invalid!"
             return False
 
         except jsonschema.exceptions.ValidationError as ex:
