@@ -20,7 +20,8 @@ jobs:
         python-version: 3.7
     - name: Install Requirements
       run: |
-        sudo apt-get update -q && sudo apt-get install
+        sudo apt-get update -q && sudo apt-get install python3-dev 
+        sudo apt-get install 
         python -m pip install --upgrade pip
         pip install jsonschema
         pip install pylint
