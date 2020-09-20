@@ -20,7 +20,7 @@ jobs:
         python-version: 3.7
     - name: Install Requirements
       run: |
-        apt-get intall gtk
+        apt-get install gtk
         python -m pip install --upgrade pip
         pip install jsonschema
         pip install pylint
