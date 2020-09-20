@@ -27,6 +27,8 @@ jobs:
     - name: Run Pylint
       run: |
         cd src
+        echo "--- env ---"
         echo `pwd` > .env
         cat .env
+        echo "--- /env ---"
         python ../pipelines/lint.py --path keypad_controller --threshold 10
