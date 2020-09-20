@@ -30,9 +30,9 @@ jobs:
         pip install jsonschema
         pip install pylint
         pip install twisted
-        pip install -f wxPython
     - name: Run Pylint
       run: |
+        dpkg -l
         cd src
         export PYTHONPATH=`pwd`/keypad_controller
         python ../pipelines/lint.py --path keypad_controller --threshold 10
