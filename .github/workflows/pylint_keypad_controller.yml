@@ -20,7 +20,6 @@ jobs:
         python-version: 3.7
 
     # pip install wheel
-    # pip install wxPython
     - name: Install Requirements
       run: |
         sudo apt-get update -q && sudo apt-get install
@@ -29,6 +28,7 @@ jobs:
         pip install jsonschema
         pip install pylint
         pip install twisted
+        pip install wxPython
     - name: Run Pylint
       run: |
         cd src
