@@ -20,11 +20,11 @@ wxreactor.install()
 from twisted.internet import reactor
 from twisted.web import server
 import wx
-from common.Logger import Logger, LogType
 from configuration_manager import ConfigurationManager
-from KeypadApiController import KeypadApiController
+from keypad_api_controller import KeypadApiController
 from keypad_state_object import KeypadStateObject
 from log_store import LogStore
+from common.Logger import Logger, LogType
 
 
 ## The main application class for the keypad controller application.

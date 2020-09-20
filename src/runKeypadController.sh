@@ -1,5 +1,5 @@
 export CENCON_CONFIG=centralController/configuration.json
 export CENCON_DB=centralController/ccontroller.db
 
-cd KeypadController
+cd keypad_controller
 python3 keypad_controller.py

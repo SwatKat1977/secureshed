@@ -16,16 +16,16 @@ limitations under the License.
 import json
 import jsonschema
 from twisted.web import resource
+from keypad_state_object import KeypadStateObject
 import APIs.Keypad.JsonSchemas as schemas
 from common.APIClient.HTTPStatusCode import HTTPStatusCode
 from common.APIClient.MIMEType import MIMEType
 from common.Logger import LogType
-from keypad_state_object import KeypadStateObject
 
 
 ## Implementation of thread that handles API calls to the keypad API.
 class KeypadApiController(resource.Resource):
-    __slots__ = ['__config', '__stateObject']
+    __slots__ = ['_config', '_state_object']
 
     isLeaf = True
 
@@ -38,10 +38,10 @@ class KeypadApiController(resource.Resource):
     def __init__(self, config, stateObject, logStore, logger):
         super().__init__()
 
-        self.__config = config
-        self.__stateObject = stateObject
+        self._config = config
+        self._state_object = stateObject
         self._logger = logger
-        self._logStore = logStore
+        self._log_store = logStore
 
 
     ## Render a POST HTTP method type.
@@ -54,13 +54,13 @@ class KeypadApiController(resource.Resource):
         requestUri = str(requestInst.path, 'utf-8').lstrip('/')
 
         if requestUri == 'receiveCentralControllerPing':
-            return self.__ReceiveCentralControllerPing(requestInst)
+            return self._receive_central_controller_ping(requestInst)
 
         if requestUri == 'receiveKeypadLock':
-            return self.__ReceiveKeypadLock(requestInst)
+            return self._receive_keypad_lock(requestInst)
 
         if requestUri == 'retrieveConsoleLogs':
-            return self._RetrieveConsoleLogs(requestInst)
+            return self._retrieve_console_logs(requestInst)
 
         requestInst.setResponseCode(HTTPStatusCode.NotFound)
         return b''
@@ -70,81 +70,81 @@ class KeypadApiController(resource.Resource):
     #  Note: Disabled pylint warning about name as inherited method.
     #  @param self The object pointer.
     #  @param requestInst GET request to process.
-    def render_GET(self, requestInst):
+    def render_GET(self, request_inst):
         # pylint: disable=C0103
 
-        requestUri = str(requestInst.path, 'utf-8').lstrip('/')
+        request_uri = str(request_inst.path, 'utf-8').lstrip('/')
 
-        if requestUri == '_healthStatus':
-            return self._health_status(requestInst)
+        if request_uri == '_healthStatus':
+            return self._health_status(request_inst)
 
-        requestInst.setResponseCode(HTTPStatusCode.NotFound)
+        request_inst.setResponseCode(HTTPStatusCode.NotFound)
         return b''
 
 
     ## Function to handle processing of a 'receiveCentralControllerPing' route.
     #  @param self The object pointer.
     #  @param requestInst Request to be processed.
-    def __ReceiveCentralControllerPing(self, requestInst):
+    def _receive_central_controller_ping(self, request_inst):
         # Verify that an authorisation key exists in the request header, if not
         # then return a 401 (Unauthenticated) status with a human-readable
         # reason.
-        if requestInst.getHeader(schemas.AUTH_KEY) is None:
-            requestInst.setResponseCode(HTTPStatusCode.Unauthenticated)
-            requestInst.setHeader('Content-Type', MIMEType.Text)
+        if request_inst.getHeader(schemas.AUTH_KEY) is None:
+            request_inst.setResponseCode(HTTPStatusCode.Unauthenticated)
+            request_inst.setHeader('Content-Type', MIMEType.Text)
             return b'Authorisation key is missing'
 
-        authorisationKey = requestInst.getHeader(schemas.AUTH_KEY)
-        expectedKey = self.__config.keypadController.authKey
+        authorisation_key = request_inst.getHeader(schemas.AUTH_KEY)
+        expected_key = self._config.keypadController.authKey
 
         # Verify that authorisation key passed in is matches what is in the
         # configuration file. If the key isn't valid then return a 403
         # (forbidden) status with a human-readable reason.
-        if authorisationKey != expectedKey:
-            requestInst.setResponseCode(HTTPStatusCode.Forbidden)
-            requestInst.setHeader('Content-Type', MIMEType.Text)
+        if authorisation_key != expected_key:
+            request_inst.setResponseCode(HTTPStatusCode.Forbidden)
+            request_inst.setHeader('Content-Type', MIMEType.Text)
             return b'Authorisation key is invalid'
 
         # We should only change the state if the current state is
         # 'CommunicationsLost', changing otherwise is unsafe and may result in
         # unexpected behaviour.  Since we don't need to report this we will
         # return an OK.
-        currentPanel, _ = self.__stateObject.current_panel
-        if currentPanel == KeypadStateObject.PanelType.CommunicationsLost:
+        current_panel, _ = self._state_object.current_panel
+        if current_panel == KeypadStateObject.PanelType.CommunicationsLost:
             new_panel = (KeypadStateObject.PanelType.Keypad, {})
-            self.__stateObject.new_panel = new_panel
+            self._state_object.new_panel = new_panel
 
         self._logger.Log(LogType.Info,
                          "Received an 'alive ping' from central controller")
-        requestInst.setResponseCode(HTTPStatusCode.OK)
-        requestInst.setHeader('Content-Type', MIMEType.Text)
+        request_inst.setResponseCode(HTTPStatusCode.OK)
+        request_inst.setHeader('Content-Type', MIMEType.Text)
         return b'OK'
 
 
     ## Function to handle processing of a 'receiveKeypadLock' route.
     #  @param self The object pointer.
     #  @param requestInst Request to be processed.
-    def __ReceiveKeypadLock(self, requestInst):
+    def _receive_keypad_lock(self, request_inst):
 
-        response = self.__ValidateAuthKey(requestInst)
+        response = self._validate_auth_key(request_inst)
         if response is not None:
             return response
 
         # Check for that if a message body exists and if so, is it in a json
         # MIME type, if not report a 400 error status with a human-readable.
-        contentType = requestInst.getHeader(b'content-type')
-        if contentType is None or contentType != str.encode(MIMEType.JSON):
-            requestInst.setResponseCode(HTTPStatusCode.BadRequest)
-            requestInst.setHeader('Content-Type', MIMEType.Text)
+        content_type = request_inst.getHeader(b'content-type')
+        if content_type is None or content_type != str.encode(MIMEType.JSON):
+            request_inst.setResponseCode(HTTPStatusCode.BadRequest)
+            request_inst.setHeader('Content-Type', MIMEType.Text)
             return b'Message body not type JSON'
 
         try:
-            rawBody = requestInst.content.read()
-            body = json.loads(rawBody)
+            raw_body = request_inst.content.read()
+            body = json.loads(raw_body)
 
         except json.decoder.JSONDecodeError:
-            requestInst.setResponseCode(HTTPStatusCode.BadRequest)
-            requestInst.setHeader('Content-Type', MIMEType.Text)
+            request_inst.setResponseCode(HTTPStatusCode.BadRequest)
+            request_inst.setHeader('Content-Type', MIMEType.Text)
             return b'Message body not valid JSON'
 
         try:
@@ -152,46 +152,46 @@ class KeypadApiController(resource.Resource):
                                 schema=schemas.KeypadLockRequest.Schema)
 
         except jsonschema.exceptions.ValidationError as ex:
-            errrMsg = "ReceiveKeypadLockReq message failed validation, " +\
+            err_msg = "ReceiveKeypadLockReq message failed validation, " +\
                       f"reason: {ex}"
-            self._logger.Log(LogType.Error, errrMsg)
-            requestInst.setResponseCode(HTTPStatusCode.BadRequest)
-            requestInst.setHeader('Content-Type', MIMEType.Text)
-            return str.encode(errrMsg)
+            self._logger.Log(LogType.Error, err_msg)
+            request_inst.setResponseCode(HTTPStatusCode.BadRequest)
+            request_inst.setHeader('Content-Type', MIMEType.Text)
+            return str.encode(err_msg)
 
-        lockTime = body[schemas.KeypadLockRequest.BodyElement.LockTime]
-        newPanel = (KeypadStateObject.PanelType.KeypadIsLocked, lockTime)
-        self.__stateObject.new_panel = newPanel
+        lock_time = body[schemas.KeypadLockRequest.BodyElement.LockTime]
+        new_panel = (KeypadStateObject.PanelType.KeypadIsLocked, lock_time)
+        self._state_object.new_panel = new_panel
 
         self._logger.Log(LogType.Info,
                               "Received an 'lock keypad' from central controller")
-        requestInst.setResponseCode(HTTPStatusCode.OK)
-        requestInst.setHeader('Content-Type', MIMEType.Text)
+        request_inst.setResponseCode(HTTPStatusCode.OK)
+        request_inst.setHeader('Content-Type', MIMEType.Text)
         return b'OK'
 
 
-    def _RetrieveConsoleLogs(self, requestInst):
+    def _retrieve_console_logs(self, request_inst):
         # Validate the request to ensure that the auth key is firstly present,
         # then if it's valid.  None is returned if successful.
-        response = self.__ValidateAuthKey(requestInst)
+        response = self._validate_auth_key(request_inst)
         if response is not None:
             return response
 
        # Check for that if a message body exists and if so, is it in a json
         # MIME type, if not report a 400 error status with a human-readable.
-        contentType = requestInst.getHeader(b'content-type')
-        if contentType is None or contentType != str.encode(MIMEType.JSON):
-            requestInst.setResponseCode(HTTPStatusCode.BadRequest)
-            requestInst.setHeader('Content-Type', MIMEType.Text)
+        content_type = request_inst.getHeader(b'content-type')
+        if content_type is None or content_type != str.encode(MIMEType.JSON):
+            request_inst.setResponseCode(HTTPStatusCode.BadRequest)
+            request_inst.setHeader('Content-Type', MIMEType.Text)
             return b'Message body not type JSON'
 
         try:
-            rawBody = requestInst.content.read()
-            body = json.loads(rawBody)
+            raw_body = request_inst.content.read()
+            body = json.loads(raw_body)
 
         except json.decoder.JSONDecodeError:
-            requestInst.setResponseCode(HTTPStatusCode.BadRequest)
-            requestInst.setHeader('Content-Type', MIMEType.Text)
+            request_inst.setResponseCode(HTTPStatusCode.BadRequest)
+            request_inst.setHeader('Content-Type', MIMEType.Text)
             return b'Message body not valid JSON'
 
         try:
@@ -199,28 +199,30 @@ class KeypadApiController(resource.Resource):
                                 schema=schemas.RetrieveConsoleLogs.Schema)
 
         except jsonschema.exceptions.ValidationError as ex:
-            errrMsg = "ReceiveKeypadLockReq message failed validation, " +\
+            err_msg = "ReceiveKeypadLockReq message failed validation, " +\
                       f"reason: {ex}"
-            self._logger.Log(LogType.Error, errrMsg)
-            requestInst.setResponseCode(HTTPStatusCode.BadRequest)
-            requestInst.setHeader('Content-Type', MIMEType.Text)
-            return str.encode(errrMsg)
+            self._logger.Log(LogType.Error, err_msg)
+            request_inst.setResponseCode(HTTPStatusCode.BadRequest)
+            request_inst.setHeader('Content-Type', MIMEType.Text)
+            return str.encode(err_msg)
 
         start = body[schemas.RetrieveConsoleLogs.BodyElement.StartTimestamp]
-        logEvents = self._logStore.GetLogEvents(start)
+        log_events = self._log_store.GetLogEvents(start)
 
-        requestInst.setResponseCode(HTTPStatusCode.OK)
-        requestInst.setHeader('Content-Type', MIMEType.JSON)
-        return str.encode(json.dumps(logEvents))
+        request_inst.setResponseCode(HTTPStatusCode.OK)
+        request_inst.setHeader('Content-Type', MIMEType.JSON)
+        return str.encode(json.dumps(log_events))
 
 
     #  @param self The object pointer.
-    def _health_status(self, requestInst):
+    def _health_status(self, request_inst):
+        # pylint: disable=no-self-use
+
         return_json = {
             "health": "normal"
         }
-        requestInst.setResponseCode(HTTPStatusCode.OK)
-        requestInst.setHeader('Content-Type', MIMEType.JSON)
+        request_inst.setResponseCode(HTTPStatusCode.OK)
+        request_inst.setHeader('Content-Type', MIMEType.JSON)
         return json.dumps(return_json).encode("UTF-8")
 
 
@@ -229,24 +231,24 @@ class KeypadApiController(resource.Resource):
     #  @param requestInst Request to verify auth key on.
     #  @returns On success None is returned, otherwise a binary string is
     #  returned on failed.
-    def __ValidateAuthKey(self, requestInst):
+    def _validate_auth_key(self, request_inst):
         # Verify that an authorisation key exists in the request header, if not
         # then return a 401 (Unauthenticated) status with a human-readable
         # reason.
-        if requestInst.getHeader(schemas.AUTH_KEY) is None:
-            requestInst.setResponseCode(HTTPStatusCode.Unauthenticated)
-            requestInst.setHeader('Content-Type', MIMEType.Text)
+        if request_inst.getHeader(schemas.AUTH_KEY) is None:
+            request_inst.setResponseCode(HTTPStatusCode.Unauthenticated)
+            request_inst.setHeader('Content-Type', MIMEType.Text)
             return b'Authorisation key is missing'
 
-        authorisationKey = requestInst.getHeader(schemas.AUTH_KEY)
-        expectedKey = self.__config.keypadController.authKey
+        authorisation_key = request_inst.getHeader(schemas.AUTH_KEY)
+        expected_key = self._config.keypadController.authKey
 
         # Verify that authorisation key passed in is matches what is in the
         # configuration file. If the key isn't valid then return a 403
         # (forbidden) status with a human-readable reason.
-        if authorisationKey != expectedKey:
-            requestInst.setResponseCode(HTTPStatusCode.Forbidden)
-            requestInst.setHeader('Content-Type', MIMEType.Text)
+        if authorisation_key != expected_key:
+            request_inst.setResponseCode(HTTPStatusCode.Forbidden)
+            request_inst.setHeader('Content-Type', MIMEType.Text)
             return b'Authorisation key is invalid'
 
         # Return None if auth key was successful.

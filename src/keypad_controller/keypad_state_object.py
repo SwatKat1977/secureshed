@@ -16,13 +16,13 @@ limitations under the License.
 import enum
 import time
 from twisted.internet import reactor
+from gui.keypad_panel import KeypadPanel
+from gui.locked_panel import LockedPanel
+from gui.comms_lost_panel import CommsLostPanel
 from common.APIClient.APIEndpointClient import APIEndpointClient
 from common.APIClient.HTTPStatusCode import HTTPStatusCode
 from common.APIClient.MIMEType import MIMEType
 from common.Logger import LogType
-from Gui.KeypadPanel import KeypadPanel
-from Gui.LockedPanel import LockedPanel
-from Gui.CommsLostPanel import CommsLostPanel
 
 
 class KeypadStateObject:
@@ -146,13 +146,13 @@ class KeypadStateObject:
         panel, _ = self._current_panel
 
         if panel == KeypadStateObject.PanelType.KeypadIsLocked:
-            self._keypad_locked_panel.Display()
+            self._keypad_locked_panel.display()
 
         elif panel == KeypadStateObject.PanelType.CommunicationsLost:
-            self._comms_lost_panel.Display()
+            self._comms_lost_panel.display()
 
         elif panel == KeypadStateObject.PanelType.Keypad:
-            self._keypad_panel.Display()
+            self._keypad_panel.display()
 
         # The displayed panel has changed, we can now reset newPanel.
         self._new_panel = self._current_panel

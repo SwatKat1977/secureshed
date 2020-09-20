@@ -15,15 +15,15 @@ limitations under the License.
 '''
 # pylint: disable=C0413
 import sys
-sys.path.insert(0, '..')
-from KeypadApp import KeypadApp
+sys.path.append("..")
+from keypad_app import KeypadApp
 
 
 ## Keypad controller application entry point.
-def Main():
-    keypadApp = KeypadApp()
-    keypadApp.start_app()
-    keypadApp.stop_app()
+def main():
+    app = KeypadApp()
+    app.start_app()
+    app.stop_app()
 
 if __name__ == "__main__":
-    Main()
+    main()

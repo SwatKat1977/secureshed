@@ -96,7 +96,7 @@ class StateManager:
 
         if response is None:
             if not self._unable_to_conn_error_displayed:
-                msg = f'Unable to communicate with keypad, reason : ' +\
+                msg = 'Unable to communicate with keypad, reason : ' +\
                     f'{self._keypad_api_client.LastErrMsg}'
                 self._logger.Log(LogType.Info, msg)
                 self._event_mgr.QueueEvent(event)
@@ -119,7 +119,7 @@ class StateManager:
 
         # 200 OK : code accepted, code incorrect or code refused.
         if response.status_code == HTTPStatusCode.OK:
-            msg = f"Successfully send 'AlivePing' to keypad controller"
+            msg = "Successfully send 'AlivePing' to keypad controller"
             self._logger.Log(LogType.Info, msg)
 
         self._unable_to_conn_error_displayed = False
@@ -136,7 +136,7 @@ class StateManager:
                                                        json_body)
 
         if response is None:
-            msg = f'Keypad locked msg : Unable to communicate with keypad, ' +\
+            msg = 'Keypad locked msg : Unable to communicate with keypad, ' +\
                   f'reason : {self._keypad_api_client.LastErrMsg}'
             self._logger.Log(LogType.Debug, msg)
             self._event_mgr.QueueEvent(event)

@@ -22,7 +22,9 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install pylint
+        pip install jsonschema
     - name: Run Pylint
       run: |
-        cd src/powerConsole
-        python ../../pipelines/lint.py --path . --threshold 0.1
+        cd src
+        export PYTHONPATH=`pwd`/powerConsole
+        python ../pipelines/lint.py --path powerConsole --threshold 8

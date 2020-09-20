@@ -26,5 +26,5 @@ jobs:
         pip install jsonschema
     - name: Run Pylint
       run: |
-        cd src/central_controller
-        python ../../pipelines/lint.py --path . --threshold 10
+        cd src
+        python ../pipelines/lint.py --path central_controller --threshold 10
