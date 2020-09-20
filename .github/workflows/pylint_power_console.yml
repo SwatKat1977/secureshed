@@ -25,4 +25,5 @@ jobs:
     - name: Run Pylint
       run: |
         cd src
-        python ../pipelines/lint.py --path powerConsole --threshold 0.1
+        export PYTHONPATH=`pwd`/powerConsole
+        python ../pipelines/lint.py --path powerConsole --threshold 10
