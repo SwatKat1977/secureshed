@@ -20,12 +20,12 @@ jobs:
         python-version: 3.7
     - name: Install Requirements
       run: |
+        apt-get intall gtk
         python -m pip install --upgrade pip
         pip install jsonschema
         pip install pylint
         pip install twisted
         pip install wheel
-        pip install PyGTK
         pip install wxPython
     - name: Run Pylint
       run: |
