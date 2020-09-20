@@ -30,7 +30,7 @@ jobs:
         pip install jsonschema
         pip install pylint
         pip install twisted
-        pip install wxPython -f
+        pip install -f wxPython
     - name: Run Pylint
       run: |
         cd src
