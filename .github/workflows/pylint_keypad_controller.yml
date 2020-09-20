@@ -25,7 +25,7 @@ jobs:
         pip install pylint
         pip install twisted
         pip install wheel
-        pip install gtk
+        pip install PyGTK
         pip install wxPython
     - name: Run Pylint
       run: |
