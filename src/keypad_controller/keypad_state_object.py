@@ -16,13 +16,13 @@ limitations under the License.
 import enum
 import time
 from twisted.internet import reactor
+from gui.keypad_panel import KeypadPanel
+from gui.locked_panel import LockedPanel
+from gui.comms_lost_panel import CommsLostPanel
 from common.APIClient.APIEndpointClient import APIEndpointClient
 from common.APIClient.HTTPStatusCode import HTTPStatusCode
 from common.APIClient.MIMEType import MIMEType
 from common.Logger import LogType
-from gui.keypad_panel import KeypadPanel
-from gui.locked_panel import LockedPanel
-from gui.comms_lost_panel import CommsLostPanel
 
 
 class KeypadStateObject:
