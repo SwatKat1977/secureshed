@@ -28,6 +28,7 @@ jobs:
       run: |
         cd src
         echo "--- env ---"
+        export PYTHONPATH=`pwd`/keypad_controller
         echo `pwd`/keypad_controller > .env
         cat .env
         echo "--- /env ---"
