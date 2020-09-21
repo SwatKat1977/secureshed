@@ -29,10 +29,10 @@ jobs:
         sudo apt-get update -q && sudo apt-get install
         sudo apt-get install python-wxgtk3.0
         python -m pip install --upgrade pip
+        pip install wheel
         pip install jsonschema
         pip install pylint
         pip install twisted
-        pip install wheel
         pip install -U wxpython
     - name: Run Pylint
       run: |
