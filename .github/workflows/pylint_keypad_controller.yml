@@ -28,6 +28,7 @@ jobs:
       run: |
         sudo apt-get update -q && sudo apt-get install
         sudo apt-get install python-wxgtk3.0
+        sudo apt-get install build-essential libgtk-3-dev
         python -m pip install --upgrade pip
         pip install wheel
         pip install jsonschema
@@ -36,7 +37,6 @@ jobs:
         # pip install -U -f https://extras.wxpython.org/wxPython4/extras/linux/gtk3/ubuntu-20.04 wxPython
     - name: Run Pylint
       run: |
-        dpkg -l
         cd src
         export PYTHONPATH=`pwd`/keypad_controller
         python ../pipelines/lint.py --path keypad_controller --threshold 10
