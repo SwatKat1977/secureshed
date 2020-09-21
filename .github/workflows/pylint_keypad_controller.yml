@@ -33,7 +33,7 @@ jobs:
         pip install pylint
         pip install twisted
         pip install wheel
-        pip install wxpython
+        pip install -U wxpython
     - name: Run Pylint
       run: |
         dpkg -l
