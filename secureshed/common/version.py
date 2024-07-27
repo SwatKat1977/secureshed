@@ -14,6 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 '''
 
-VERSION = '0.8.1 (pre-alpha)'
+VERSION_MAJOR: int = 0
+VERSION_MINOR: int = 8
+VERSION_PATCH: int = 1
+VERSION_LABEL: str = "pre-alpha"
 
-COPYRIGHT = '2019-2020'
+COPYRIGHT_DATE = '2019-2024'
