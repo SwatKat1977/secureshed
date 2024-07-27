@@ -1,5 +1,5 @@
-'''
-Copyright 2019 Secure Shed Project Dev Team
+"""
+Copyright 2019-2024 Secure Shed Project Dev Team
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -12,11 +12,10 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-'''
+"""
 # pylint: disable=R0903
 from common.json_enabled_class import JsonLoadingClass
-from central_controller.emulated_raspberry_pi_io import GPIO
-
+from emulated_raspberry_pi_io import GPIO
 
 class DevicesConfigLoader(JsonLoadingClass):
 
@@ -145,13 +144,10 @@ class DevicesConfigLoader(JsonLoadingClass):
     def last_error_msg(self):
         return self._last_error_msg
 
-
     def __init__(self):
         self._last_error_msg = ''
 
-
     def read_devices_config_file(self, filename):
-
         self._last_error_msg = ''
 
         data, err_msg = self.read_json_file(filename, self.JsonSchema)

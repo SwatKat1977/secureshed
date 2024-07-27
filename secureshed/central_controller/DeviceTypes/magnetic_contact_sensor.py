@@ -1,5 +1,5 @@
-'''
-Copyright 2019 Secure Shed Project Dev Team
+"""
+Copyright 2019-2024 Secure Shed Project Dev Team
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -12,14 +12,12 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-'''
+"""
 import enum
 import time
-from central_controller.DeviceTypes.base_device_type import BaseDeviceType
-import central_controller.events as Evts
-from common.Event import Event
-from common.Logger import LogType
-
+from DeviceTypes.base_device_type import BaseDeviceType
+import events as Evts
+from event import Event
 
 ## Implementation of generic magnetic contact sensor device which supports
 ## a configurable grace period if the state changes.
@@ -36,7 +34,6 @@ class MagneticContactSensor(BaseDeviceType):
         AlarmSetPeriod = 2
         AlarmUnsetPeriod = 3
 
-
     #  @param self The object pointer.
     def __init__(self, hardwareIO, eventMgr, logger):
         # pylint: disable=too-many-instance-attributes
@@ -51,7 +48,6 @@ class MagneticContactSensor(BaseDeviceType):
         self._logger = logger
         self._state_type = self.StateType.AlarmInactive
 
-
     ## Initialise the magnetic contact sensor hardware device plug-in.
     #  @param self The object pointer.
     #  @param deviceName Name of device instance.
@@ -65,16 +61,15 @@ class MagneticContactSensor(BaseDeviceType):
 
         # Expecting one pin.
         if len(pins) != 1:
-            self._logger.Log(LogType.Warn,
-                             "Device '%s' was expecting 1 pin, actually %s",
-                             device_name, len(pins))
+            self._logger.warning(
+                "Device '%s' was expecting 1 pin, actually %s", device_name,
+                len(pins))
             return False
 
         pin = [pin for pin in pins if pin['identifier'] == self.ExpectedPinId]
         if not pin:
-            self._logger.Log(LogType.Warn,
-                             "Device '%s' missing expected pin '%s'",
-                             device_name, self.ExpectedPinId)
+            self._logger.warning("Device '%s' missing expected pin '%s'",
+                                 device_name, self.ExpectedPinId)
             return False
 
         self._io_pin = int(pin[0]['ioPin'][len(pin_prefix):])
@@ -82,7 +77,6 @@ class MagneticContactSensor(BaseDeviceType):
                                 pull_up_down=self._hardware_io.PUD_UP)
 
         return True
-
 
     ## Check the state of the device, e.g. has the state changed so that it is
     #  triggered etc.
@@ -116,27 +110,24 @@ class MagneticContactSensor(BaseDeviceType):
 
                 # If the alarm is inactive then just change state change.
                 if self._state_type == self.StateType.AlarmInactive:
-                    self._logger.Log(LogType.Info,
-                                     "Device '%s' was %s",
-                                     self._device_name, state_msg)
+                    self._logger.info("Device '%s' was %s",
+                                      self._device_name, state_msg)
                     self._is_triggered = contact_state
                     return
 
                 grace_secs = self._additional_params['triggerGracePeriodSecs']
                 if grace_secs:
                     self._state_type = self.StateType.AlarmUnsetPeriod
-                    self._logger.Log(LogType.Info,
-                                     "Device '%s' sensor triggered, " + \
-                                     "entered grace period of %s seconds",
-                                     self._device_name, grace_secs)
+                    self._logger.info("Device '%s' sensor triggered, "
+                                      "entered grace period of %s seconds",
+                                      self._device_name, grace_secs)
                     self._grace_timeout = time.time() + grace_secs
 
                 else:
                     self._is_triggered = contact_state
-                    self._logger.Log(LogType.Info, "Device '%s' was %s",
-                                     self._device_name, state_msg)
+                    self._logger.info("Device '%s' was %s",
+                                      self._device_name, state_msg)
                     self._generate_device_state_change_evt()
-
 
     ## Recieve events from the event manager, these include the change of the
     #  the alarms state (activate/deactivated etc.).
@@ -148,19 +139,16 @@ class MagneticContactSensor(BaseDeviceType):
                 grace_secs = self._additional_params['triggerGracePeriodSecs']
                 self._grace_timeout = event.body['activationTimestamp'] + \
                     grace_secs
-                self._logger.Log(LogType.Info,
-                                 "Alarm activated, device '%s' is in " + \
-                                 "grace period of %s seconds",
-                                 self._device_name, grace_secs)
+                self._logger.info("Alarm activated, device '%s' is in "
+                                  "grace period of %s seconds",
+                                  self._device_name, grace_secs)
                 self._state_type = self.StateType.AlarmSetPeriod
             self._is_triggered = False
 
         elif event.id == Evts.EvtType.AlarmDeactivated:
             self._state_type = self.StateType.AlarmInactive
 
-
     ## Generate and queue the event when a device state changes.
-    #  @param self The object pointer.
     def _generate_device_state_change_evt(self):
         evt_body = {
             Evts.SensorDeviceBodyItem.DeviceType: self.SensorName,
@@ -170,8 +158,6 @@ class MagneticContactSensor(BaseDeviceType):
         evt = Event(Evts.EvtType.SensorDeviceStateChange, evt_body)
         self._event_mgr.QueueEvent(evt)
 
-
-    #  @param self The object pointer.
     def _handle_alarm_set_grace_period(self, contact_state):
         curr_time = time.time()
 
@@ -183,19 +169,15 @@ class MagneticContactSensor(BaseDeviceType):
         # The grace period has expired, change to the state 'AlarmActivate'
         # and then check the trigger state.
         self._state_type = self.StateType.AlarmActivate
-        self._logger.Log(LogType.Info,
-                         "Device '%s' alarm set grace period ended...",
-                         self._device_name)
+        self._logger.info("Device '%s' alarm set grace period ended...",
+                          self._device_name)
 
         if contact_state:
-            self._logger.Log(LogType.Info,
-                             "Device '%s' caused alarm to trigger",
-                             self._device_name)
+            self._logger.info("Device '%s' caused alarm to trigger",
+                              self._device_name)
             self._is_triggered = True
             self._generate_device_state_change_evt()
 
-
-    #  @param self The object pointer.
     def _handle_alarm_unset_grace_period(self):
         curr_time = time.time()
 
@@ -206,9 +188,8 @@ class MagneticContactSensor(BaseDeviceType):
 
         # If we have come out of the grace period and the alarm hasn't been
         # deactivated during this time then trigger the alarm.
-        self._logger.Log(LogType.Info,
-                         "Device '%s' alarm unset grace period ended, " + \
-                         "the alarm has been triggered!", self._device_name)
+        self._logger.info("Device '%s' alarm unset grace period ended, "
+                          "the alarm has been triggered!", self._device_name)
         self._state_type = self.StateType.AlarmActivate
         self._generate_device_state_change_evt()
         self._is_triggered = True
