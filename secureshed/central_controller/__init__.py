@@ -1,5 +1,5 @@
-'''
-Copyright 2019 Secure Shed Project Dev Team
+"""
+Copyright 2019-2024 Secure Shed Project Dev Team
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -12,34 +12,27 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-'''
-# pylint: disable=wrong-import-position
-import logging
-import os
+"""
 import sys
-sys.path.append("..")
-from flask import Flask
-from central_controller.central_controller_app import CentralControllerApp
+from quart import Quart
+from application import CentralControllerApp, Application
 
+app = Quart(__name__)
 
-## Flask startup function.
-#  @param test_config Unused.
-def create_app(test_config=None):
-    # pylint: disable=W0613,E1101,C0103
+@app.before_serving
+async def startup() -> None:
+    """
+    Code executed before Quart has started serving http requests.
+    """
+    app.add_background_task(SERVICE_APP.run)
 
-    app = Flask(__name__)
+@app.after_serving
+async def shutdown() -> None:
+    """
+    Code executed after Quart has stopped serving http requests.
+    """
+    SERVICE_APP.stop()
 
-    log = logging.getLogger('werkzeug')
-    log.setLevel(logging.ERROR)
-
-    if not os.getenv('CENCON_CONFIG'):
-        app.logger.error('CENCON_CONFIG environment variable missing!')
-        sys.exit(1)
-
-    if not os.getenv('CENCON_DB'):
-        app.logger.error('CENCON_DB environment variable missing!')
-        sys.exit(1)
-
-    centralControllerApp = CentralControllerApp(app)
-    centralControllerApp.start_app()
-    return app
+SERVICE_APP = Application(app)
+if not SERVICE_APP.initialise():
+    sys.exit()
