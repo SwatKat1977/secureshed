@@ -1,5 +1,5 @@
-'''
-Copyright 2019-2020 Secure Shed Project Dev Team
+"""
+Copyright 2019-2024 Secure Shed Project Dev Team
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -12,17 +12,16 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-'''
+"""
 import json
-from flask import request
+from quart import request
 import jsonschema
 import APIs.CentralController.JsonSchemas as schemas
-import central_controller.events as Evts
-from common.APIClient.HTTPStatusCode import HTTPStatusCode
-from common.APIClient.MIMEType import MIMEType
-from common.Event import Event
-from common.Logger import LogType
-
+import events as Evts
+from APIClient.HTTPStatusCode import HTTPStatusCode
+from APIClient.MIMEType import MIMEType
+from event import Event
+from Logger import LogType
 
 ## Implementation of thread that handles API calls to the keypad API.
 class ApiController:
