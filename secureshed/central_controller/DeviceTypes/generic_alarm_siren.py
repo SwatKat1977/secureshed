@@ -65,8 +65,8 @@ class GenericAlarmSiren(BaseDeviceType):
 
 
     def receive_event(self, event):
-        if event.id == Evts.EvtType.ActivateSiren:
+        if event.event_id == Evts.EvtType.ActivateSiren:
             self._hardware_io.output(self._io_pin, self._hardware_io.LOW)
 
-        elif event.id == Evts.EvtType.DeactivateSiren:
+        elif event.event_id == Evts.EvtType.DeactivateSiren:
             self._hardware_io.output(self._io_pin, self._hardware_io.HIGH)

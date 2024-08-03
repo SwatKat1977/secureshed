@@ -48,12 +48,24 @@ class MagneticContactSensor(BaseDeviceType):
         self._logger = logger
         self._state_type = self.StateType.AlarmInactive
 
-    ## Initialise the magnetic contact sensor hardware device plug-in.
-    #  @param self The object pointer.
-    #  @param deviceName Name of device instance.
-    #  @param pins Pin(s) layout.
-    #  @param additionalParams Additional optional parameters for the device.
     def initialise(self, device_name, pins, additional_params):
+        """
+        Initialize the device with the provided name, pins, and additional parameters.
+
+        This method performs the following steps:
+        1. Validates the number of provided pins.
+        2. Checks for the presence of the expected pin.
+        3. Sets up the I/O pin with the hardware interface.
+
+        Args:
+            device_name (str): The name of the device to initialize.
+            pins (list): A list of pin dictionaries, each containing 'identifier' and 'ioPin' keys.
+            additional_params (dict): Additional parameters for device initialization.
+
+        Returns:
+            bool: True if initialization is successful, False otherwise.
+        """
+
         self._device_name = device_name
         self._additional_params = additional_params
 
@@ -78,10 +90,12 @@ class MagneticContactSensor(BaseDeviceType):
 
         return True
 
-    ## Check the state of the device, e.g. has the state changed so that it is
-    #  triggered etc.
-    #  @param self The object pointer.
-    def check_device(self):
+    def check_device(self) -> None:
+        """
+        Check the state of the device, e.g. has the state changed so that it is
+        triggered etc.
+        """
+
         contact_state = self._hardware_io.input(self._io_pin)
 
         # If we are in the alarmed set grace period then the triggered flag is
@@ -129,12 +143,16 @@ class MagneticContactSensor(BaseDeviceType):
                                       self._device_name, state_msg)
                     self._generate_device_state_change_evt()
 
-    ## Recieve events from the event manager, these include the change of the
-    #  the alarms state (activate/deactivated etc.).
-    #  @param self The object pointer.
-    #  @param eventInst Event instance.
-    def receive_event(self, event):
-        if event.id == Evts.EvtType.AlarmActivated:
+    def receive_event(self, event: Event) -> None:
+        """
+        Receive events from the event manager, these include the change of the
+        alarms state (activate/deactivated etc.).
+
+        Args:
+            event (Event): Event to process.
+        """
+
+        if event.event_id == Evts.EvtType.AlarmActivated:
             if 'triggerGracePeriodSecs' in self._additional_params:
                 grace_secs = self._additional_params['triggerGracePeriodSecs']
                 self._grace_timeout = event.body['activationTimestamp'] + \
@@ -145,11 +163,14 @@ class MagneticContactSensor(BaseDeviceType):
                 self._state_type = self.StateType.AlarmSetPeriod
             self._is_triggered = False
 
-        elif event.id == Evts.EvtType.AlarmDeactivated:
+        elif event.event_id == Evts.EvtType.AlarmDeactivated:
             self._state_type = self.StateType.AlarmInactive
 
-    ## Generate and queue the event when a device state changes.
-    def _generate_device_state_change_evt(self):
+    def _generate_device_state_change_evt(self) -> None:
+        """
+        Generate and queue the event when a device state changes.
+        """
+
         evt_body = {
             Evts.SensorDeviceBodyItem.DeviceType: self.SensorName,
             Evts.SensorDeviceBodyItem.DeviceName: self._device_name,

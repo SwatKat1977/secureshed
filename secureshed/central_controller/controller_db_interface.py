@@ -87,6 +87,7 @@ class ControllerDBInterface:
             self._db_obj.close()
             return False
 
+
         self._db_file = db_file
         self._is_connected = True
 
@@ -101,6 +102,7 @@ class ControllerDBInterface:
         """
         query = "SELECT IsMasterKey FROM KeyCodes WHERE KeyCode=?"
         details = self._execute_with_return(query, (keycode,), True)
+        print("::get_keycode_details:: details: ", details)
 
         if not details:
             return None
@@ -123,8 +125,7 @@ class ControllerDBInterface:
             returns False if the query fails to execute, True if successful.
         """
         query_params = [] if not values else values
-        if not self._execute_sql(query, query_params):
-            return False
+        self._execute_sql(query, query_params)
 
         if commit:
             self._db_obj.commit()
@@ -149,8 +150,9 @@ class ControllerDBInterface:
         """
 
         query_params = [] if not values else values
-        if not self._execute_sql(query, query_params):
-            return None
+        print("::_execute_with_return:: Query Params", query_params)
+
+        self._execute_sql(query, query_params)
 
         column_names = list(map(lambda x: x[0], self._cursor.description))
 
