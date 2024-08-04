@@ -1,5 +1,5 @@
-'''
-Copyright 2019-2020 Secure Shed Project Dev Team
+"""
+Copyright 2019-2024 Secure Shed Project Dev Team
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-'''
+"""
 import collections
 import json
 import jsonschema
@@ -81,6 +81,8 @@ class ConfigurationManager:
     #  None is returned and the lastErrorMsg is populated.
     def parse_config_file(self, filename):
         self._last_error_msg = ''
+
+        print("Parsey warsey", filename)
 
         try:
             with open(filename) as file_handle:

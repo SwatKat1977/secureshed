@@ -1,5 +1,5 @@
-'''
-Copyright 2019-2020 Secure Shed Project Dev Team
+"""
+Copyright 2019-2024 Secure Shed Project Dev Team
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -12,18 +12,17 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-'''
+"""
 from datetime import datetime
 import json
 import jsonschema
 import wx
 import APIs.Keypad.JsonSchemas as schemas
-from common.APIClient.APIEndpointClient import APIEndpointClient
-from common.APIClient.HTTPStatusCode import HTTPStatusCode
-from common.APIClient.MIMEType import MIMEType
+from APIClient.APIEndpointClient import APIEndpointClient
+from APIClient.HTTPStatusCode import HTTPStatusCode
+from APIClient.MIMEType import MIMEType
 from Gui.console_logs_panel import ConsoleLogsPanel
 from Gui.keypad_controller_config_panel import KeypadControllerConfigPanel
-
 
 class KeypadControllerPanel(wx.Panel):
     # pylint: disable=too-few-public-methods
@@ -31,7 +30,6 @@ class KeypadControllerPanel(wx.Panel):
 
     RetrieveConsoleLogsPath = '/retrieveConsoleLogs'
     HealthStatusPath = '/_healthStatus'
-
 
     def __init__(self, parent, config):
         wx.Panel.__init__(self, parent)
@@ -97,7 +95,6 @@ class KeypadControllerPanel(wx.Panel):
 
         self._update_log_entries(msg_body)
 
-
     def _update_log_entries(self, msg_body):
         body_elements = schemas.RequestLogsResponse.BodyElement
 
@@ -118,7 +115,6 @@ class KeypadControllerPanel(wx.Panel):
             self._logs_panel.add_log_entry(self._last_log_id,
                                            entry[body_elements.EntryMsgLevel], msg)
             self._last_log_id += 1
-
 
     def _check_connection_status(self):
 
