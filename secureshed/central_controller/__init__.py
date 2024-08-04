@@ -15,7 +15,7 @@ limitations under the License.
 """
 import sys
 from quart import Quart
-from application import CentralControllerApp, Application
+from application import Application
 
 app = Quart(__name__)
 

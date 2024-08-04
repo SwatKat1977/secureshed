@@ -18,8 +18,6 @@ import json
 import logging
 import os
 import signal
-import sys
-import time
 import jsonschema
 import quart
 from base_application import BaseApplication
@@ -28,16 +26,16 @@ from version import (COPYRIGHT_DATE, VERSION_MAJOR, VERSION_MINOR,
 from event import Event
 from event_manager import EventManager
 from failed_attempts_responses_schema import FAILED_ATTEMPT_RESPONSES_SCHEMA
-from api_controller import ApiController
 from controller_db_interface import ControllerDBInterface
 from devices_config_loader import DevicesConfigLoader
 from device_manager import DeviceManager
 from device_type_manager import DeviceTypeManager
 import events as Evts
 from state_manager import StateManager
-from worker_thread import WorkerThread
 from configuration import Configuration
 from configuration_layout import CONFIGURATION_LAYOUT
+from api import keypad as keypad_api
+from api import service as service_api
 
 CONFIG_FILE_ENV_VAR: str = "SECURESHED_CONTROLLER_CONFIG"
 CONFIG_FILE_REQUIRED_ENV_VAR: str = "SECURESHED_CONTROLLER_CONFIG_REQUIRED"
@@ -65,6 +63,8 @@ class Application(BaseApplication):
         console_stream.setFormatter(log_format)
         self._logger.addHandler(console_stream)
         self._logger.setLevel("INFO")
+
+        signal.signal(signal.SIGINT, self._signal_handler)
 
     def _initialise(self) -> bool:
         """
@@ -106,6 +106,19 @@ class Application(BaseApplication):
 
         self._register_event_callbacks()
 
+        self._add_api_views()
+
+        #api_controller = ApiController(self._event_manager,
+        #                               controller_db,
+        #                               configuration,
+        #                               self._endpoint,
+        #                               self._log_store,
+        #                               self._logger)
+
+        send_alive_ping_evt = Event(Evts.EvtType.KeypadApiSendAlivePing)
+        self._event_manager.QueueEvent(send_alive_ping_evt)
+
+
         return True
 
     async def _main_loop(self):
@@ -114,6 +127,9 @@ class Application(BaseApplication):
         self._event_manager.ProcessNextEvent()
 
         await asyncio.sleep(0.1)
+
+    def _shutdown(self):
+        self._logger.info("Shutting down central controller...")
 
     def _load_database(self) -> bool:
         self._database_file = os.getenv(DB_FILE_ENV_VAR)
@@ -292,154 +308,18 @@ class Application(BaseApplication):
         self._event_manager.RegisterEvent(Evts.EvtType.KeypadApiSendKeypadLock,
                                           self._state_mgr.send_keypad_locked_msg)
 
-class CentralControllerApp:
-    # pylint: disable=too-many-instance-attributes
+    def _add_api_views(self):
+        self._logger.info("Adding 'service' API views")
+        service_api_blueprint = service_api.create_blueprint(self._logger)
+        self._quart.register_blueprint(service_api_blueprint)
 
-    __slots__ = ['_config_file', '_curr_devices', '__db', '_device_mgr',
-                 '_endpoint', '_event_manager', '_logger', '_log_store',
-                 '_state_mgr', '_worker_thread']
-
-    def __init__(self, endpoint):
-        self._config_file = os.getenv('CENCON_CONFIG')
-        self._curr_devices = None
-        self.__db = os.getenv('CENCON_DB')
-        self._device_mgr = None
-        self._endpoint = endpoint
-        self._event_manager = None
-        self._log_store = LogStore()
-        self._state_mgr = None
-        self._worker_thread = None
-        self._logger = Logger()
-
-    def start_app(self):
-        # pylint: disable=too-many-statements
-        self._logger.WriteToConsole = True
-        self._logger.ExternalLogger = self
-        self._logger.Initialise()
-
-        signal.signal(signal.SIGINT, self._signal_handler)
-
-        """
-        self._logger.Log(LogType.Info, 'Secure Shed Central Controller V%s',
-                         VERSION_MAJOR)
-        self._logger.Log(LogType.Info,
-                         'Copyright %s Secure Shed Project Dev Team',
-                         COPYRIGHT_DATE)
-        self._logger.Log(LogType.Info,
-                         'Licensed under the Apache License, Version 2.0')
-
-        config_manger = ConfigurationManager()
-
-        configuration = config_manger.parse_config_file(self._config_file)
-        if not configuration:
-            self._logger.Log(LogType.Error,
-                             'Parse failed, last message : %s',
-                             config_manger.last_error_msg)
-            sys.exit(1)
-
-        self._logger.Log(LogType.Info, '=== Configuration Parameters ===')
-        self._logger.Log(LogType.Info, 'Environment Variables:')
-        self._logger.Log(LogType.Info, '|=> Configuration file       : %s',
-                         self._config_file)
-        self._logger.Log(LogType.Info, '|=> Database                 : %s',
-                         self.__db)
-        self._logger.Log(LogType.Info, '===================================')
-        self._logger.Log(LogType.Info, '=== Configuration File Settings ===')
-        self._logger.Log(LogType.Info, 'General Settings:')
-        self._logger.Log(LogType.Info, '|=> Devices Config File      : %s',
-                         configuration.general_settings.devicesConfigFile)
-        self._logger.Log(LogType.Info, '|=> Device Types Config File : %s',
-                         configuration.general_settings.deviceTypesConfigFile)
-        self._logger.Log(LogType.Info, 'Keypad Controller Settings:')
-        self._logger.Log(LogType.Info, '|=> Authentication Key       : %s',
-                         configuration.keypad_controller.authKey)
-        self._logger.Log(LogType.Info, '|=> Endpoint                 : %s',
-                         configuration.keypad_controller.endpoint)
-        self._logger.Log(LogType.Info, 'Central Controller Settings:')
-        self._logger.Log(LogType.Info, '|=> Authentication Key       : %s',
-                         configuration.central_controller_api.authKey)
-        self._logger.Log(LogType.Info, '|=> Network Port             : %s',
-                         configuration.central_controller_api.networkPort)
-        self._logger.Log(LogType.Info, '================================')
-
-
-        self._event_manager = EventManager()
-
-        controller_db = ControllerDBInterface()
-        if not controller_db.connect(self.__db):
-            self._logger.Log(LogType.Error, "Database '%s' is missing!",
-                             self.__db)
-            sys.exit(1)
-
-        # Build state manager which manages the state of the alarm itself and
-        # how states are changed due to hardware device(s) being triggered.
-        self._state_mgr = StateManager(controller_db, configuration,
-                                       self._event_manager, self._logger)
-
-        # Attempt to load the device types plug-ins, if a plug-in cannot be
-        # found or is invalid then a warning is logged and it's not loaded.
-        device_type_mgr = DeviceTypeManager(self._logger)
-        device_types_cfg = device_type_mgr.read_device_types_config(
-            configuration.general_settings.deviceTypesConfigFile)
-        if not device_types_cfg:
-            self._logger.Log(LogType.Error, device_type_mgr.last_error_msg)
-            sys.exit(1)
-
-        device_type_mgr.load_device_types()
-
-        # Load the devices configuration file which contains the devices
-        # attached to the alarm.  The devices are matched to the device types
-        # loaded above.
-        devices_cfg = configuration.general_settings.devicesConfigFile
-        devices_cfg_loader = DevicesConfigLoader()
-        self._curr_devices = devices_cfg_loader.read_devices_config_file(devices_cfg)
-        if not self._curr_devices:
-            self._logger.Log(LogType.Error, devices_cfg_loader.last_error_msg)
-            sys.exit(1)
-
-        self._device_mgr = DeviceManager(device_type_mgr, self._event_manager,
-                                         self._logger)
-        dev_lst = self._curr_devices[devices_cfg_loader.JsonTopElement.Devices]
-        self._device_mgr.load(dev_lst)
-        self._device_mgr.initialise_hardware()
-
-        self._register_event_callbacks()
-        """
-
-        # Create the IO processing thread which handles IO requests from
-        # hardware devices.
-        self._worker_thread = WorkerThread(configuration,
-                                           self._device_mgr,
-                                           self._event_manager,
-                                           self._state_mgr,
-                                           self._logger)
-        self._worker_thread.start()
-
-        # pylint: disable=unused-variable
-        api_controller = ApiController(self._event_manager,
-                                       controller_db,
-                                       configuration,
-                                       self._endpoint,
-                                       self._log_store,
-                                       self._logger)
-
-        send_alive_ping_evt = Event(Evts.EvtType.KeypadApiSendAlivePing)
-        self._event_manager.QueueEvent(send_alive_ping_evt)
-
-    def add_log_event(self, curr_time, log_level, msg):
-        self._log_store.add_log_event(curr_time, log_level, msg)
+        self._logger.info("Adding 'keypad' API views")
+        keypad_api_blueprint = keypad_api.create_blueprint(self._logger,
+                                                           self._event_manager)
+        self._quart.register_blueprint(keypad_api_blueprint)
 
     def _signal_handler(self, signum, frame):
         #pylint: disable=unused-argument
 
-        self._logger.Log(LogType.Info, 'Shutting down...')
-        self._shutdown()
-        sys.exit(1)
-
-    def _shutdown(self):
-        self._worker_thread.signal_shutdown_requested()
-
-        while not self._worker_thread.shutdown_completed:
-            time.sleep(1)
-
-        self._logger.Log(LogType.Info, 'Worker thread has Shut down')
+        self._logger.info("Shutting down...")
+        self.stop()

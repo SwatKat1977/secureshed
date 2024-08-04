@@ -1,5 +1,5 @@
-'''
-Copyright 2019 Secure Shed Project Dev Team
+"""
+Copyright 2019-2024 Secure Shed Project Dev Team
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -12,10 +12,9 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-'''
+"""
 
-
-CONFIGURATIONJSONSCHEMA = \
+FAILED_ATTEMPT_RESPONSES_SCHEMA = \
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
 
@@ -24,10 +23,10 @@ CONFIGURATIONJSONSCHEMA = \
         "action":
         {
             "type": "object",
-            "additionalProperties" : False,
+            "additionalProperties": False,
             "properties":
             {
-                "additionalProperties" : False,
+                "additionalProperties": False,
                 "actionType":
                 {
                     "type": "string",
@@ -46,10 +45,10 @@ CONFIGURATIONJSONSCHEMA = \
         "actionParameter":
         {
             "type": "object",
-            "additionalProperties" : False,
+            "additionalProperties": False,
             "properties":
             {
-                "additionalProperties" : False,
+                "additionalProperties": False,
                 "key":   {"type": "string"},
                 "value": {"type": "string"}
             },
@@ -59,10 +58,10 @@ CONFIGURATIONJSONSCHEMA = \
         "failedAttemptResponse":
         {
             "type": "object",
-            "additionalProperties" : False,
+            "additionalProperties": False,
             "properties":
             {
-                "additionalProperties" : False,
+                "additionalProperties": False,
                 "attemptNo":
                 {
                     "type": "integer",
@@ -76,74 +75,12 @@ CONFIGURATIONJSONSCHEMA = \
                     "default": []
                 }
             },
-            "required" : ["attemptNo", "actions"]
+            "required": ["attemptNo", "actions"]
         }
     },
 
-    "type" : "object",
-    "additionalProperties" : False,
-
-    "properties":
-    {
-        "additionalProperties" : False,
-        "failedAttemptResponses":
-        {
-            "type": "array",
-            "items": {"$ref": "#/definitions/failedAttemptResponse"},
-            "default": []
-        },
-        "centralControllerApi":
-        {
-            "additionalProperties" : False,
-            "properties":
-            {
-                "additionalProperties" : False,
-                "networkPort" :
-                {
-                    "type" : "integer",
-                    "minimum": 1
-                },
-                "authKey" :
-                {
-                    "type" : "string"
-                }
-            },
-            "required" : ["authKey", "networkPort"]
-        },
-        "keypadController":
-        {
-            "additionalProperties" : False,
-            "properties":
-            {
-                "endpoint":
-                {
-                    "type" : "string"
-                },
-                "authKey":
-                {
-                    "type" : "string"
-                }
-            },
-            "required" : ["authKey", "endpoint"]
-        },
-        "generalSettings":
-        {
-            "additionalProperties" : False,
-            "properties":
-            {
-                "additionalProperties" : False,
-                "devicesConfigFile":
-                {
-                    "type" : "string"
-                },
-                "deviceTypesConfigFile":
-                {
-                    "type" : "string"
-                }
-            },
-            "required" : ["devicesConfigFile", "deviceTypesConfigFile"]
-        }
-    },
-    "required" : ["centralControllerApi", "failedAttemptResponses",
-                  "generalSettings", "keypadController"]
+    "type": "array",
+    "additionalProperties": False,
+    "items": {"$ref": "#/definitions/failedAttemptResponse"},
+    "default": []
 }

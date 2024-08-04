@@ -138,16 +138,16 @@ class DeviceManager:
 
     def receive_event(self, event):
         # Event : Activate siren.
-        if event.id == Evts.EvtType.ActivateSiren:
+        if event.event_id == Evts.EvtType.ActivateSiren:
             self._process_activate_siren_event(event)
 
-        elif event.id == Evts.EvtType.DeactivateSiren:
+        elif event.event_id == Evts.EvtType.DeactivateSiren:
             self._process_deactivate_siren_event(event)
 
-        elif event.id == Evts.EvtType.AlarmActivated:
+        elif event.event_id == Evts.EvtType.AlarmActivated:
             self._process_alarm_activated_event(event)
 
-        elif event.id == Evts.EvtType.AlarmDeactivated:
+        elif event.event_id == Evts.EvtType.AlarmDeactivated:
             self._process_alarm_deactivated_event(event)
 
     def _process_activate_siren_event(self, event):

@@ -1,5 +1,5 @@
-'''
-Copyright 2019-2020 Secure Shed Project Dev Team
+"""
+Copyright 2019-2024 Secure Shed Project Dev Team
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -12,16 +12,15 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-'''
+"""
 #pylint: disable=unused-argument
 import enum
 import time
 import wx
-from common.Version import VERSION
+from version import VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH, VERSION_LABEL
 from Gui.central_controller_panel import CentralControllerPanel
 from Gui.keypad_controller_panel import KeypadControllerPanel
 from worker_thread import WorkerThread
-
 
 ID_TOOLBAR_KEYPAD_CTRL = 1001
 ID_TOOLBAR_CENTRAL_CTRL = 1002
@@ -46,7 +45,12 @@ class MainWindow(wx.Frame):
     def __init__(self, config):
         window_width = 800
         window_height = 600
-        title = f"Secure Shed Power Console (Core {VERSION})"
+
+        label: str = "" if VERSION_LABEL == "" else f"-({VERSION_LABEL})"
+        version_txt: str = (f"{VERSION_MAJOR}.{VERSION_MINOR}.{VERSION_PATCH}"
+                            f"{label}")
+        title = f"Secure Shed Power Console (Core {version_txt})"
+
         frame_size = (window_width, window_height)
         super().__init__(None, title=title, size=frame_size)
 

@@ -13,19 +13,12 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
+from power_console_app import PowerConsoleApp
 
-class BaseDeviceType:
+def main():
+    power_console_app = PowerConsoleApp()
+    power_console_app.start_app()
+    power_console_app.stop_app()
 
-    #  @param self The object pointer.
-    def initialise(self, device_name, pins, additional_params):
-        raise NotImplementedError
-
-
-    #  @param self The object pointer.
-    def check_device(self):
-        raise NotImplementedError
-
-
-    #  @param self The object pointer.
-    def receive_event(self, event):
-        raise NotImplementedError
+if __name__ == "__main__":
+    main()

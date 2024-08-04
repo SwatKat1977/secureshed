@@ -99,7 +99,7 @@ class StateManager:
         Args:
             event (Event): The event object received from the keypad.
         """
-        if event.id == Evts.EvtType.KeypadKeyCodeEntered:
+        if event.event_id == Evts.EvtType.KeypadKeyCodeEntered:
             self._handle_key_code_entered_event(event)
 
     def rcv_device_event(self, event: Event) -> None:
@@ -112,7 +112,7 @@ class StateManager:
         Args:
             event (Event): The event object received from the device.
         """
-        if event.id == Evts.EvtType.SensorDeviceStateChange:
+        if event.event_id == Evts.EvtType.SensorDeviceStateChange:
             self._handle_sensor_device_state_change_event(event)
 
     def send_alive_ping_msg(self, event: Event) -> None:
@@ -208,7 +208,7 @@ class StateManager:
         if id_list:
             self._state.transient_states = [evt for evt in
                                             self._state.transient_states
-                                            if evt.id not in id_list]
+                                            if evt.event_id not in id_list]
 
     ## Function to handle a a keycode has been entered.
     #  @param self The object pointer.
@@ -217,9 +217,11 @@ class StateManager:
         body = event.body
 
         key_sequence = body[schemas.ReceiveKeyCode.BodyElement.KeySeq]
+        print("Key Seq", key_sequence)
 
         # Read the key code detail from the database.
         details = self._database.get_keycode_details(key_sequence)
+        print("DETAILS: ", details)
 
         if details is not None:
             if self._state.current_alarm_state == AlarmState.TRIGGERED:
@@ -275,9 +277,9 @@ class StateManager:
                     elif response == 'resetAttemptAccount':
                         self._state.failed_entry_attempts = 0
 
-    ## Function to handle the alarm being triggered.
-    #  @param self The object pointer.
     def _trigger_alarm(self, no_grace_time=False):
+        """ Function to handle the alarm being triggered. """
+
         self._state.current_alarm_state = AlarmState.ACTIVATED
 
         alarm_set_evt_body = {
@@ -288,9 +290,9 @@ class StateManager:
         activate_event = Event(Evts.EvtType.AlarmActivated, alarm_set_evt_body)
         self._event_mgr.QueueEvent(activate_event)
 
-    ## Function to handle the alarm being deactivated.
-    #  @param self The object pointer.
     def _deactivate_alarm(self):
+        """ Function to handle the alarm being deactivated. """
+
         self._state.current_alarm_state = AlarmState.DEACTIVATED
         self._state.failed_entry_attempts = 0
 
@@ -319,7 +321,7 @@ class StateManager:
         # a door etc. would change the alarm state, although we should log that
         # the event has occurred.
         if self._state.current_alarm_state == AlarmState.TRIGGERED:
-            self._logger.Info("%s was %s, alarm already triggered",
+            self._logger.info("%s was %s, alarm already triggered",
                               device_name, state_str)
             return
 
